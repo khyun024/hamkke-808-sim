@@ -64,7 +64,7 @@ dl.chk dd.good { color: var(--ok); }
   <aside>
     <header>
       <h1>색면화 좌대 · 수정안</h1>
-      <p>제작 전 검토용. 기존 구조(<a href="https://saekmyeon-pedestal.oho-77.workers.dev" target="_blank" rel="noopener">색면화 좌대 3D</a>)는 그대로 두고 바꾸는 곳만 파란 라벨로 표시했어요. 오른쪽은 같은 몸체로 추가하는 컴퓨터용 좌대예요.</p>
+      <p>제작 전 검토용. 기존 구조(<a href="https://saekmyeon-pedestal.oho-77.workers.dev" target="_blank" rel="noopener">색면화 좌대 3D</a>)는 그대로 두고 바꾸는 곳만 파란 라벨로 표시했어요. 오른쪽은 데스크톱 한 대만 넣는 작은 추가 좌대예요.</p>
     </header>
     <div>
       <h2>보기</h2>
@@ -79,7 +79,7 @@ dl.chk dd.good { color: var(--ok); }
         <li><b>선 구멍</b> · Ø40 → Ø80, 브러시 그로밋, 아랫면 뒤쪽 · 두 좌대 모두<small>전원 플러그(약 Ø40)와 HDMI·소리 선이 한꺼번에 넉넉히 지나가게</small></li>
         <li><b>점검문</b> · 피아노 경첩 + 자석 캐치, 손가락 구멍(Ø26)으로 당겨 엶 · 두 좌대 모두<small>나사·공구 없이 바로 열고 닫음. 자석이 닫힌 상태를 잡아 주고, 손잡이가 튀어나오지 않아 뒤에서 봐도 깔끔함</small></li>
         <li><b>놓는 방향 표시</b> · 상판 단차 뒤쪽 가장자리에 ▲ 각인, 캔버스 틀 윗변 바깥에 같은 색 점<small>점과 ▲를 맞춰 위에서 내려놓으면 그림이 똑바로 들어감. 포켓 윗모서리는 2mm 모따기해서 자연스럽게 미끄러져 앉게</small></li>
-        <li><b>추가 좌대</b> · 같은 몸체, 윗면 평평, 포켓·리더 없음<small>점검문·환기구·Ø80 선 구멍은 같게</small></li>
+        <li><b>추가 좌대</b> · 데스크톱만 들어가는 작은 상자 <span data-v="b2"></span>mm<small>판 18mm로 상자만 짜고, 윗뚜껑을 들어 올려 PC를 넣고 뺌(경첩·문 없음, 자석 2개로 자리 잡음). 흡기·배기 구멍과 Ø80 선 구멍만 내면 됨</small></li>
       </ol>
       <p class="hint" style="margin-top:8px">NFC 태그는 캔버스 틀 네 귀퉁이 아랫면에 하나씩 붙여서(작품당 4장), 어느 방향으로 올려도 한 장이 리더 위에 오게 해요. 리더·아두이노 부착과 USB 팬은 저희가 해요.</p>
     </div>
@@ -112,11 +112,11 @@ const mm = v => v / 1000;
 /* ───────── 치수 (mm) ─────────
    좌표: 정면 −Z(관객), 후면 +Z(점검 뚜껑판), 관객 기준 오른쪽 = −X. 기존 제작안과 같은 방향 */
 const FIX = { W: 600, D: 600, H: 900, side: 18, top: 30, step: 5, pocketDepth: 10, stepW: 18, frame: 20, doorW: 504, doorH: 792, hole: 80, notchW: 30 };
-const P = { canvas: 242, clear: 2.5, remain: 5, bar: 20, tag: 25, pc1W: 210, pc1D: 450, pc1H: 490, pc2W: 210, pc2D: 450, pc2H: 490, gap: 300 };
+const P = { canvas: 242, clear: 2.5, remain: 5, bar: 20, tag: 25, pc1W: 210, pc1D: 450, pc1H: 490, b2W: 340, b2D: 580, b2H: 600, pc2W: 210, pc2D: 450, pc2H: 490, gap: 300 };
 const PARAMS = [
   ['sub', '색면화 좌대'], ['canvas', '캔버스 한 변'], ['clear', '포켓 여유 / 측'], ['remain', '리더 위 남는 두께'], ['bar', '왁구 각재 폭'], ['tag', 'NFC 태그 지름'],
   ['pc1W', 'PC 폭'], ['pc1D', 'PC 깊이'], ['pc1H', 'PC 높이'],
-  ['sub', '추가 좌대'], ['pc2W', 'PC 폭'], ['pc2D', 'PC 깊이'], ['pc2H', 'PC 높이'], ['gap', '두 좌대 사이 간격'],
+  ['sub', '추가 좌대 (데스크톱만)'], ['b2W', '외형 폭'], ['b2D', '외형 깊이'], ['b2H', '외형 높이'], ['pc2W', 'PC 폭'], ['pc2D', 'PC 깊이'], ['pc2H', 'PC 높이'], ['gap', '두 좌대 사이 간격'],
 ];
 const view = { ghost: true, lid: false, lift: false, labels: true };
 
@@ -180,9 +180,10 @@ function tube(parent, pts, r = 4, mat = M.cable) {
   const m = new THREE.Mesh(new THREE.TubeGeometry(c, 40, mm(r), 8), mat); parent.add(m); return m;
 }
 
-/* 좌대 하나: 몸체(측판·정면판·바닥판), 뒤판(개구부 + 공구 없이 여닫는 점검문), 환기구, 선 구멍, PC. 두 좌대에 같은 라벨 */
-function body(g, pcW, pcD, pcH, name) {
-  const { W, D, H, side, top } = FIX, ih = H - side - top, iw = W - 2 * side;
+/* 좌대 하나: 몸체(측판·정면판·바닥판), 뒤판, 환기구, 선 구멍, PC. 두 좌대에 같은 라벨.
+   S.door = 뒤판에 공구 없이 여닫는 점검문(① 색면화 좌대), 없으면 뒤판을 막고 윗뚜껑으로 엶(② 추가 좌대) */
+function body(g, pcW, pcD, pcH, name, S) {
+  const { W, D, H, top } = S, side = FIX.side, ih = H - side - top, iw = W - 2 * side;
   const wood = M.wood();
   box(g, side, H - top, D, W / 2 - side / 2, (H - top) / 2, 0, wood);                 // 왼쪽(관객 기준) 측판 +X
   box(g, side, H - top, D, -W / 2 + side / 2, (H - top) / 2, 0, wood);                // 오른쪽 측판 −X
@@ -192,15 +193,19 @@ function body(g, pcW, pcD, pcH, name) {
   bot.holes.push(new THREE.Path().absarc(0, mm(hz), mm(FIX.hole / 2), 0, Math.PI * 2, true));
   slab(g, bot, side, side, wood);
   const grom = new THREE.Mesh(new THREE.TorusGeometry(mm(FIX.hole / 2), mm(3), 8, 32), M.black); grom.rotation.x = Math.PI / 2; grom.position.set(0, mm(side + 1), mm(hz)); g.add(grom);
+  const zr = D / 2 - side / 2;
+  if (!S.door) box(g, iw, H - top - side, side, 0, (side + H - top) / 2, zr, wood); // 뒤판 (막힘)
+  const y0 = side + (ih - FIX.doorH) / 2, y1 = y0 + FIX.doorH, sideW = (iw - FIX.doorW) / 2;
+  let lid = null;
+  if (S.door) {
   // 뒤판: 개구부 둘레 네 조각
-  const y0 = side + (ih - FIX.doorH) / 2, y1 = y0 + FIX.doorH, sideW = (iw - FIX.doorW) / 2, zr = D / 2 - side / 2;
   box(g, iw, y0 - side, side, 0, (y0 + side) / 2, zr, wood);
   box(g, iw, H - top - y1, side, 0, (y1 + H - top) / 2, zr, wood);
   box(g, sideW, FIX.doorH, side, iw / 2 - sideW / 2, (y0 + y1) / 2, zr, wood);
   box(g, sideW, FIX.doorH, side, -iw / 2 + sideW / 2, (y0 + y1) / 2, zr, wood);
   // 점검문: 개구부보다 사방 15 크게. 한쪽 세로 모서리 전체에 피아노 경첩, 반대쪽에 자석 캐치 + 손가락 구멍. 나사·공구 없이 당겨 엶
   const lw = FIX.doorW + 30, lh = FIX.doorH + 30;
-  const lid = new THREE.Group(); g.add(lid); // 경첩 축에 놓인 그룹
+  lid = new THREE.Group(); g.add(lid); // 경첩 축에 놓인 그룹
   lid.position.set(mm(lw / 2), mm((y0 + y1) / 2), mm(D / 2 + 6));
   box(lid, lw, lh, 12, -lw / 2, 0, 0, M.lid());
   box(lid, 6, lh - 20, 4, 0, 0, 4, M.screw, false);                  // 피아노 경첩
@@ -208,10 +213,12 @@ function body(g, pcW, pcD, pcH, name) {
   const fh = new THREE.Mesh(new THREE.CylinderGeometry(mm(13), mm(13), mm(13), 24), M.black); // 손가락 구멍 Ø26
   fh.rotation.x = Math.PI / 2; fh.position.set(mm(-lw + 45), 0, 0); lid.add(fh);
   if (view.lid) lid.rotation.y = 1.75;
+  }
   // 환기: 흡기(오른쪽 측판 아래), 배기(왼쪽 측판 위) + USB 팬
-  const vent = (x, y, z, w, h) => { for (let i = 0; i < 5; i++) box(g, 4, mm(1) * 0 + h / 6, w, x, y - h / 2 + h * (i + 0.5) / 5, z, M.black, false); };
-  vent(-W / 2 - 1, side + 70, 60, 200, 60);
-  vent(W / 2 + 1, H - top - 90, 60, 200, 60);
+  const vw = S.door ? 200 : 150, vh = S.door ? 60 : 40;
+  const vent = (x, y, z, w, h) => { for (let i = 0; i < 5; i++) box(g, 4, h / 6, w, x, y - h / 2 + h * (i + 0.5) / 5, z, M.black, false); };
+  vent(-W / 2 - 1, side + 70, 60, vw, vh);
+  vent(W / 2 + 1, H - top - 90, 60, vw, vh);
   box(g, 25, 80, 80, W / 2 - side - 14, H - top - 90, 60, M.black);
   // PC (바닥, 뒤쪽 선 구멍 쪽)
   const pz = D / 2 - side - 30 - pcD / 2;
@@ -221,7 +228,8 @@ function body(g, pcW, pcD, pcH, name) {
   if (view.labels) {
     const big = label(g, name, 0, H + 150, 0, true); big.element.style.font = '700 13px var(--sans)';
     label(g, '정면 (관객 쪽)', 0, H * 0.45, -D / 2 - 30);
-    label(g, '<b>점검문</b> · 경첩 + 자석, 손가락 구멍으로 당겨 엶 (나사 없음)', 0, (y0 + y1) / 2 + 220, D / 2 + 40, true);
+    if (S.door) label(g, '<b>점검문</b> · 경첩 + 자석, 손가락 구멍으로 당겨 엶 (나사 없음)', 0, (y0 + y1) / 2 + 220, D / 2 + 40, true);
+    else label(g, '<b>윗뚜껑</b> · 들어 올려 엶, 자석 2개로 자리 잡음 (경첩·문 없음)', 0, H + 70, 0, true);
     label(g, '<b>선 구멍 Ø' + FIX.hole + '</b> · 그로밋', 0, 40, hz + 30, true);
     label(g, '흡기 · 오른쪽 측판 아래', -W / 2 - 10, side + 70, 60);
     label(g, 'USB 팬 · 배기 · 왼쪽 측판 위', W / 2 + 10, H - top - 40, 60);
@@ -238,7 +246,7 @@ function build() {
 
   // ── 색면화 좌대 (원점) ──
   const A = new THREE.Group(); world.add(A);
-  const a = body(A, P.pc1W, P.pc1D, P.pc1H, '① 색면화 좌대 · 캔버스 포켓 + NFC 리더');
+  const a = body(A, P.pc1W, P.pc1D, P.pc1H, '① 색면화 좌대 · 캔버스 포켓 + NFC 리더', { W, D, H, top, door: true });
   const tm = M.top();
   // 상판: 위에서부터 단차층(5) · 포켓층(10, 손잡이 홈) · 남는 바닥(15 = 리더 위 remain + 아래 리더 홈층)
   const s1 = sq(null, W / 2); s1.holes.push(sq(null, stepS / 2, new THREE.Path())); slab(A, s1, step, H, tm);
@@ -273,9 +281,14 @@ function build() {
   C.position.y = mm(cy + (view.lift ? 160 : 0));
 
   // ── 추가 좌대 (관객 기준 오른쪽 = −X) ──
-  const B = new THREE.Group(); B.position.x = -mm(W + P.gap); world.add(B);
-  const b = body(B, P.pc2W, P.pc2D, P.pc2H, '② 추가 좌대 · 컴퓨터용, 윗면 평평');
-  slab(B, sq(null, W / 2), top, H, M.top());
+  // 데스크톱만 들어가는 작은 상자: 외형 b2W × b2D × b2H, 판 18, 윗뚜껑을 들어 올려 엶
+  const SB = { W: P.b2W, D: P.b2D, H: P.b2H, top: 18, door: false };
+  const B = new THREE.Group(); B.position.x = -mm(W / 2 + P.gap + SB.W / 2); world.add(B);
+  const b = body(B, P.pc2W, P.pc2D, P.pc2H, '② 추가 좌대 · 데스크톱만, 작게', SB);
+  const capS = new THREE.Shape(); capS.moveTo(mm(-SB.W / 2), mm(-SB.D / 2)); capS.lineTo(mm(SB.W / 2), mm(-SB.D / 2)); capS.lineTo(mm(SB.W / 2), mm(SB.D / 2)); capS.lineTo(mm(-SB.W / 2), mm(SB.D / 2)); capS.closePath();
+  const cap = new THREE.Group(); B.add(cap); slab(cap, capS, SB.top, SB.H, M.top());
+  [-1, 1].forEach(sz => box(cap, 20, 6, 20, 0, SB.H - SB.top - 3, sz * (SB.D / 2 - 40), M.black, false)); // 자석
+  if (view.lid) { cap.position.y = mm(260); cap.position.z = mm(120); cap.rotation.x = -0.35; }
 
   // ── 라벨 ──
   if (view.labels) {
@@ -294,7 +307,8 @@ function renderChecks(pocket, stepS, floorT, remain) {
   const iw = FIX.W - 2 * FIX.side, ih = FIX.H - FIX.side - FIX.top;
   const row = (k, v, ok) => `<dt>${k}</dt><dd class="${ok === undefined ? '' : ok ? 'good' : 'bad'}">${v}</dd>`;
   const pc = (w, d, h) => [iw - w, iw - d, ih - h, FIX.doorW - w, FIX.doorH - h];
-  const [a1, a2, a3, a4, a5] = pc(P.pc1W, P.pc1D, P.pc1H), [b1, b2, b3, b4, b5] = pc(P.pc2W, P.pc2D, P.pc2H);
+  const [a1, a2, a3, a4, a5] = pc(P.pc1W, P.pc1D, P.pc1H);
+  const bw = P.b2W - 2 * FIX.side, bd = P.b2D - 2 * FIX.side, bh = P.b2H - FIX.side - 18, [b1, b2, b3] = [bw - P.pc2W, bd - P.pc2D, bh - P.pc2H];
   $('#chk').innerHTML = [
     row('안쪽 포켓 (캔버스 + 여유×2)', `${pocket} × ${pocket}`),
     row('손가락 단차', `${stepS} × ${stepS}`),
@@ -303,11 +317,12 @@ function renderChecks(pocket, stepS, floorT, remain) {
     row('태그가 각재에 다 붙나 · 각재 폭 실측 필요', `${P.bar} vs Ø${P.tag}`, P.bar >= P.tag),
     row('색면화 PC 안쪽 여유 W/D/H', `${a1} / ${a2} / ${a3}`, Math.min(a1, a2, a3) >= 20),
     row('색면화 PC 개구부 통과 W/H', `${a4} / ${a5}`, Math.min(a4, a5) >= 10),
-    row('추가 PC 안쪽 여유 W/D/H', `${b1} / ${b2} / ${b3}`, Math.min(b1, b2, b3) >= 20),
-    row('추가 PC 개구부 통과 W/H', `${b4} / ${b5}`, Math.min(b4, b5) >= 10),
+    row('추가 좌대 안쪽 (W/D/H)', `${bw} / ${bd} / ${bh}`),
+    row('추가 PC 안쪽 여유 W/D/H (위로 넣음)', `${b1} / ${b2} / ${b3}`, Math.min(b1, b2, b3) >= 20),
+    row('PC 양옆 손 넣을 틈 (한쪽)', `${(b1 / 2).toFixed(0)}`, b1 / 2 >= 40),
     row('선 구멍 (두 좌대) vs 접지 플러그 약 Ø40', `Ø${FIX.hole}`, FIX.hole >= 50),
   ].join('');
-  document.querySelectorAll('[data-v]').forEach(el => el.textContent = { remain, clear: P.clear, pocket }[el.dataset.v]);
+  document.querySelectorAll('[data-v]').forEach(el => el.textContent = { remain, clear: P.clear, pocket, b2: `${P.b2W} × ${P.b2D} × ${P.b2H} `.trim() }[el.dataset.v]);
 }
 
 /* ───────── UI ───────── */
@@ -320,7 +335,7 @@ const VIEWS = [
 let tween = null;
 function flyTo(p, t) { const p0 = camera.position.clone(), t0 = controls.target.clone(), st = performance.now(), P1 = new THREE.Vector3(...p), T1 = new THREE.Vector3(...t); tween = now => { const k = Math.min(1, (now - st) / 700), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; camera.position.lerpVectors(p0, P1, e); controls.target.lerpVectors(t0, T1, e); if (k >= 1) tween = null; }; }
 VIEWS.forEach(([n, p, t]) => { const b = document.createElement('button'); b.className = 'b'; b.textContent = n; b.onclick = () => flyTo(p, t); $('#hud').appendChild(b); });
-[['ghost', '반투명'], ['lid', '점검문 열기'], ['lift', '캔버스 들어 올리기'], ['labels', '라벨']].forEach(([k, n]) => {
+[['ghost', '반투명'], ['lid', '점검문·뚜껑 열기'], ['lift', '캔버스 들어 올리기'], ['labels', '라벨']].forEach(([k, n]) => {
   const b = document.createElement('button'); b.className = 'b' + (view[k] ? ' on' : ''); b.textContent = n;
   b.onclick = () => { view[k] = !view[k]; b.classList.toggle('on', view[k]); build(); };
   $('#toggles').appendChild(b);
