@@ -207,7 +207,7 @@ textarea#json { width: 100%; min-height: 90px; background: var(--field); color: 
         <h2>공간 치수 (가정값)</h2>
         <div class="row"><label for="v-wallH">가벽 높이</label><div class="ctl"><input type="number" id="v-wallH" step="0.05" min="2" max="6"><span class="unit">m</span></div></div>
         <div class="row"><label for="v-ceilH">천장 그리드 높이</label><div class="ctl"><input type="number" id="v-ceilH" step="0.05" min="2.2" max="8"><span class="unit">m</span></div></div>
-        <p class="hint">평면은 배치도 치수(1500·730·720·680·600 등)에 맞춰 1px = 3.3cm로 환산했어요. 도면에 높이 정보가 없어 벽·천장 높이는 현장 사진을 보고 잡은 값이니 실측 후 고쳐주세요.</p>
+        <p class="hint">평면은 배치도 치수(1500·730·720·680·600 등)에 맞춰 1px = 3.3cm로 환산했어요. 벽 높이 3.3m는 재단 확인값(2026-11-03)이고, 천장 그리드 높이는 현장 사진을 보고 잡은 값이에요.</p>
       </div>
     </section>
 
@@ -297,7 +297,7 @@ const X = px => (px - 245) * S, Z = py => (py - 170) * S;
 const v3 = (px, py, y = 0) => new THREE.Vector3(X(px), y, Z(py));
 const V2 = p => new THREE.Vector2(X(p[0]), Z(p[1]));
 
-const dims = { wallH: 3.6, ceilH: 3.75, pedW: 0.6, pedD: 0.6, pedH: 0.9 };
+const dims = { wallH: 3.3, ceilH: 3.75, pedW: 0.6, pedD: 0.6, pedH: 0.9 };
 const view = { gallery: 80, exposure: 100, work: true, equip: true, zone: false, zoning: false, people: true, frustum: true, cone: true, power: true, spkPos: 'A', spkDir: 'room', fieldDir: 'ltr', strip: true };
 const BASE_EXPOSURE = 0.02;
 

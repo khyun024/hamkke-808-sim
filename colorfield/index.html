@@ -227,10 +227,10 @@ const savePrefs = () => { try { localStorage.setItem(STORE, JSON.stringify(opt))
 
 /* ───────── 방 치수 (전체 시뮬레이션의 배치도 환산값) ─────────
    원점 = 왼쪽 벽(서) · 방 입구 쪽(북) 모서리. X = 동, Z = 남. 정면 벽 = 남쪽, 오른쪽 벽 = 동쪽 */
-const ROOM = { W: 7.4, D: 7.1, H: 3.6, RL: 5.45, ped: [3.73, 3.66], pedW: 0.6, pedH: 0.9 };
+const ROOM = { W: 7.4, D: 7.1, H: 3.3, RL: 5.45, ped: [3.73, 3.66], pedW: 0.6, pedH: 0.9 };
 const TOTAL = ROOM.W + ROOM.RL;
-// 펼친 화면 크기, 첫 띠가 출발하기까지, 내보낸 그림을 지우기까지(초), 입자 최대 수
-const CF = { PW: 2048, PH: 576, L0: 1.0, XF: 40, NMAX: 200000, NI: 50000 };
+// 펼친 화면 크기(12.85 m × 3.3 m 비율), 첫 띠가 출발하기까지, 내보낸 그림을 지우기까지(초), 입자 최대 수
+const CF = { PW: 2048, PH: 526, L0: 1.0, XF: 40, NMAX: 200000, NI: 50000 };
 
 /* ───────── 렌더러 ───────── */
 const main = $('#main');
@@ -241,7 +241,7 @@ renderer.toneMapping = THREE.NoToneMapping;
 renderer.autoClear = false;
 main.prepend(renderer.domElement);
 
-/* ───────── 입자 장면 (펼친 화면 2048×576, 위가 벽 위) ───────── */
+/* ───────── 입자 장면 (펼친 화면 2048×526, 위가 벽 위) ───────── */
 const pScene = new THREE.Scene();
 const pCam = new THREE.OrthographicCamera(0, CF.PW, CF.PH, 0, -1, 1);
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(CF.PW, CF.PH, { type: THREE.HalfFloatType }));
@@ -1110,7 +1110,7 @@ function analyse(now) {
   U.uBass.value = AR.v.bass; U.uHigh.value = AR.v.high; U.uLevel.value = AR.v.level;
 }
 
-window.cfAR = AR; // 개발 확인용
+window.cfAR = AR; window.cfView = { camera, controls }; // 개발 확인용 (소리 분석 값, 시점)
 /* ───────── 루프 ───────── */
 const clock = new THREE.Clock();
 let fpsN = 0, fpsT = 0;
