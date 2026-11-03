@@ -80,6 +80,7 @@ dl.chk dd.good { color: var(--ok); }
         <li><b>미닫이 뒤판</b> · 뒷면 위·아래에 홈 각재를 대고 12mm 합판 뒤판을 끼움. 옆으로 스르륵 밀어 빼냄 · 두 좌대 모두<small>필통 뚜껑처럼 여닫음. 경첩·자석·나사 없음. 홈은 판보다 1~2mm 넉넉히 파고 초를 칠하면 부드러움. 손가락 홈(세로 140mm)으로 밀고, 빼낼 쪽 옆에 판 폭만큼(약 64cm) 비워 둠</small></li>
         <li><b>놓는 방향 표시</b> · 상판 단차 뒤쪽 가장자리에 ▲ 각인, 캔버스 틀 윗변 바깥에 같은 색 점<small>점과 ▲를 맞춰 위에서 내려놓으면 그림이 똑바로 들어감. 포켓 윗모서리는 2mm 모따기해서 자연스럽게 미끄러져 앉게</small></li>
         <li><b>추가 좌대</b> · 색면화 좌대와 같은 바닥 크기, 높이만 낮춤 <span data-v="b2"></span>mm<small>판 18mm, 위판은 고정. 뒤판은 ①과 같은 미닫이로 반대쪽(바깥)으로 빼서 두 좌대 사이는 비워 둠. 상판 포켓·리더 없이 흡기·배기 구멍과 Ø80 선 구멍만 내면 됨</small></li>
+        <li><b>스피커 자리</b> · 색면화 PC를 눕히고 그 위에 스피커(하만카돈 Aura Studio 5, Ø234×306)를 올림. 관객 왼쪽 측판에 그릴 250×300<small>측판을 그만큼 따내고 펀칭 철판이나 스피커 천을 뒤에서 덧댐. 막힌 나무 상자 안이면 소리가 많이 먹히고, 리더와도 30cm 넘게 떨어짐</small></li>
       </ol>
       <p class="hint" style="margin-top:8px">NFC 태그는 캔버스 틀 네 귀퉁이 아랫면에 하나씩 붙여서(작품당 4장), 어느 방향으로 올려도 한 장이 리더 위에 오게 해요. 리더·아두이노 부착과 USB 팬은 저희가 해요.</p>
     </div>
@@ -112,10 +113,10 @@ const mm = v => v / 1000;
 /* ───────── 치수 (mm) ─────────
    좌표: 정면 −Z(관객), 후면 +Z(점검 뚜껑판), 관객 기준 오른쪽 = −X. 기존 제작안과 같은 방향 */
 const FIX = { W: 600, D: 600, H: 900, side: 18, top: 30, step: 5, pocketDepth: 10, stepW: 18, frame: 20, hole: 80, notchW: 30 };
-const P = { canvas: 242, clear: 2.5, remain: 5, bar: 20, tag: 25, pc1W: 210, pc1D: 450, pc1H: 490, b2W: 600, b2D: 600, b2H: 600, pc2W: 210, pc2D: 450, pc2H: 490, gap: 300 };
+const P = { canvas: 242, clear: 2.5, remain: 5, bar: 20, tag: 25, pc1W: 210, pc1D: 450, pc1H: 490, spkD: 234, spkH: 306, b2W: 600, b2D: 600, b2H: 600, pc2W: 210, pc2D: 450, pc2H: 490, gap: 300 };
 const PARAMS = [
   ['sub', '색면화 좌대'], ['canvas', '캔버스 한 변'], ['clear', '포켓 여유 / 측'], ['remain', '리더 위 남는 두께'], ['bar', '왁구 각재 폭'], ['tag', 'NFC 태그 지름'],
-  ['pc1W', 'PC 폭'], ['pc1D', 'PC 깊이'], ['pc1H', 'PC 높이'],
+  ['pc1W', 'PC 폭 (눕히면 높이)'], ['pc1D', 'PC 깊이'], ['pc1H', 'PC 높이 (눕히면 폭)'], ['spkD', '스피커 지름'], ['spkH', '스피커 높이'],
   ['sub', '추가 좌대 (데스크톱만)'], ['b2W', '외형 폭'], ['b2D', '외형 깊이'], ['b2H', '외형 높이'], ['pc2W', 'PC 폭'], ['pc2D', 'PC 깊이'], ['pc2H', 'PC 높이'], ['gap', '두 좌대 사이 간격'],
 ];
 const view = { ghost: true, lid: false, lift: false, labels: true };
@@ -223,7 +224,7 @@ function body(g, pcW, pcD, pcH, name, S) {
     label(g, '<b>선 구멍 Ø' + FIX.hole + '</b> · 그로밋', 0, 40, hz + 30, true);
     label(g, '흡기 · 오른쪽 측판 아래', -W / 2 - 10, side + 70, 60);
     label(g, 'USB 팬 · 배기 · 왼쪽 측판 위', W / 2 + 10, H - top - 40, 60);
-    label(g, 'PC ' + pcW + '×' + pcD + '×' + pcH, 0, side + pcH + 30, pz);
+    label(g, 'PC ' + pcW + '×' + pcD + '×' + pcH + (S.flat ? ' · 눕힘' : ''), S.flat ? -pcW / 2 + 60 : 0, side + pcH + 30, pz - pcD / 2 + 40);
   }
   doors.push({ g: lid, dir: S.dir, travel: W + 40 });
   return { lid, hz, pz };
@@ -238,7 +239,16 @@ function build() {
 
   // ── 색면화 좌대 (원점) ──
   const A = new THREE.Group(); world.add(A);
-  const a = body(A, P.pc1W, P.pc1D, P.pc1H, '① 색면화 좌대 · 캔버스 포켓 + NFC 리더', { W, D, H, top, dir: 1 });
+  const a = body(A, P.pc1H, P.pc1D, P.pc1W, '① 색면화 좌대 · 캔버스 포켓 + NFC 리더', { W, D, H, top, dir: 1, flat: true }); // PC를 눕혀 넣음
+  // 스피커 (하만카돈 Aura Studio 5, Ø234 × 306): 눕힌 PC 위, 관객 왼쪽(+X) 측판 쪽. 그 측판에 그릴
+  const sy = FIX.side + P.pc1W, sx = Math.min(P.pc1H / 2, W / 2 - FIX.side - 10) - P.spkD / 2, sr = mm(P.spkD / 2);
+  const spk = new THREE.Group(); spk.position.set(mm(sx), mm(sy), mm(a.pz)); A.add(spk);
+  const sBody = new THREE.Mesh(new THREE.CylinderGeometry(sr, sr, mm(P.spkH * 0.62), 40), M.pc); sBody.position.y = mm(P.spkH * 0.31); spk.add(sBody);
+  const sDome = new THREE.Mesh(new THREE.CylinderGeometry(sr * 0.97, sr, mm(P.spkH * 0.38), 40), new THREE.MeshStandardMaterial({ color: 0xbfd4e6, roughness: .15, transparent: true, opacity: .45 }));
+  sDome.position.y = mm(P.spkH * 0.81); spk.add(sDome);
+  const gw = 250, gh = 300, gy = sy + P.spkH / 2;
+  box(A, 3, gh, gw, W / 2 + 1.5, gy, a.pz, M.black, false);                                                         // 그릴 (펀칭 철판 또는 스피커 천)
+  for (let i = 0; i < 9; i++) for (let j = 0; j < 8; j++) box(A, 1, 6, 6, W / 2 + 3.2, gy - gh / 2 + 24 + i * 31.5, a.pz - gw / 2 + 20 + j * 30, M.screw, false);
   const tm = M.top();
   // 상판: 위에서부터 단차층(5) · 포켓층(10, 손잡이 홈) · 남는 바닥(15 = 리더 위 remain + 아래 리더 홈층)
   const s1 = sq(null, W / 2); s1.holes.push(sq(null, stepS / 2, new THREE.Path())); slab(A, s1, step, H, tm);
@@ -260,7 +270,7 @@ function build() {
   box(A, rw - 4, 1.6, rd - 4, tx, yr, tz, M.board);
   box(A, 68.6, 1.6, 53.4, -60, H - top - 14, 120, M.uno);
   box(A, 12, 10, 16, -60 + 30, H - top - 14 - 6, 120 - 26, M.usb, false);
-  tube(A, [[-30, H - top - 20, 94], [-20, H - top - 120, 120], [0, a.pz + 300, 200], [0, FIX.side + P.pc1H - 20, a.pz + P.pc1D / 2 - 20]], 2.5, M.usb);
+  tube(A, [[-30, H - top - 20, 94], [-20, H - top - 120, 120], [0, a.pz + 300, 200], [-P.pc1H / 2 + 60, FIX.side + P.pc1W - 20, a.pz + P.pc1D / 2 - 20]], 2.5, M.usb);
   // 캔버스 (포켓 바닥에 앉아 위로 5 솟음) + 네 귀퉁이 태그
   const C = new THREE.Group(); A.add(C);
   const cy = H - step - pocketDepth, cs = P.canvas, bw = P.bar;
@@ -286,6 +296,8 @@ function build() {
     label(A, '<b>포켓</b> ' + pocket + ' · 여유 ' + P.clear + '/측', 0, H + 70, -pocket / 2, true);
     label(A, '<b>태그 4장</b> Ø' + P.tag + ' · 틀 귀퉁이', -cs / 2, cy + (view.lift ? 160 : 0) - 10, -cs / 2, true);
     label(A, 'RC522 · 아두이노 (저희 부착)', -60, H - top - 60, 160);
+    label(A, '<b>스피커</b> Aura Studio 5 · Ø' + P.spkD + '×' + P.spkH + ' · 눕힌 PC 위', sx, sy + P.spkH + 40, a.pz, true);
+    label(A, '<b>스피커 그릴</b> ' + gw + '×' + gh + ' · 관객 왼쪽 측판', W / 2 + 20, gy - gh / 2 - 30, a.pz, true);
     label(A, '<b>방향 표시</b> ▲ 그림 위쪽', 0, H + 20, stepS / 2 + 30, true);
   }
   renderChecks(pocket, stepS, floorT, remain);
@@ -296,7 +308,7 @@ function renderChecks(pocket, stepS, floorT, remain) {
   const iw = FIX.W - 2 * FIX.side, ih = FIX.H - FIX.side - FIX.top;
   const row = (k, v, ok) => `<dt>${k}</dt><dd class="${ok === undefined ? '' : ok ? 'good' : 'bad'}">${v}</dd>`;
   const pc = (w, d, h) => [iw - w, iw - d, ih - h, iw - w, ih - h];
-  const [a1, a2, a3, a4, a5] = pc(P.pc1W, P.pc1D, P.pc1H);
+  const [a1, a2, a3, a4, a5] = pc(P.pc1H, P.pc1D, P.pc1W); // 눕힌 PC
   const bw = P.b2W - 2 * FIX.side, bd = P.b2D - 2 * FIX.side, bh = P.b2H - FIX.side - 18, [b1, b2, b3] = [bw - P.pc2W, bd - P.pc2D, bh - P.pc2H];
   $('#chk').innerHTML = [
     row('안쪽 포켓 (캔버스 + 여유×2)', `${pocket} × ${pocket}`),
@@ -304,7 +316,9 @@ function renderChecks(pocket, stepS, floorT, remain) {
     row('캔버스 윗면 돌출', `${FIX.frame - FIX.step - FIX.pocketDepth}`),
     row('포켓 바닥 / 리더 위 나무', `${floorT} / ${remain}`, remain <= 8),
     row('태그가 각재에 다 붙나 · 각재 폭 실측 필요', `${P.bar} vs Ø${P.tag}`, P.bar >= P.tag),
-    row('색면화 PC 안쪽 여유 W/D/H', `${a1} / ${a2} / ${a3}`, Math.min(a1, a2, a3) >= 20),
+    row('색면화 PC(눕힘) 안쪽 여유 W/D/H', `${a1} / ${a2} / ${a3}`, Math.min(a1, a2, a3) >= 20),
+    row('스피커가 PC 윗면 안에 앉나 (지름 vs PC 폭·깊이)', `${P.spkD} vs ${P.pc1H}·${P.pc1D}`, P.spkD <= Math.min(P.pc1H, P.pc1D)),
+    row('스피커 ↔ 리더 거리 (5cm 넘게)', `${FIX.H - FIX.top - FIX.side - P.pc1W - P.spkH}`, FIX.H - FIX.top - FIX.side - P.pc1W - P.spkH >= 50),
     row('색면화 PC 뒤로 넣는 틈 W/H (뒤판 뺐을 때)', `${a4} / ${a5}`, Math.min(a4, a5) >= 10),
     row('추가 좌대 안쪽 (W/D/H)', `${bw} / ${bd} / ${bh}`),
     row('추가 PC 안쪽 여유 W/D/H (뒤로 넣음)', `${b1} / ${b2} / ${b3}`, Math.min(b1, b2, b3) >= 20),
