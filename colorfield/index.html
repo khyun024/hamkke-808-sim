@@ -1,0 +1,732 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>색면화 프리비즈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: 좌측 조작 패널 + 우측 화면(위: 공간, 아래: 펼친 출력 화면). 좁은 화면에서는 화면 위, 패널 아래. */
+:root {
+  --bg: #0d0f10; --panel: #15181a; --fg: #e6eaec; --muted: #8f999f; --line: #2a3135;
+  --field: #1c2124; --accent: #4cc2e4; --accent-ink: #062431;
+  --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: dark; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 13px; overflow: hidden; }
+#app { display: grid; grid-template-columns: 300px 1fr; height: 100%; }
+aside { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+aside header h1 { font-size: 15px; margin: 0; font-weight: 700; }
+aside header p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+aside header a { color: var(--accent); }
+.sec h2 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.b { border: 1px solid var(--line); background: var(--field); color: var(--fg); border-radius: 6px; padding: 6px 10px; font: 500 12px var(--sans); cursor: pointer; }
+.b:hover { border-color: var(--accent); }
+.b.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.b:disabled { opacity: .45; cursor: default; border-color: var(--line); }
+.b:focus-visible, .thumbs button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.thumbs button { padding: 0; border: 1px solid var(--line); border-radius: 5px; background: var(--field); cursor: pointer; aspect-ratio: 1; overflow: hidden; }
+.thumbs button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumbs button.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.thumbs .up { display: grid; place-items: center; color: var(--muted); font-size: 11px; line-height: 1.3; text-align: center; }
+.row { display: grid; grid-template-columns: 74px 1fr 36px; align-items: center; gap: 8px; min-height: 26px; }
+.row label { color: var(--muted); font-size: 12px; }
+.row input { width: 100%; accent-color: var(--accent); }
+.row output { font: 11px var(--mono); color: var(--muted); text-align: right; }
+.hint { color: var(--muted); font-size: 11.5px; line-height: 1.6; margin: 0; }
+.state { font-size: 12px; line-height: 1.5; min-height: 46px; }
+.state small { display: block; color: var(--muted); font: 11px var(--mono); }
+.chips { float: right; display: flex; flex-direction: column; width: 40px; height: 40px; margin-left: 8px; border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+main { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: #000; }
+main canvas { display: block; }
+#cap { position: absolute; left: 0; right: 0; pointer-events: none; }
+#cap .corner { position: absolute; top: 0; bottom: 0; border-left: 1px dashed rgba(255,255,255,.35); }
+#cap .t { position: absolute; top: 6px; font: 10.5px var(--mono); color: rgba(255,255,255,.6); padding: 0 8px; text-shadow: 0 1px 2px #000; }
+#cap .l { left: 0; } #cap .r { right: 0; }
+#cap .rule { position: absolute; left: 0; right: 0; top: 0; border-top: 1px solid #2a3135; }
+#vlabel { position: absolute; left: 12px; top: 10px; font: 10.5px var(--mono); color: rgba(255,255,255,.55); pointer-events: none; }
+#fps { position: absolute; right: 12px; top: 10px; font: 10.5px var(--mono); color: rgba(255,255,255,.4); pointer-events: none; }
+@media (max-width: 760px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: 56% 44%; }
+  main { grid-row: 1; }
+  aside { grid-row: 2; border-right: 0; border-top: 1px solid var(--line); }
+  .thumbs { grid-template-columns: repeat(8, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div id="app">
+  <aside>
+    <header>
+      <h1>색면화 · 좌대 연동 미디어아트</h1>
+      <p>갤러리808 색면화 방 프리비즈. 정면 벽(7.4 m)과 오른쪽 벽(5.4 m)을 이어 한 화면으로 투사. <a href="../">전체 설치 시뮬레이션 ↗</a></p>
+    </header>
+    <div class="sec">
+      <h2>좌대에 그림 올리기</h2>
+      <div class="thumbs" id="thumbs"></div>
+      <input type="file" id="file" accept="image/*" hidden>
+      <div class="btns" style="margin-top:8px">
+        <button class="b" id="off">그림 빼기</button>
+        <button class="b" id="sound">소리 켜기</button>
+      </div>
+      <div class="state" id="state" style="margin-top:10px"></div>
+    </div>
+    <div class="sec">
+      <h2>보기</h2>
+      <div class="btns" id="mode">
+        <button class="b" data-v="both">공간 + 펼친 화면</button>
+        <button class="b" data-v="room">공간만</button>
+        <button class="b" data-v="flat">펼친 화면만</button>
+      </div>
+      <div class="btns" id="views" style="margin-top:6px"></div>
+      <div class="btns" id="dir" style="margin-top:6px">
+        <button class="b" data-v="ltr">왼쪽 벽 쪽에서 시작</button>
+        <button class="b" data-v="rtl">반대로</button>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>입자</h2>
+      <div class="row"><label for="gain">밝기</label><input type="range" id="gain" min="0.4" max="3" step="0.05"><output id="gain-o"></output></div>
+      <div class="row"><label for="size">알갱이 크기</label><input type="range" id="size" min="2" max="10" step="0.25"><output id="size-o"></output></div>
+      <div class="row"><label for="turb">흔들림</label><input type="range" id="turb" min="0" max="3" step="0.05"><output id="turb-o"></output></div>
+      <div class="row"><label for="bloom">번짐</label><input type="range" id="bloom" min="0" max="2" step="0.05"><output id="bloom-o"></output></div>
+    </div>
+    <p class="hint">그림을 고르면 띠마다 14만 개 알갱이로 나뉘어 위 띠부터 차례로 왼쪽에서 쏘아지고, 소용돌이치며 띠 모양으로 내려앉아요. 머무는 동안 알갱이가 반짝이며 흔들리고, 6.5초마다 빛 물결이 지나가요. 26초 한 바퀴의 끝에서 왼쪽부터 바람에 흩날리듯 빠져나가고, 다시 처음부터 반복해요. 다른 그림을 고르면 앞 그림이 흩어지는 동안 다음 그림이 쏘아져요. 그림을 빼면 올렸던 그림들의 알갱이가 옅게 떠돌며 숨 쉬고, 좌대 위 놓을 자리가 빛나요. 이미지 파일을 화면에 끌어다 놓아도 돼요.</p>
+  </aside>
+  <main id="main">
+    <div id="vlabel"></div>
+    <div id="fps"></div>
+    <div id="cap" hidden><div class="rule"></div><div class="corner" id="corner"></div><span class="t l" id="capL"></span><span class="t r" id="capR"></span></div>
+  </main>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+const $ = s => document.querySelector(s);
+const pref = (() => { try { return JSON.parse(localStorage.getItem('cf-prefs') || '{}'); } catch (e) { return {}; } })();
+const opt = Object.assign({ mode: 'both', dir: 'ltr', gain: 0.75, size: 4, turb: 1, bloom: 0.55 }, pref);
+const savePrefs = () => { try { localStorage.setItem('cf-prefs', JSON.stringify(opt)); } catch (e) { } };
+
+/* ───────── 방 치수 (전체 시뮬레이션의 배치도 환산값) ─────────
+   원점 = 왼쪽 벽(서) · 방 입구 쪽(북) 모서리. X = 동, Z = 남. 정면 벽 = 남쪽, 오른쪽 벽 = 동쪽 */
+const ROOM = { W: 7.4, D: 7.1, H: 3.6, RL: 5.45, ped: [3.73, 3.66], pedW: 0.6, pedH: 0.9 };
+const TOTAL = ROOM.W + ROOM.RL;
+
+/* ───────── 타임라인 ───────── */
+const CF = { PW: 2048, PH: 576, CYCLE: 26, L0: 0.6, GAP: 0.75, TRAVEL: 5.5, REL: 19, RELD: 4.5, XF: 5.5, N: 140000, NI: 50000 };
+
+/* ───────── 렌더러 ───────── */
+const main = $('#main');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.autoClear = false;
+main.prepend(renderer.domElement);
+
+/* ───────── 입자 장면 (펼친 화면 2048×576, 위가 벽 위) ───────── */
+const pScene = new THREE.Scene();
+const pCam = new THREE.OrthographicCamera(0, CF.PW, CF.PH, 0, -1, 1);
+const rtA = new THREE.WebGLRenderTarget(CF.PW, CF.PH, { type: THREE.HalfFloatType });
+const composer = new EffectComposer(renderer, rtA);
+composer.renderToScreen = false;
+composer.setPixelRatio(1);
+composer.setSize(CF.PW, CF.PH);
+composer.addPass(new RenderPass(pScene, pCam, null, new THREE.Color(0x000000), 1));
+const bloom = new UnrealBloomPass(new THREE.Vector2(CF.PW, CF.PH), opt.bloom, 0.5, 0.3);
+composer.addPass(bloom);
+const fieldTex = () => composer.readBuffer.texture;
+
+const NOISE = /* glsl */`
+float hash(vec3 p) { p = fract(p * 0.3183099 + .1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float noise(vec3 x) {
+  vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(hash(i), hash(i + vec3(1, 0, 0)), f.x), mix(hash(i + vec3(0, 1, 0)), hash(i + vec3(1, 1, 0)), f.x), f.y),
+             mix(mix(hash(i + vec3(0, 0, 1)), hash(i + vec3(1, 0, 1)), f.x), mix(hash(i + vec3(0, 1, 1)), hash(i + vec3(1, 1, 1)), f.x), f.y), f.z);
+}
+// 2D 컬 노이즈: 소용돌이처럼 흐르는 방향
+vec2 curl(vec2 p, float t) {
+  float e = 0.12;
+  float a = noise(vec3(p.x, p.y + e, t)) - noise(vec3(p.x, p.y - e, t));
+  float b = noise(vec3(p.x + e, p.y, t)) - noise(vec3(p.x - e, p.y, t));
+  return vec2(a, -b) / (2.0 * e);
+}`;
+const FRAG = /* glsl */`
+varying vec3 vCol; varying float vA;
+void main() {
+  float r = length(gl_PointCoord - 0.5);
+  if (r > 0.5) discard;
+  float k = smoothstep(0.5, 0.0, r); k *= k;
+  gl_FragColor = vec4(vCol * k * vA, 1.0);
+}`;
+
+// 그림 하나 = 입자 한 벌. 띠마다 출발·도착·떠남 시각을 미리 정해 두고 셰이더가 시간으로 위치를 계산
+const SHOW_VERT = /* glsl */`
+attribute vec2 aTarget; attribute vec3 aColor; attribute vec4 aSeed; attribute vec4 aT; // 출발, 도착, 떠남(자연), 떠남(교체 후)
+uniform float uTau, uRelAge, uTauSnap, uTime, uSize, uGain, uTurb, uPW;
+varying vec3 vCol; varying float vA;
+${NOISE}
+vec3 basePos(float tau, out float a, out float b) {
+  a = 0.0; b = 1.0;
+  if (tau < aT.x) return vec3(-99.0);
+  vec2 tgt = aTarget;
+  if (tau < aT.y) { // 쏘아져 날아가는 중
+    float s = (tau - aT.x) / max(0.001, aT.y - aT.x), e = 1.0 - pow(1.0 - s, 3.0);
+    vec2 st = vec2(-12.0 - aSeed.x * 60.0, tgt.y + (aSeed.y - 0.5) * 220.0);
+    vec2 p = mix(st, tgt, e);
+    p.y += sin(s * 3.14159) * (aSeed.z - 0.5) * 120.0;
+    p += curl(p * 0.0035 + aSeed.xy * 3.0, uTime * 0.35) * 70.0 * uTurb * (1.0 - e);
+    a = smoothstep(0.0, 0.06, s); b = 1.0 + 1.0 * (1.0 - e);
+    return vec3(p, 1.0 - e);
+  }
+  // 내려앉은 뒤: 알갱이가 제자리 근처에서 흔들리고 반짝임
+  float age = tau - aT.y, settle = smoothstep(0.0, 1.2, age);
+  vec2 p = tgt + curl(tgt * 0.0045 + aSeed.zw, uTime * 0.12) * 7.0 * uTurb * settle;
+  p.y += sin(tgt.x * 0.005 + uTime * 0.7 + aSeed.w) * 2.0 * uTurb;
+  // 빛 물결: 6.5초마다 왼쪽에서 오른쪽으로 지나감
+  float d = tgt.x / uPW - fract(uTime / 6.5) * 1.4 + 0.2, pulse = exp(-d * d * 90.0);
+  p += curl(tgt * 0.012, uTime * 0.8) * 16.0 * pulse * uTurb;
+  b = 0.78 + 0.32 * sin(uTime * (1.2 + aSeed.z * 3.5) + aSeed.w * 6.283) + 1.1 * pulse + 0.6 * (1.0 - settle);
+  a = 1.0;
+  return vec3(p, pulse * 0.5);
+}
+void main() {
+  float a, b;
+  bool forced = uRelAge >= 0.0;
+  vec3 bp = basePos(forced ? uTauSnap : uTau, a, b);
+  vec2 p = bp.xy;
+  // 떠남: 왼쪽부터 바람에 흩날리듯 오른쪽으로
+  float lv = forced ? max(uRelAge - aT.w, uTauSnap - aT.z + uRelAge) : uTau - aT.z;
+  if (lv > 0.0) {
+    vec2 c = curl(p * 0.004 + aSeed.xy * 2.0, uTime * 0.4);
+    p.x += lv * (160.0 + aSeed.x * 520.0) + lv * lv * 240.0;
+    p += c * lv * 110.0 * (0.4 + uTurb * 0.6);
+    p.y += lv * (aSeed.y - 0.5) * 60.0;
+    a *= exp(-lv * 1.25);
+    b += 0.9 * exp(-lv * 2.5);
+  }
+  vCol = aColor * b * uGain; vA = a;
+  gl_PointSize = uSize * (0.55 + aSeed.w * 0.9) * (1.0 + bp.z * 0.9);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 0.0, 1.0);
+  if (a < 0.003) gl_Position = vec4(3.0, 3.0, 3.0, 1.0);
+}`;
+
+// 아이들: 올렸던 그림의 알갱이가 옅게 떠돌며 숨 쉼. 시작 쪽(왼쪽)으로 천천히 거꾸로 흐름
+const IDLE_VERT = /* glsl */`
+attribute vec2 aTarget; attribute vec3 aColor; attribute vec4 aSeed;
+uniform float uTime, uA, uSize, uGain, uPW, uPH;
+varying vec3 vCol; varying float vA;
+${NOISE}
+void main() {
+  float sp = 6.0 + aSeed.x * 20.0;
+  vec2 p = vec2(mod(aTarget.x - uTime * sp, uPW + 40.0) - 20.0, aTarget.y);
+  p += curl(p * 0.003 + aSeed.zw, uTime * 0.05) * 14.0;
+  p.y += sin(uTime * 0.21 + aSeed.z * 6.283) * 6.0;
+  float breath = 0.55 + 0.45 * sin(uTime * 6.2832 / 7.0);
+  float pch = smoothstep(0.35, 0.8, noise(vec3(p.x * 0.0025 + uTime * 0.04, aTarget.y * 0.01, aSeed.y * 0.0)));
+  float tw = 0.5 + 0.5 * sin(uTime * (0.6 + aSeed.y * 2.2) + aSeed.w * 6.283);
+  bool mote = aSeed.w > 0.985;
+  vA = uA * (mote ? 0.9 * tw : (0.08 + 0.5 * pch) * (0.35 + 0.65 * tw)) * (0.45 + 0.55 * breath);
+  vCol = (mote ? mix(aColor, vec3(1.0), 0.5) * 1.6 : aColor) * uGain;
+  gl_PointSize = uSize * (mote ? 1.6 : 0.6 + aSeed.w * 0.7);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 0.0, 1.0);
+  if (vA < 0.003) gl_Position = vec4(3.0, 3.0, 3.0, 1.0);
+}`;
+
+function pointsMesh(n, vert, uniforms, attrs) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+  for (const [name, size] of attrs) g.setAttribute(name, new THREE.BufferAttribute(new Float32Array(n * size), size));
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(CF.PW / 2, CF.PH / 2, 0), 1e5);
+  const m = new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: FRAG, uniforms, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending });
+  const pts = new THREE.Points(g, m); pts.frustumCulled = false; pScene.add(pts);
+  return pts;
+}
+const common = () => ({ uTime: { value: 0 }, uSize: { value: opt.size }, uGain: { value: opt.gain }, uPW: { value: CF.PW } });
+const slots = [0, 1].map(() => {
+  const pts = pointsMesh(CF.N, SHOW_VERT, { ...common(), uTau: { value: -1 }, uRelAge: { value: -1 }, uTauSnap: { value: 0 }, uTurb: { value: opt.turb } }, [['aTarget', 2], ['aColor', 3], ['aSeed', 4], ['aT', 4]]);
+  pts.visible = false;
+  return { pts, show: null };
+});
+const idlePts = pointsMesh(CF.NI, IDLE_VERT, { ...common(), uA: { value: 1 }, uPH: { value: CF.PH } }, [['aTarget', 2], ['aColor', 3], ['aSeed', 4]]);
+
+/* ───────── 그림 → 띠 ───────── */
+const PENTA = [0, 2, 4, 7, 9];
+function rgbHsl([r, g, b]) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return [0, 0, l];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [(h * 60 + 360) % 360, s, l];
+}
+// 띠 색 → 음: 유채색은 색상으로 5음계 음을, 밝기로 옥타브를 고름. 검정은 낮은 울림, 흰색은 높은 숨
+function bandVoice(rgb) {
+  const [h, s, l] = rgbHsl(rgb);
+  let midi, kind = 'tone';
+  if (l < 0.17) { midi = 36; kind = 'low'; }
+  else if (l > 0.82 && s < 0.4) { midi = 84; kind = 'air'; }
+  else if (s < 0.18) midi = l < 0.5 ? 55 : 67;
+  else midi = (l < 0.36 ? 48 : l < 0.62 ? 60 : 72) + PENTA[Math.floor(((h + 18) % 360) / 72)];
+  return { midi, kind, sat: s };
+}
+// 사진에서 캔버스 영역 찾기: 테두리 색을 배경으로 보고, 배경과 다른 픽셀이 35% 넘는 행·열의 범위
+function autoCrop(img) {
+  const W = img.naturalWidth, H = img.naturalHeight, k = 160 / Math.max(W, H);
+  const w = Math.max(8, Math.round(W * k)), h = Math.max(8, Math.round(H * k));
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, w, h);
+  const d = g.getImageData(0, 0, w, h).data, px = (x, y) => { const i = (y * w + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+  const b = Math.max(2, Math.round(Math.min(w, h) * 0.04)), bg = [0, 0, 0]; let n = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (x < b || y < b || x >= w - b || y >= h - b) { const p = px(x, y); bg[0] += p[0]; bg[1] += p[1]; bg[2] += p[2]; n++; }
+  bg.forEach((v, i) => bg[i] = v / n);
+  const on = (x, y) => { const p = px(x, y); return Math.hypot(p[0] - bg[0], p[1] - bg[1], p[2] - bg[2]) > 40; };
+  const rows = [], cols = [];
+  for (let y = 0; y < h; y++) { let m = 0; for (let x = 0; x < w; x++) m += on(x, y); if (m / w > 0.35) rows.push(y); }
+  for (let x = 0; x < w; x++) { let m = 0; for (let y = 0; y < h; y++) m += on(x, y); if (m / h > 0.35) cols.push(x); }
+  if (rows.length < h * 0.2 || cols.length < w * 0.2) return [0, 0, W, H];
+  const x0 = cols[0], x1 = cols[cols.length - 1] + 1, y0 = rows[0], y1 = rows[rows.length - 1] + 1;
+  const ix = (x1 - x0) * 0.02, iy = (y1 - y0) * 0.02;
+  return [(x0 + ix) / k, (y0 + iy) / k, (x1 - x0 - 2 * ix) / k, (y1 - y0 - 2 * iy) / k];
+}
+// 가로 띠 읽기: 가운데 70% 폭의 행 평균색을 위에서 아래로 훑어, 색이 크게 바뀌는 곳에서 자름
+function bandsOf(img, rect) {
+  const [sx, sy, sw, sh] = rect, C = 40, R = 240;
+  const c = document.createElement('canvas'); c.width = C; c.height = R;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, sx + sw * 0.15, sy, sw * 0.7, sh, 0, 0, C, R);
+  const d = g.getImageData(0, 0, C, R).data, rows = [];
+  for (let y = 0; y < R; y++) { const a = [0, 0, 0]; for (let x = 0; x < C; x++) { const i = (y * C + x) * 4; a[0] += d[i]; a[1] += d[i + 1]; a[2] += d[i + 2]; } rows.push(a.map(v => v / C)); }
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  const mean = s => s.sum.map(v => v / s.n);
+  const merge = (a, b) => { a.y0 = Math.min(a.y0, b.y0); a.y1 = Math.max(a.y1, b.y1); a.n += b.n; a.sum = a.sum.map((v, k) => v + b.sum[k]); };
+  const segs = [{ y0: 0, y1: 1, n: 1, sum: rows[0].slice() }];
+  for (let y = 1; y < R; y++) {
+    const s = segs[segs.length - 1], m = mean(s);
+    if (dist(rows[y], m) > 38 && dist(rows[Math.min(R - 1, y + 2)], m) > 38) segs.push({ y0: y, y1: y + 1, n: 1, sum: rows[y].slice() });
+    else { s.y1 = y + 1; s.n++; rows[y].forEach((v, k) => s.sum[k] += v); }
+  }
+  // 경계 번짐으로 생긴 얇은 조각은 색이 가까운 이웃에 붙이고, 비슷한 이웃끼리는 합침
+  for (let again = true; again;) {
+    again = false;
+    for (let i = 0; i < segs.length && segs.length > 1; i++) {
+      if (segs[i].n >= R * 0.02) continue;
+      const L = segs[i - 1], N = segs[i + 1], m = mean(segs[i]);
+      merge(!L ? N : !N ? L : dist(m, mean(L)) <= dist(m, mean(N)) ? L : N, segs[i]);
+      segs.splice(i, 1); again = true; break;
+    }
+  }
+  for (let i = 1; i < segs.length; i++) if (dist(mean(segs[i]), mean(segs[i - 1])) < 26) { merge(segs[i - 1], segs[i]); segs.splice(i--, 1); }
+  return segs.map(s => {
+    const a = Math.floor(s.y0 + (s.y1 - s.y0) * 0.2), b = Math.max(a + 1, Math.ceil(s.y1 - (s.y1 - s.y0) * 0.2)), col = [0, 0, 0];
+    for (let y = a; y < b; y++) rows[y].forEach((v, k) => col[k] += v / (b - a));
+    const rgb = col.map(v => Math.min(255, Math.max(0, Math.round((v - 10) * 1.1)))); // 사진 색을 빛으로 쏠 때 조금 또렷하게
+    const w = (s.y1 - s.y0) / R;
+    return { y0: s.y0 / R, y1: s.y1 / R, w, rgb, hex: '#' + rgb.map(v => v.toString(16).padStart(2, '0')).join(''), pad: 0.025 + 0.11 * Math.sqrt(w), ...bandVoice(rgb) };
+  });
+}
+const linCol = rgb => new THREE.Color().setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, THREE.SRGBColorSpace);
+
+/* ───────── 그림 하나를 입자로 ───────── */
+const invEaseOut = u => 1 - Math.cbrt(1 - Math.min(1, Math.max(0, u)));
+function fillSlot(slot, show) {
+  const g = slot.pts.geometry, A = n => g.getAttribute(n).array;
+  const tg = A('aTarget'), co = A('aColor'), sd = A('aSeed'), tt = A('aT');
+  const cum = []; let acc = 0; show.bands.forEach(b => cum.push(acc += b.w));
+  const cols = show.bands.map(b => { const c = linCol(b.rgb); const l = c.r * .2126 + c.g * .7152 + c.b * .0722; return l < 0.02 ? c.multiplyScalar(0.6).addScalar(0.012) : c; });
+  const glw = show.bands.map(b => { const c = linCol(b.rgb); return c.r * .2126 + c.g * .7152 + c.b * .0722 < 0.02 ? 0.1 : 0.55; }); // 검은 띠의 반짝임은 희미하게
+  for (let j = 0; j < CF.N; j++) {
+    const r = Math.random() * acc; let i = 0; while (i < cum.length - 1 && r > cum[i]) i++;
+    const b = show.bands[i], u = Math.random(), v = b.y0 + Math.random() * (b.y1 - b.y0);
+    tg[2 * j] = u * CF.PW; tg[2 * j + 1] = (1 - v) * CF.PH;
+    const c = cols[i], jit = 0.82 + Math.random() * 0.36, glint = Math.random() < 0.025;
+    const gw = glw[i]; co[3 * j] = glint ? c.r * 0.5 + gw : c.r * jit; co[3 * j + 1] = glint ? c.g * 0.5 + gw : c.g * jit; co[3 * j + 2] = glint ? c.b * 0.5 + gw : c.b * jit;
+    const s0 = Math.random(), s1 = Math.random(), s2 = Math.random(), s3 = glint ? 0.95 + Math.random() * 0.05 : Math.random();
+    sd[4 * j] = s0; sd[4 * j + 1] = s1; sd[4 * j + 2] = s2; sd[4 * j + 3] = s3;
+    const L = CF.L0 + i * CF.GAP, arr = L + CF.TRAVEL * invEaseOut(u) + s1 * 0.45;
+    tt[4 * j] = Math.max(L, arr - (0.45 + u * 1.1 + s2 * 0.5));
+    tt[4 * j + 1] = arr;
+    tt[4 * j + 2] = CF.REL + CF.RELD * 0.8 * u + s0 * 0.5;
+    tt[4 * j + 3] = 2.2 * u + s2 * 0.45;
+  }
+  ['aTarget', 'aColor', 'aSeed', 'aT'].forEach(n => g.getAttribute(n).needsUpdate = true);
+  slot.show = show; show.slot = slot; slot.pts.visible = true;
+  const U = slot.pts.material.uniforms; U.uRelAge.value = -1; U.uTau.value = -1;
+}
+const IDLE_BANDS = [{ y0: .16, y1: .34, w: .18, rgb: [214, 200, 176] }, { y0: .46, y1: .58, w: .12, rgb: [170, 184, 200] }, { y0: .7, y1: .86, w: .16, rgb: [200, 176, 170] }];
+function fillIdle() {
+  const g = idlePts.geometry, A = n => g.getAttribute(n).array;
+  const tg = A('aTarget'), co = A('aColor'), sd = A('aSeed');
+  const sets = field.hist.length ? field.hist.map(h => h.bands) : [IDLE_BANDS];
+  const per = sets.map(bs => { const cum = []; let a = 0; bs.forEach(b => cum.push(a += b.w)); return { bs, cum, a, cols: bs.map(b => linCol(b.rgb)) }; });
+  for (let j = 0; j < CF.NI; j++) {
+    const S = per[j % per.length], r = Math.random() * S.a; let i = 0; while (i < S.cum.length - 1 && r > S.cum[i]) i++;
+    const b = S.bs[i], c = S.cols[i], v = b.y0 + Math.random() * (b.y1 - b.y0), l = c.r * .2126 + c.g * .7152 + c.b * .0722;
+    tg[2 * j] = Math.random() * CF.PW; tg[2 * j + 1] = (1 - v) * CF.PH;
+    const k = l < 0.02 ? 0 : 1; co[3 * j] = c.r * k + 0.01; co[3 * j + 1] = c.g * k + 0.01; co[3 * j + 2] = c.b * k + 0.012;
+    for (let q = 0; q < 4; q++) sd[4 * j + q] = Math.random();
+  }
+  ['aTarget', 'aColor', 'aSeed'].forEach(n => g.getAttribute(n).needsUpdate = true);
+}
+
+/* ───────── 상태 ───────── */
+const field = { cur: null, hist: [], idleA: 1, drop: 1 };
+const tnow = () => performance.now() / 1000;
+const phaseOf = (s, now) => now < s.t0 ? -1 : (now - s.t0) % CF.CYCLE;
+function placeImage(img, name, key, rect) {
+  if (field.cur?.key === key) return;
+  let bands;
+  try { bands = bandsOf(img, rect); } catch (e) { $('#state').textContent = '이미지 색을 읽지 못했어요. 파일을 직접 열었다면(file://) 로컬 서버나 배포 주소로 열어 주세요.'; return; }
+  const now = tnow(), had = !!field.cur;
+  if (field.cur) releaseShow(field.cur, now);
+  const face = document.createElement('canvas'), fk = 512 / Math.max(rect[2], rect[3]);
+  face.width = Math.round(rect[2] * fk); face.height = Math.round(rect[3] * fk);
+  face.getContext('2d').drawImage(img, rect[0], rect[1], rect[2], rect[3], 0, 0, face.width, face.height);
+  const show = { key, name, bands, face, t0: now + (had ? 0.9 : 0.35), cycle: -2, launched: new Set(), voices: [] };
+  const slot = slots.find(s => !s.show) || slots.find(s => s.show !== field.cur) || slots[0];
+  if (slot.show) { sndRelease(slot.show, 0.3); slot.show = null; }
+  fillSlot(slot, show);
+  field.cur = show;
+  field.hist = [{ key, bands }, ...field.hist.filter(h => h.key !== key)].slice(0, 7);
+  fillIdle();
+  field.drop = 0; buildPedestalArt(); renderUI();
+}
+function releaseShow(s, now) {
+  s.relAt = now; s.tauSnap = phaseOf(s, now);
+  const U = s.slot.pts.material.uniforms; U.uTauSnap.value = s.tauSnap; U.uRelAge.value = 0;
+  sndRelease(s, 2.8);
+}
+function removeImage() {
+  if (!field.cur) return;
+  releaseShow(field.cur, tnow()); field.cur = null; buildPedestalArt(); renderUI();
+}
+
+/* ───────── 소리 ─────────
+   띠가 출발할 때 종소리 하나(흐름을 따라 왼쪽 → 오른쪽으로 이동), 띠가 남아 있는 동안 머무는 소리. 두께가 두꺼울수록 크게 */
+const snd = { ctx: null, on: false };
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function sndInit() {
+  if (snd.ctx) return;
+  const ctx = snd.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3;
+  snd.master = ctx.createGain(); snd.master.gain.value = 0;
+  snd.bus = ctx.createGain();
+  const n = ctx.sampleRate * 3.6, ir = ctx.createBuffer(2, n, ctx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const a = ir.getChannelData(ch); for (let i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.8); }
+  const verb = ctx.createConvolver(); verb.buffer = ir;
+  const wet = ctx.createGain(); wet.gain.value = 0.5;
+  snd.bus.connect(comp); snd.bus.connect(verb); verb.connect(wet); wet.connect(comp);
+  comp.connect(snd.master); snd.master.connect(ctx.destination);
+  // 아이들: 낮은 5도 울림 + 숨소리 같은 걸러진 잡음
+  snd.idle = ctx.createGain(); snd.idle.gain.value = 0; snd.idle.connect(snd.bus);
+  [[48, 0.5], [55, 0.32], [60, 0.12]].forEach(([m, a]) => { const o = ctx.createOscillator(); o.frequency.value = mtof(m); const g = ctx.createGain(); g.gain.value = a; o.connect(g).connect(snd.idle); o.start(); });
+  const nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), na = nb.getChannelData(0);
+  for (let i = 0; i < na.length; i++) na[i] = Math.random() * 2 - 1;
+  const ns = ctx.createBufferSource(); ns.buffer = nb; ns.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 650; bp.Q.value = 0.6;
+  snd.breath = ctx.createGain(); snd.breath.gain.value = 0;
+  ns.connect(bp).connect(snd.breath).connect(snd.bus); ns.start();
+}
+function sndSet(on) {
+  if (on) sndInit();
+  snd.on = on;
+  if (!snd.ctx) return;
+  const t = snd.ctx.currentTime;
+  snd.master.gain.cancelScheduledValues(t);
+  if (on) {
+    snd.ctx.resume(); snd.master.gain.setTargetAtTime(0.9, t, 0.2);
+    const s = field.cur; // 이미 나와 있는 띠는 머무는 소리만 이어 붙임
+    if (s) s.launched.forEach(i => sndLaunch(s, i, true));
+  } else {
+    snd.master.gain.setTargetAtTime(0, t, 0.15);
+    slots.forEach(sl => sl.show && sndRelease(sl.show, 0.3));
+  }
+}
+function sndLaunch(s, i, quiet = false) {
+  if (!snd.on) return;
+  const ctx = snd.ctx, t = ctx.currentTime, b = s.bands[i], f = mtof(b.midi), dir = opt.dir === 'rtl' ? -1 : 1;
+  if (!quiet) {
+    const pan = ctx.createStereoPanner(); pan.connect(snd.bus);
+    pan.pan.setValueAtTime(-0.85 * dir, t); pan.pan.linearRampToValueAtTime(0.85 * dir, t + CF.TRAVEL);
+    const bell = ctx.createGain(); bell.connect(pan);
+    bell.gain.setValueAtTime(0, t); bell.gain.linearRampToValueAtTime(0.1 + 0.16 * Math.sqrt(b.w), t + 0.01); bell.gain.exponentialRampToValueAtTime(0.0008, t + 3.4);
+    [[1, 1], [2.005, 0.32], [3.01, 0.1]].forEach(([m, a]) => { const o = ctx.createOscillator(); o.frequency.value = f * m; const g = ctx.createGain(); g.gain.value = a; o.connect(g).connect(bell); o.start(t); o.stop(t + 3.6); });
+  }
+  const pad = ctx.createGain(); pad.gain.setValueAtTime(0, t); pad.gain.linearRampToValueAtTime(b.pad, t + 2.5);
+  const pp = ctx.createStereoPanner(); pp.pan.value = s.bands.length > 1 ? (i / (s.bands.length - 1) - 0.5) * 0.7 : 0;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = b.kind === 'low' ? 260 : 500 + b.sat * 2400; lp.Q.value = 0.5;
+  lp.connect(pad).connect(pp).connect(snd.bus);
+  const oscs = (b.kind === 'tone' ? [['triangle', -6], ['triangle', 6]] : [['sine', 0], ['sine', b.kind === 'air' ? 1200 : 700]]).map(([type, cents]) => {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = cents; o.connect(lp); o.start(t); return o;
+  });
+  if (b.kind === 'air') { const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.23; lg.gain.value = b.pad * 0.6; lfo.connect(lg).connect(pad.gain); lfo.start(t); oscs.push(lfo); }
+  s.voices.push({ g: pad.gain, oscs });
+}
+function sndRelease(s, dur) {
+  if (!snd.ctx) { s.voices = []; return; }
+  const t = snd.ctx.currentTime;
+  s.voices.forEach(v => {
+    if (v.g.cancelAndHoldAtTime) v.g.cancelAndHoldAtTime(t); else { v.g.cancelScheduledValues(t); v.g.setValueAtTime(v.g.value, t); }
+    v.g.linearRampToValueAtTime(0, t + dur); v.oscs.forEach(o => o.stop(t + dur + 0.1));
+  });
+  s.voices = [];
+}
+
+/* ───────── 방 ───────── */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+const camera = new THREE.PerspectiveCamera(58, 1, 0.05, 100);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxPolarAngle = Math.PI * 0.495;
+scene.add(new THREE.AmbientLight(0xffffff, 0.05));
+
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.95, emissive: 0xffffff, emissiveMap: fieldTex() });
+// 바닥 끝점 a·b, 펼친 화면 가로 좌표 U0(a 쪽)·U1(b 쪽)으로 벽 한 장
+function wall(a, b, U0, U1, mat) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute([a[0], 0, a[1], b[0], 0, b[1], b[0], ROOM.H, b[1], a[0], ROOM.H, a[1]], 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute([U0, 0, U1, 0, U1, 1, U0, 1], 2));
+  g.setIndex([0, 1, 2, 0, 2, 3]); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat); mat.side = THREE.DoubleSide; scene.add(m); return m;
+}
+const wSouth = wall([0, ROOM.D], [ROOM.W, ROOM.D], 0, ROOM.W / TOTAL, wallMat);
+const wEast = wall([ROOM.W, ROOM.D], [ROOM.W, ROOM.D - ROOM.RL], ROOM.W / TOTAL, 1, wallMat);
+function applyDir() {
+  const flip = opt.dir === 'rtl';
+  [[wSouth, 0, ROOM.W / TOTAL], [wEast, ROOM.W / TOTAL, 1]].forEach(([m, u0, u1]) => {
+    const uv = m.geometry.getAttribute('uv'), a = flip ? 1 - u0 : u0, b = flip ? 1 - u1 : u1;
+    uv.setX(0, a); uv.setX(1, b); uv.setX(2, b); uv.setX(3, a); uv.needsUpdate = true;
+  });
+  renderCaption();
+}
+// 투사 없는 왼쪽 벽 (월텍)
+const plainMat = new THREE.MeshStandardMaterial({ color: 0x8a8a86, roughness: 0.95 });
+wall([0, 0], [0, ROOM.D], 0, 0, plainMat);
+const wt = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.7, 2.3), new THREE.MeshStandardMaterial({ color: 0xcfcac0, roughness: .9 }));
+wt.position.set(0.02, 1.5, 1.4); scene.add(wt);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.MeshStandardMaterial({ color: 0x3a3a38, roughness: 0.55, metalness: 0.0 }));
+floor.rotation.x = -Math.PI / 2; floor.position.set(ROOM.W / 2, 0, ROOM.D / 2 - 2); scene.add(floor);
+// 벽에서 번지는 빛: 지금 보이는 띠 색의 평균으로 바닥·좌대·사람을 물들임
+const spillS = new THREE.PointLight(0xffffff, 0, 9, 1.6); spillS.position.set(ROOM.W / 2, 1.8, ROOM.D - 0.8); scene.add(spillS);
+const spillE = new THREE.PointLight(0xffffff, 0, 8, 1.6); spillE.position.set(ROOM.W - 0.8, 1.8, ROOM.D - ROOM.RL / 2); scene.add(spillE);
+// 좌대 + 위에서 내리는 핀 조명
+const ped = new THREE.Group(); ped.position.set(ROOM.ped[0], 0, ROOM.ped[1]); scene.add(ped);
+const pedM = new THREE.Mesh(new THREE.BoxGeometry(ROOM.pedW, ROOM.pedH, ROOM.pedW), new THREE.MeshStandardMaterial({ color: 0xe8e6e1, roughness: .8 }));
+pedM.position.y = ROOM.pedH / 2; ped.add(pedM);
+const pin = new THREE.SpotLight(0xfff4e6, 9, 6, 0.2, 0.6, 1.4); pin.position.set(ROOM.ped[0], 3.7, ROOM.ped[1]); pin.target.position.set(ROOM.ped[0], 0, ROOM.ped[1]); scene.add(pin, pin.target);
+const pedTop = new THREE.Group(); pedTop.position.y = ROOM.pedH; ped.add(pedTop);
+const haloTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+  g.strokeStyle = '#fff'; g.lineWidth = 6; g.shadowColor = '#fff'; g.shadowBlur = 22; g.strokeRect(46, 46, 164, 164);
+  g.shadowBlur = 0; g.lineWidth = 2; g.strokeRect(46, 46, 164, 164);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const halo = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.42), new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0 }));
+halo.rotation.x = -Math.PI / 2; halo.position.y = 0.003; pedTop.add(halo);
+let art = null;
+function buildPedestalArt() {
+  if (art) { pedTop.remove(art); art.material[2].map.dispose(); art.geometry.dispose(); art = null; }
+  const s = field.cur; if (!s) return;
+  const t = new THREE.CanvasTexture(s.face); t.colorSpace = THREE.SRGBColorSpace;
+  const side = new THREE.MeshStandardMaterial({ color: 0xeeeae2, roughness: .9 });
+  const W = 0.3, D = W * s.face.height / s.face.width;
+  art = new THREE.Mesh(new THREE.BoxGeometry(W, 0.025, D), [side, side, new THREE.MeshStandardMaterial({ map: t, roughness: .85 }), side, side, side]);
+  art.rotation.y = Math.PI; // 그림 위쪽이 정면 벽 쪽 (입구에서 다가가면 바로 보임)
+  pedTop.add(art);
+}
+// 관람객 (170cm)
+const personMat = new THREE.MeshStandardMaterial({ color: 0x2b2d30, roughness: .8 });
+[[2.3, 2.6, 0.9], [5.6, 4.4, 2.6]].forEach(([x, z, r]) => {
+  const p = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.19, 1.0, 4, 12), personMat); body.position.y = 0.72; body.scale.z = 0.6;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), personMat); head.position.y = 1.58;
+  p.add(body, head); p.position.set(x, 0, z); p.rotation.y = r; scene.add(p);
+});
+
+/* ───────── 펼친 화면 (출력) ───────── */
+const flatScene = new THREE.Scene();
+const flatCam = new THREE.OrthographicCamera(0, 1, 1, 0, -1, 1);
+const flatQuad = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: fieldTex() }));
+flatQuad.position.set(0.5, 0.5, 0); flatScene.add(flatQuad);
+
+/* ───────── 시점 ───────── */
+const VIEWS = [
+  ['entrance', '입구에서', [1.4, 1.65, -1.2], [4.6, 1.5, 5.2]],
+  ['side', '좌대 옆에서', [2.2, 1.6, 2.4], [6.2, 1.7, 6.0]],
+  ['corner', '모서리 정면', [2.0, 1.65, 1.4], [ROOM.W, 1.7, ROOM.D]],
+  ['top', '위에서', [3.7, 11, 3.6], [3.7, 0, 3.7]],
+];
+let tween = null;
+function flyTo(pos, tgt, dur = 800) {
+  const p0 = camera.position.clone(), t0 = controls.target.clone(), st = performance.now(), P = new THREE.Vector3(...pos), T = new THREE.Vector3(...tgt);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) dur = 1;
+  tween = now => { const k = Math.min(1, (now - st) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; camera.position.lerpVectors(p0, P, e); controls.target.lerpVectors(t0, T, e); if (k >= 1) tween = null; };
+}
+VIEWS.forEach(([id, name, p, t]) => { const b = document.createElement('button'); b.className = 'b'; b.textContent = name; b.onclick = () => flyTo(p, t); $('#views').appendChild(b); });
+camera.position.set(...VIEWS[0][2]); controls.target.set(...VIEWS[0][3]);
+
+/* ───────── 화면 배치 ───────── */
+let layout = { W: 1, H: 1, flatH: 0 };
+function resize() {
+  const W = main.clientWidth, H = main.clientHeight;
+  renderer.setSize(W, H);
+  const asp = TOTAL / ROOM.H;
+  const flatH = opt.mode === 'room' ? 0 : opt.mode === 'flat' ? Math.min(H, W / asp) : Math.min(H * 0.38, W / asp);
+  layout = { W, H, flatH };
+  const roomH = opt.mode === 'flat' ? 0 : H - flatH;
+  camera.aspect = W / Math.max(1, roomH); camera.updateProjectionMatrix();
+  const cap = $('#cap'); cap.hidden = !flatH;
+  cap.style.height = flatH + 'px'; cap.style.top = (opt.mode === 'flat' ? (H - flatH) / 2 : H - flatH) + 'px';
+  $('#vlabel').textContent = opt.mode === 'flat' ? '' : '공간 · 드래그 회전 · 휠 확대';
+  renderCaption();
+}
+function renderCaption() {
+  const ltr = opt.dir !== 'rtl', first = ltr ? ROOM.W : ROOM.RL;
+  $('#corner').style.left = (first / TOTAL * 100) + '%';
+  $('#capL').textContent = ltr ? `펼친 화면 · 시작 ← 정면 벽 ${ROOM.W} m` : `펼친 화면 · 시작 ← 오른쪽 벽 ${ROOM.RL} m`;
+  $('#capR').textContent = ltr ? `모서리 → 오른쪽 벽 ${ROOM.RL} m · 끝` : `모서리 → 정면 벽 ${ROOM.W} m · 끝`;
+}
+new ResizeObserver(resize).observe(main);
+
+/* ───────── UI ───────── */
+const PRESETS = [1, 2, 3, 4, 5, 6, 7].map(k => ({ key: 'cf' + k, name: `색면화 ${k}`, src: `cf${k}.jpg` }));
+function presetImg(ps) {
+  if (!ps.img) { ps.img = new Image(); ps.img.src = ps.src; }
+  return ps.img.complete && ps.img.naturalWidth ? Promise.resolve(ps.img) : new Promise((ok, no) => { ps.img.addEventListener('load', () => ok(ps.img), { once: true }); ps.img.addEventListener('error', no, { once: true }); });
+}
+function loadUserImage(file) {
+  if (!file?.type.startsWith('image')) return;
+  const im = new Image();
+  im.onload = () => placeImage(im, file.name.replace(/\.[^.]+$/, ''), 'u:' + file.name + file.size, autoCrop(im));
+  im.src = URL.createObjectURL(file);
+}
+PRESETS.forEach(ps => {
+  const b = document.createElement('button'); b.dataset.k = ps.key; b.title = ps.name; b.setAttribute('aria-label', ps.name + ' 좌대에 올리기');
+  b.innerHTML = `<img src="${ps.src}" alt="">`;
+  b.onclick = () => presetImg(ps).then(im => placeImage(im, ps.name, ps.key, [0, 0, im.naturalWidth, im.naturalHeight])).catch(() => { });
+  $('#thumbs').appendChild(b);
+});
+{ const b = document.createElement('button'); b.className = 'up'; b.innerHTML = '내 이미지<br>올리기'; b.onclick = () => $('#file').click(); $('#thumbs').appendChild(b); }
+$('#file').onchange = e => { loadUserImage(e.target.files[0]); e.target.value = ''; };
+$('#off').onclick = removeImage;
+$('#sound').onclick = () => { sndSet(!snd.on); $('#sound').classList.toggle('on', snd.on); $('#sound').textContent = snd.on ? '소리 끄기' : '소리 켜기'; renderState(); };
+main.addEventListener('dragover', e => e.preventDefault());
+main.addEventListener('drop', e => { e.preventDefault(); loadUserImage(e.dataTransfer.files[0]); });
+function seg(id, key, after) {
+  const w = $('#' + id), paint = () => w.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === opt[key]));
+  w.querySelectorAll('button').forEach(b => b.onclick = () => { opt[key] = b.dataset.v; paint(); savePrefs(); after(); });
+  paint();
+}
+seg('mode', 'mode', resize);
+seg('dir', 'dir', applyDir);
+[['gain', v => v.toFixed(2)], ['size', v => v.toFixed(1)], ['turb', v => v.toFixed(2)], ['bloom', v => v.toFixed(2)]].forEach(([k, fmt]) => {
+  const el = $('#' + k), out = $('#' + k + '-o');
+  const set = () => {
+    opt[k] = +el.value; out.textContent = fmt(opt[k]);
+    const U = k === 'gain' ? 'uGain' : k === 'size' ? 'uSize' : k === 'turb' ? 'uTurb' : null;
+    if (U) [...slots.map(s => s.pts), idlePts].forEach(p => { if (p.material.uniforms[U]) p.material.uniforms[U].value = opt[k]; });
+    if (k === 'bloom') bloom.strength = opt[k];
+  };
+  el.value = opt[k]; set(); el.oninput = () => { set(); savePrefs(); };
+});
+function renderUI() {
+  document.querySelectorAll('#thumbs button[data-k]').forEach(b => b.classList.toggle('on', b.dataset.k === field.cur?.key));
+  $('#off').disabled = !field.cur;
+  renderState();
+}
+function renderState() {
+  const s = field.cur, el = $('#state');
+  if (!s) { el.innerHTML = `<b>아이들</b> · 올렸던 그림 ${field.hist.length}점의 알갱이가 떠돌고 있어요<small>7초 주기로 숨 쉼 · ${snd.on ? '소리 켜짐' : '소리 꺼짐'}</small>`; return; }
+  const tau = phaseOf(s, tnow()), lastL = CF.L0 + (s.bands.length - 1) * CF.GAP;
+  const stage = tau < 0 ? '준비' : tau < lastL + CF.TRAVEL + 1 ? '쏘아지는 중' : tau < CF.REL ? '머무는 중' : tau < CF.REL + CF.RELD + 2 ? '흩날리는 중' : '쉼';
+  el.innerHTML = `<div class="chips">${s.bands.map(b => `<i style="flex:${b.w};background:${b.hex}"></i>`).join('')}</div><b>${s.name}</b> · 띠 ${s.bands.length}개 · ${stage}<small>${Math.max(0, tau).toFixed(0)} / ${CF.CYCLE}초 루프 · ${snd.on ? '소리 켜짐' : '소리 꺼짐'}</small>`;
+}
+setInterval(renderState, 500);
+
+/* ───────── 루프 ───────── */
+const clock = new THREE.Clock();
+let fpsN = 0, fpsT = 0;
+function spillOf(s, now) {
+  // 지금 벽에 남아 있는 비율(대략)과 띠 평균색
+  const tau = s.relAt != null ? -1 : phaseOf(s, now);
+  let k = 0;
+  if (s.relAt != null) k = Math.max(0, 1 - (now - s.relAt) / 2.5);
+  else if (tau >= 0) k = tau < CF.L0 + CF.TRAVEL ? (tau - CF.L0) / CF.TRAVEL : tau < CF.REL ? 1 : Math.max(0, 1 - (tau - CF.REL) / CF.RELD);
+  const c = new THREE.Color(0, 0, 0); s.bands.forEach(b => c.add(linCol(b.rgb).multiplyScalar(b.w)));
+  return c.multiplyScalar(Math.max(0, Math.min(1, k)));
+}
+function frame(nowMs) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(clock.getDelta(), 0.05), now = nowMs / 1000;
+  if (tween) tween(nowMs); else controls.update();
+  const cur = field.cur;
+  field.idleA = THREE.MathUtils.clamp(field.idleA + (cur ? -dt / 1.5 : dt / 3), 0, 1);
+  // 소리 이벤트
+  if (cur) {
+    const tau = phaseOf(cur, now), cyc = now < cur.t0 ? -1 : Math.floor((now - cur.t0) / CF.CYCLE);
+    if (cyc !== cur.cycle) { cur.cycle = cyc; cur.launched = new Set(); cur.relDone = false; }
+    if (tau >= 0) cur.bands.forEach((b, i) => { if (tau >= CF.L0 + i * CF.GAP && !cur.launched.has(i)) { cur.launched.add(i); sndLaunch(cur, i); } });
+    if (tau >= CF.REL && !cur.relDone) { cur.relDone = true; sndRelease(cur, CF.RELD); }
+  }
+  if (snd.on) {
+    const t = snd.ctx.currentTime, br = 0.5 + 0.5 * Math.sin(now * 2 * Math.PI / 7);
+    snd.idle.gain.setTargetAtTime(field.idleA * 0.05 * (0.6 + 0.4 * br), t, 0.25);
+    snd.breath.gain.setTargetAtTime(field.idleA * 0.035 * br * br, t, 0.25);
+  }
+  // 입자 uniform
+  const spill = new THREE.Color(0, 0, 0);
+  slots.forEach(sl => {
+    const s = sl.show, U = sl.pts.material.uniforms; U.uTime.value = now;
+    if (!s) return;
+    if (s.relAt != null) { U.uRelAge.value = now - s.relAt; if (now - s.relAt > CF.XF) { sl.show = null; sl.pts.visible = false; return; } }
+    else U.uTau.value = phaseOf(s, now);
+    spill.add(spillOf(s, now));
+  });
+  idlePts.material.uniforms.uTime.value = now; idlePts.material.uniforms.uA.value = field.idleA;
+  idlePts.visible = field.idleA > 0.003;
+  halo.material.opacity = field.idleA * (0.45 + 0.35 * Math.sin(now * 2 * Math.PI / 7));
+  if (art && field.drop < 1) { field.drop = Math.min(1, field.drop + dt / 0.45); art.position.y = 0.0125 + 0.18 * Math.pow(1 - field.drop, 3); }
+  else if (art) art.position.y = 0.0125;
+  const sp = spill.clone().multiplyScalar(opt.gain * 0.6).addScalar(0.02 * field.idleA);
+  [spillS, spillE].forEach(l => { l.color.copy(sp).multiplyScalar(1 / Math.max(0.001, Math.max(sp.r, sp.g, sp.b))); l.intensity = 22 * Math.max(sp.r, sp.g, sp.b); });
+
+  composer.render();
+  const tex = fieldTex();
+  if (wallMat.emissiveMap !== tex) { wallMat.emissiveMap = tex; wallMat.needsUpdate = true; }
+  if (flatQuad.material.map !== tex) { flatQuad.material.map = tex; flatQuad.material.needsUpdate = true; }
+
+  const { W, H, flatH } = layout;
+  renderer.setRenderTarget(null);
+  renderer.setScissorTest(true);
+  renderer.setScissor(0, 0, W, H); renderer.setViewport(0, 0, W, H); renderer.setClearColor(0x000000); renderer.clear();
+  if (opt.mode !== 'flat') { renderer.setScissor(0, flatH, W, H - flatH); renderer.setViewport(0, flatH, W, H - flatH); renderer.render(scene, camera); }
+  if (flatH) {
+    const y = opt.mode === 'flat' ? (H - flatH) / 2 : 0;
+    renderer.setScissor(0, y, W, flatH); renderer.setViewport(0, y, W, flatH); renderer.render(flatScene, flatCam);
+  }
+  renderer.setScissorTest(false);
+  fpsN++; fpsT += dt; if (fpsT > 1) { $('#fps').textContent = `${Math.round(fpsN / fpsT)} fps`; fpsN = 0; fpsT = 0; }
+}
+fillIdle();
+applyDir();
+renderUI();
+resize();
+requestAnimationFrame(frame);
+</script>
