@@ -18,31 +18,41 @@
 [hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 13px; overflow: hidden; }
-#app { display: grid; grid-template-columns: 300px 1fr; height: 100%; }
-aside { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+#app { display: grid; grid-template-columns: 330px 1fr; height: 100%; }
+aside { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 14px 16px 28px; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 aside header h1 { font-size: 15px; margin: 0; font-weight: 700; }
 aside header p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 aside header a { color: var(--accent); }
 .sec h2 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
-.btns { display: flex; flex-wrap: wrap; gap: 6px; }
-.b { border: 1px solid var(--line); background: var(--field); color: var(--fg); border-radius: 6px; padding: 6px 10px; font: 500 12px var(--sans); cursor: pointer; }
+.btns { display: flex; flex-wrap: wrap; gap: 5px; }
+.b { border: 1px solid var(--line); background: var(--field); color: var(--fg); border-radius: 6px; padding: 5px 9px; font: 500 12px var(--sans); cursor: pointer; }
 .b:hover { border-color: var(--accent); }
 .b.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .b:disabled { opacity: .45; cursor: default; border-color: var(--line); }
-.b:focus-visible, .thumbs button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.b:focus-visible, .thumbs button:focus-visible, input:focus-visible, summary:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .thumbs button { padding: 0; border: 1px solid var(--line); border-radius: 5px; background: var(--field); cursor: pointer; aspect-ratio: 1; overflow: hidden; }
 .thumbs button img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .thumbs button.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 .thumbs .up { display: grid; place-items: center; color: var(--muted); font-size: 11px; line-height: 1.3; text-align: center; }
-.row { display: grid; grid-template-columns: 74px 1fr 36px; align-items: center; gap: 8px; min-height: 26px; }
-.row label { color: var(--muted); font-size: 12px; }
-.row input { width: 100%; accent-color: var(--accent); }
-.row output { font: 11px var(--mono); color: var(--muted); text-align: right; }
+details.grp { border-top: 1px solid var(--line); padding-top: 8px; }
+details.grp summary { cursor: pointer; font-size: 12.5px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 2px 0 6px; }
+details.grp summary::-webkit-details-marker { display: none; }
+details.grp summary::after { content: '+'; color: var(--muted); font: 14px var(--mono); }
+details.grp[open] summary::after { content: '−'; }
+details.grp summary .rs { margin-left: auto; margin-right: 10px; font: 500 11px var(--sans); color: var(--muted); background: none; border: 0; cursor: pointer; padding: 0; }
+details.grp summary .rs:hover { color: var(--accent); }
+.ctl { margin-bottom: 7px; }
+.ctl .lab { display: flex; justify-content: space-between; color: var(--muted); font-size: 11.5px; margin-bottom: 2px; }
+.ctl .lab output { font: 11px var(--mono); color: var(--fg); }
+.ctl input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
+.ctl .btns .b { padding: 4px 8px; font-size: 11.5px; }
+.ctl.dim { opacity: .45; }
 .hint { color: var(--muted); font-size: 11.5px; line-height: 1.6; margin: 0; }
 .state { font-size: 12px; line-height: 1.5; min-height: 46px; }
 .state small { display: block; color: var(--muted); font: 11px var(--mono); }
 .chips { float: right; display: flex; flex-direction: column; width: 40px; height: 40px; margin-left: 8px; border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+textarea#json { width: 100%; box-sizing: border-box; min-height: 70px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 10.5px/1.4 var(--mono); padding: 6px; resize: vertical; }
 main { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: #000; }
 main canvas { display: block; }
 #cap { position: absolute; left: 0; right: 0; pointer-events: none; }
@@ -53,7 +63,7 @@ main canvas { display: block; }
 #vlabel { position: absolute; left: 12px; top: 10px; font: 10.5px var(--mono); color: rgba(255,255,255,.55); pointer-events: none; }
 #fps { position: absolute; right: 12px; top: 10px; font: 10.5px var(--mono); color: rgba(255,255,255,.4); pointer-events: none; }
 @media (max-width: 760px) {
-  #app { grid-template-columns: 1fr; grid-template-rows: 56% 44%; }
+  #app { grid-template-columns: 1fr; grid-template-rows: 52% 48%; }
   main { grid-row: 1; }
   aside { grid-row: 2; border-right: 0; border-top: 1px solid var(--line); }
   .thumbs { grid-template-columns: repeat(8, 1fr); }
@@ -74,6 +84,7 @@ main canvas { display: block; }
       <div class="btns" style="margin-top:8px">
         <button class="b" id="off">그림 빼기</button>
         <button class="b" id="sound">소리 켜기</button>
+        <button class="b" id="replay">다시 흘러나오기</button>
       </div>
       <div class="state" id="state" style="margin-top:10px"></div>
     </div>
@@ -84,20 +95,24 @@ main canvas { display: block; }
         <button class="b" data-v="room">공간만</button>
         <button class="b" data-v="flat">펼친 화면만</button>
       </div>
-      <div class="btns" id="views" style="margin-top:6px"></div>
-      <div class="btns" id="dir" style="margin-top:6px">
+      <div class="btns" id="views" style="margin-top:5px"></div>
+      <div class="btns" id="dir" style="margin-top:5px">
         <button class="b" data-v="ltr">왼쪽 벽 쪽에서 시작</button>
         <button class="b" data-v="rtl">반대로</button>
       </div>
     </div>
     <div class="sec">
-      <h2>입자</h2>
-      <div class="row"><label for="gain">밝기</label><input type="range" id="gain" min="0.4" max="3" step="0.05"><output id="gain-o"></output></div>
-      <div class="row"><label for="size">알갱이 크기</label><input type="range" id="size" min="2" max="10" step="0.25"><output id="size-o"></output></div>
-      <div class="row"><label for="turb">흔들림</label><input type="range" id="turb" min="0" max="3" step="0.05"><output id="turb-o"></output></div>
-      <div class="row"><label for="bloom">번짐</label><input type="range" id="bloom" min="0" max="2" step="0.05"><output id="bloom-o"></output></div>
+      <h2>조절</h2>
+      <div class="btns" id="presets"></div>
+      <p class="hint" style="margin-top:6px">값을 바꾸면 지금 벽에 있는 그림에 바로 반영돼요. 나타나는 방식·순서·속도는 「다시 흘러나오기」로 처음부터 볼 수 있어요. 바꾼 값은 이 브라우저에 저장돼요.</p>
     </div>
-    <p class="hint">그림을 고르면 띠마다 14만 개 알갱이로 나뉘어 위 띠부터 차례로 왼쪽에서 쏘아지고, 소용돌이치며 띠 모양으로 내려앉아요. 머무는 동안 알갱이가 반짝이며 흔들리고, 6.5초마다 빛 물결이 지나가요. 26초 한 바퀴의 끝에서 왼쪽부터 바람에 흩날리듯 빠져나가고, 다시 처음부터 반복해요. 다른 그림을 고르면 앞 그림이 흩어지는 동안 다음 그림이 쏘아져요. 그림을 빼면 올렸던 그림들의 알갱이가 옅게 떠돌며 숨 쉬고, 좌대 위 놓을 자리가 빛나요. 이미지 파일을 화면에 끌어다 놓아도 돼요.</p>
+    <div id="groups"></div>
+    <details class="grp">
+      <summary>설정 내보내기 · 불러오기</summary>
+      <textarea id="json" spellcheck="false" aria-label="설정 JSON"></textarea>
+      <div class="btns" style="margin-top:6px"><button class="b" id="j-copy">복사</button><button class="b" id="j-load">붙여넣은 값 불러오기</button></div>
+      <p class="hint" id="j-msg" style="margin-top:6px">마음에 드는 조합을 복사해 두거나 다른 컴퓨터에 붙여 넣어 같은 화면을 볼 수 있어요.</p>
+    </details>
   </aside>
   <main id="main">
     <div id="vlabel"></div>
@@ -120,17 +135,89 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 const $ = s => document.querySelector(s);
-const pref = (() => { try { return JSON.parse(localStorage.getItem('cf-prefs') || '{}'); } catch (e) { return {}; } })();
-const opt = Object.assign({ mode: 'both', dir: 'ltr', gain: 0.75, size: 4, turb: 1, bloom: 0.55 }, pref);
-const savePrefs = () => { try { localStorage.setItem('cf-prefs', JSON.stringify(opt)); } catch (e) { } };
+
+/* ───────── 조절 항목 ─────────
+   seg = 고르기(값은 순번), 나머지는 슬라이더. u = 셰이더 uniform 이름(u + 키)으로 바로 넘김 */
+const GROUPS = [
+  ['appear', '나타나는 방식', true, [
+    { k: 'entry', l: '알갱이가 오는 곳', seg: ['왼쪽에서 쏘기', '흩어진 데서 모이기', '위에서 떨어지기', '아래서 떠오르기', '띠 중심선에서 펼쳐지기'], d: 0, u: 1 },
+    { k: 'order', l: '채워지는 순서', seg: ['왼쪽 → 오른쪽', '오른쪽 → 왼쪽', '가운데부터', '양 끝부터', '무작위', '한꺼번에'], d: 0, u: 1 },
+    { k: 'bandOrder', l: '띠 순서', seg: ['위 띠부터', '아래 띠부터', '두꺼운 띠부터', '얇은 띠부터', '모든 띠 함께'], d: 0 },
+    { k: 'gap', l: '띠 사이 간격', min: 0, max: 6, step: 0.1, d: 2.2, f: v => v.toFixed(1) + ' 초', u: 1 },
+    { k: 'travel', l: '한 띠가 다 채워지는 시간', min: 1, max: 40, step: 0.5, d: 12, f: v => v.toFixed(1) + ' 초', u: 1 },
+    { k: 'fly', l: '알갱이 비행 시간', min: 0.2, max: 10, step: 0.1, d: 3.5, f: v => v.toFixed(1) + ' 초', u: 1 },
+    { k: 'jit', l: '도착 시각 흩어짐', min: 0, max: 6, step: 0.1, d: 1.2, f: v => v.toFixed(1) + ' 초', u: 1 },
+    { k: 'spread', l: '출발 위치 퍼짐', min: 0, max: 4, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'flyGlow', l: '날아갈 때 밝기', min: 0, max: 3, step: 0.05, d: 0.3, f: v => '+' + v.toFixed(2), u: 1 },
+  ]],
+  ['hold', '머무는 동안', true, [
+    { k: 'hold', l: '움직임', seg: ['제자리에서 흔들림', '오른쪽으로 흐름', '숨 쉬기', '출렁임'], d: 0, u: 1 },
+    { k: 'drift', l: '흐르는 속도 (흐름일 때)', min: -150, max: 150, step: 1, d: 18, f: v => v.toFixed(0) + ' px/초', u: 1, when: o => o.hold === 1 },
+    { k: 'breath', l: '숨·출렁임 주기', min: 2, max: 40, step: 0.5, d: 10, f: v => v.toFixed(1) + ' 초', u: 1, when: o => o.hold >= 2 },
+    { k: 'turb', l: '흔들림 세기', min: 0, max: 5, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'flow', l: '흔들림 속도', min: 0, max: 4, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'noise', l: '소용돌이 촘촘함', min: 0.1, max: 5, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'twAmt', l: '반짝임 세기', min: 0, max: 5, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'twSpd', l: '반짝임 속도', min: 0, max: 6, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'waveAmp', l: '빛 물결 세기', min: 0, max: 4, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'wavePer', l: '빛 물결 주기', min: 3, max: 60, step: 0.5, d: 18, f: v => v.toFixed(1) + ' 초', u: 1 },
+  ]],
+  ['leave', '사라지는 방식 (그림을 바꾸거나 뺄 때)', false, [
+    { k: 'exit', l: '움직임', seg: ['바람에 날림', '아래로 떨어짐', '제자리에서 사라짐', '위로 흩어짐', '소용돌이'], d: 0, u: 1 },
+    { k: 'leave', l: '왼쪽부터 다 빠질 때까지', min: 0, max: 15, step: 0.1, d: 4.5, f: v => v.toFixed(1) + ' 초', u: 1 },
+    { k: 'exitSpd', l: '빠지는 속도', min: 0.1, max: 4, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'delay', l: '다음 그림이 나오기까지', min: 0, max: 10, step: 0.1, d: 2.5, f: v => v.toFixed(1) + ' 초' },
+  ]],
+  ['shape', '알갱이 형태', true, [
+    { k: 'shape', l: '모양', seg: ['둥근 빛', '또렷한 점', '네모', '가로 획', '별', '고리'], d: 0, u: 1 },
+    { k: 'count', l: '알갱이 수 (그림 하나)', min: 20000, max: 200000, step: 10000, d: 140000, f: v => (v / 10000).toFixed(0) + '만 개' },
+    { k: 'size', l: '크기', min: 0.5, max: 16, step: 0.25, d: 4, f: v => v.toFixed(2) + ' px', u: 1 },
+    { k: 'sizeVar', l: '크기 편차', min: 0, max: 2, step: 0.05, d: 0.9, f: v => v.toFixed(2), u: 1 },
+    { k: 'bandScale', l: '띠 두께', min: 0.1, max: 1.3, step: 0.01, d: 1, f: v => Math.round(v * 100) + '%', u: 1 },
+    { k: 'feather', l: '띠 경계 번짐', min: 0, max: 80, step: 1, d: 0, f: v => v.toFixed(0) + ' px', u: 1 },
+  ]],
+  ['light', '색 · 빛', false, [
+    { k: 'gain', l: '밝기', min: 0.05, max: 3, step: 0.05, d: 0.75, f: v => v.toFixed(2), u: 1 },
+    { k: 'sat', l: '채도', min: 0, max: 2, step: 0.05, d: 1, f: v => Math.round(v * 100) + '%', u: 1 },
+    { k: 'bloom', l: '번짐(블룸) 세기', min: 0, max: 2.5, step: 0.05, d: 0.4, f: v => v.toFixed(2) },
+    { k: 'bloomR', l: '번짐 반경', min: 0, max: 1, step: 0.02, d: 0.5, f: v => v.toFixed(2) },
+    { k: 'bloomT', l: '번짐 시작 밝기', min: 0, max: 1, step: 0.02, d: 0.3, f: v => v.toFixed(2) },
+  ]],
+  ['idle', '아이들 (그림이 없을 때)', false, [
+    { k: 'iGain', l: '밝기', min: 0, max: 4, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'iSpd', l: '떠도는 속도', min: 0, max: 6, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
+    { k: 'iBreath', l: '숨 주기', min: 2, max: 40, step: 0.5, d: 10, f: v => v.toFixed(1) + ' 초', u: 1 },
+  ]],
+  ['sound', '소리', false, [
+    { k: 'vol', l: '음량', min: 0, max: 1.5, step: 0.05, d: 0.9, f: v => Math.round(v * 100) + '%' },
+    { k: 'verb', l: '잔향', min: 0, max: 1.5, step: 0.05, d: 0.5, f: v => Math.round(v * 100) + '%' },
+    { k: 'bell', l: '띠가 출발할 때 종소리', min: 0, max: 2, step: 0.05, d: 1, f: v => Math.round(v * 100) + '%' },
+    { k: 'bellLen', l: '종소리 여운', min: 1, max: 15, step: 0.5, d: 7, f: v => v.toFixed(1) + ' 초' },
+    { k: 'pad', l: '머무는 소리', min: 0, max: 2, step: 0.05, d: 1, f: v => Math.round(v * 100) + '%' },
+    { k: 'padIn', l: '머무는 소리가 차오르는 시간', min: 0.2, max: 20, step: 0.2, d: 6, f: v => v.toFixed(1) + ' 초' },
+  ]],
+];
+const PARAMS = GROUPS.flatMap(g => g[3]);
+const DEF = Object.fromEntries(PARAMS.map(p => [p.k, p.d]));
+const PRESETS = [
+  ['차분하게 (기본)', {}],
+  ['빛 먼지', { count: 200000, size: 2.25, sizeVar: 1.2, twAmt: 2.6, twSpd: 0.6, turb: 0.6, gain: 0.6, bloom: 0.7, entry: 1, spread: 1.4, fly: 5 }],
+  ['흐르는 강', { hold: 1, drift: 22, shape: 3, size: 7, sizeVar: 1.4, turb: 0.5, twAmt: 0.6, entry: 0, fly: 2.5, gain: 0.7, exit: 0 }],
+  ['모여드는 색', { entry: 1, order: 2, spread: 2.2, fly: 6, hold: 2, breath: 12, shape: 1, size: 3, gain: 0.7, exit: 2, leave: 6 }],
+  ['떨어지는 빛', { entry: 2, order: 4, fly: 4.5, jit: 3, spread: 1.5, shape: 4, size: 6, count: 90000, gain: 1.1, exit: 1, twAmt: 1.8 }],
+  ['출렁이는 띠', { hold: 3, breath: 14, turb: 1.4, feather: 14, bandScale: 0.85, size: 3.5, entry: 4, order: 5, bandOrder: 4, fly: 5 }],
+];
+const STORE = 'cf-prefs-v2';
+const pref = (() => { try { return JSON.parse(localStorage.getItem(STORE) || '{}'); } catch (e) { return {}; } })();
+const opt = Object.assign({ mode: 'both', dir: 'ltr' }, DEF, pref);
+const savePrefs = () => { try { localStorage.setItem(STORE, JSON.stringify(opt)); } catch (e) { } };
 
 /* ───────── 방 치수 (전체 시뮬레이션의 배치도 환산값) ─────────
    원점 = 왼쪽 벽(서) · 방 입구 쪽(북) 모서리. X = 동, Z = 남. 정면 벽 = 남쪽, 오른쪽 벽 = 동쪽 */
 const ROOM = { W: 7.4, D: 7.1, H: 3.6, RL: 5.45, ped: [3.73, 3.66], pedW: 0.6, pedH: 0.9 };
 const TOTAL = ROOM.W + ROOM.RL;
-
-/* ───────── 타임라인 ───────── */
-const CF = { PW: 2048, PH: 576, CYCLE: 26, L0: 0.6, GAP: 0.75, TRAVEL: 5.5, REL: 19, RELD: 4.5, XF: 5.5, N: 140000, NI: 50000 };
+// 펼친 화면 크기, 첫 띠가 출발하기까지, 내보낸 그림을 지우기까지(초), 입자 최대 수
+const CF = { PW: 2048, PH: 576, L0: 1.0, XF: 40, NMAX: 200000, NI: 50000 };
 
 /* ───────── 렌더러 ───────── */
 const main = $('#main');
@@ -144,13 +231,12 @@ main.prepend(renderer.domElement);
 /* ───────── 입자 장면 (펼친 화면 2048×576, 위가 벽 위) ───────── */
 const pScene = new THREE.Scene();
 const pCam = new THREE.OrthographicCamera(0, CF.PW, CF.PH, 0, -1, 1);
-const rtA = new THREE.WebGLRenderTarget(CF.PW, CF.PH, { type: THREE.HalfFloatType });
-const composer = new EffectComposer(renderer, rtA);
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(CF.PW, CF.PH, { type: THREE.HalfFloatType }));
 composer.renderToScreen = false;
 composer.setPixelRatio(1);
 composer.setSize(CF.PW, CF.PH);
 composer.addPass(new RenderPass(pScene, pCam, null, new THREE.Color(0x000000), 1));
-const bloom = new UnrealBloomPass(new THREE.Vector2(CF.PW, CF.PH), opt.bloom, 0.5, 0.3);
+const bloom = new UnrealBloomPass(new THREE.Vector2(CF.PW, CF.PH), opt.bloom, opt.bloomR, opt.bloomT);
 composer.addPass(bloom);
 const fieldTex = () => composer.readBuffer.texture;
 
@@ -167,63 +253,105 @@ vec2 curl(vec2 p, float t) {
   float a = noise(vec3(p.x, p.y + e, t)) - noise(vec3(p.x, p.y - e, t));
   float b = noise(vec3(p.x + e, p.y, t)) - noise(vec3(p.x - e, p.y, t));
   return vec2(a, -b) / (2.0 * e);
-}`;
+}
+bool is(float v, float k) { return abs(v - k) < 0.5; }`;
+// 알갱이 모양: 둥근 빛, 또렷한 점, 네모, 가로 획, 별, 고리
 const FRAG = /* glsl */`
+uniform float uShape;
 varying vec3 vCol; varying float vA;
+bool is(float v, float k) { return abs(v - k) < 0.5; }
 void main() {
-  float r = length(gl_PointCoord - 0.5);
-  if (r > 0.5) discard;
-  float k = smoothstep(0.5, 0.0, r); k *= k;
+  vec2 d = gl_PointCoord - 0.5; float r = length(d), k;
+  if (is(uShape, 1.0)) k = 1.0 - smoothstep(0.26, 0.34, r);
+  else if (is(uShape, 2.0)) k = 1.0 - smoothstep(0.3, 0.36, max(abs(d.x), abs(d.y)));
+  else if (is(uShape, 3.0)) k = exp(-d.y * d.y * 160.0) * smoothstep(0.5, 0.05, abs(d.x));
+  else if (is(uShape, 4.0)) k = max(exp(-d.x * d.x * 300.0) * (1.0 - 2.0 * abs(d.y)), exp(-d.y * d.y * 300.0) * (1.0 - 2.0 * abs(d.x))) + 0.6 * exp(-r * r * 60.0);
+  else if (is(uShape, 5.0)) k = exp(-pow((r - 0.32) * 14.0, 2.0));
+  else { k = smoothstep(0.5, 0.0, r); k *= k; }
+  if (k < 0.004) discard;
   gl_FragColor = vec4(vCol * k * vA, 1.0);
 }`;
 
-// 그림 하나 = 입자 한 벌. 띠마다 출발·도착·떠남 시각을 미리 정해 두고 셰이더가 시간으로 위치를 계산
+// 그림 하나 = 입자 한 벌. 출발·도착·떠남 시각을 셰이더가 uniform으로 계산하므로 조절값이 바로 반영됨
 const SHOW_VERT = /* glsl */`
-attribute vec2 aTarget; attribute vec3 aColor; attribute vec4 aSeed; attribute vec4 aT; // 출발, 도착, 떠남(자연), 떠남(교체 후)
-uniform float uTau, uRelAge, uTauSnap, uTime, uSize, uGain, uTurb, uPW;
+attribute vec2 aTarget; attribute vec3 aColor; attribute vec4 aSeed; attribute vec2 aBand; // aBand: 띠 번호, 띠 가운데 y
+uniform float uTau, uRelAge, uTauSnap, uTime, uPW, uPH, uL0, uRank[16];
+uniform float uEntry, uOrder, uGap, uTravel, uFly, uJit, uSpread, uFlyGlow;
+uniform float uHold, uDrift, uBreath, uTurb, uFlow, uNoise, uTwAmt, uTwSpd, uWaveAmp, uWavePer;
+uniform float uExit, uLeave, uExitSpd;
+uniform float uSize, uSizeVar, uBandScale, uFeather, uGain, uSat;
 varying vec3 vCol; varying float vA;
 ${NOISE}
-vec3 basePos(float tau, out float a, out float b) {
+float orderKey(float u) {
+  if (is(uOrder, 1.0)) return 1.0 - u;
+  if (is(uOrder, 2.0)) return abs(u - 0.5) * 2.0;
+  if (is(uOrder, 3.0)) return 1.0 - abs(u - 0.5) * 2.0;
+  if (is(uOrder, 4.0)) return fract(aSeed.x * 7.31 + aSeed.y * 3.17);
+  if (is(uOrder, 5.0)) return aSeed.y * 0.12;
+  return u;
+}
+vec3 basePos(float tau, vec2 tgt, float key, out float a, out float b) {
   a = 0.0; b = 1.0;
-  if (tau < aT.x) return vec3(-99.0);
-  vec2 tgt = aTarget;
-  if (tau < aT.y) { // 쏘아져 날아가는 중
-    float s = (tau - aT.x) / max(0.001, aT.y - aT.x), e = 1.0 - pow(1.0 - s, 3.0);
-    vec2 st = vec2(-12.0 - aSeed.x * 60.0, tgt.y + (aSeed.y - 0.5) * 220.0);
+  float L = uL0 + uRank[int(aBand.x)] * uGap;
+  float arr = L + uTravel * (1.0 - pow(1.0 - key, 1.0 / 3.0)) + aSeed.y * uJit;
+  float dep = max(L, arr - uFly * (0.55 + 0.85 * key + 0.4 * aSeed.z));
+  if (tau < dep) return vec3(-99.0);
+  float t = uTime * uFlow;
+  if (tau < arr) { // 날아오는 중
+    float s = (tau - dep) / max(0.001, arr - dep), e = 1.0 - pow(1.0 - s, 3.0);
+    vec2 st;
+    if (is(uEntry, 1.0)) { float an = aSeed.x * 6.2832; st = tgt + vec2(cos(an), sin(an)) * (80.0 + aSeed.y * 420.0) * uSpread; }
+    else if (is(uEntry, 2.0)) st = vec2(tgt.x + (aSeed.x - 0.5) * 60.0 * uSpread, uPH + 10.0 + aSeed.y * 260.0 * uSpread);
+    else if (is(uEntry, 3.0)) st = vec2(tgt.x + (aSeed.x - 0.5) * 60.0 * uSpread, -10.0 - aSeed.y * 260.0 * uSpread);
+    else if (is(uEntry, 4.0)) st = vec2(tgt.x + (aSeed.x - 0.5) * 30.0 * uSpread, aBand.y);
+    else st = vec2(-12.0 - aSeed.x * 60.0, tgt.y + (aSeed.y - 0.5) * 120.0 * uSpread);
     vec2 p = mix(st, tgt, e);
-    p.y += sin(s * 3.14159) * (aSeed.z - 0.5) * 120.0;
-    p += curl(p * 0.0035 + aSeed.xy * 3.0, uTime * 0.35) * 70.0 * uTurb * (1.0 - e);
-    a = smoothstep(0.0, 0.06, s); b = 1.0 + 1.0 * (1.0 - e);
+    p.y += sin(s * 3.14159) * (aSeed.z - 0.5) * 40.0 * uSpread;
+    p += curl(p * 0.0035 * uNoise + aSeed.xy * 3.0, t * 0.1) * 32.0 * uTurb * (1.0 - e);
+    a = smoothstep(0.0, 0.15, s); b = 1.0 + uFlyGlow * (1.0 - e);
     return vec3(p, 1.0 - e);
   }
-  // 내려앉은 뒤: 알갱이가 제자리 근처에서 흔들리고 반짝임
-  float age = tau - aT.y, settle = smoothstep(0.0, 1.2, age);
-  vec2 p = tgt + curl(tgt * 0.0045 + aSeed.zw, uTime * 0.12) * 7.0 * uTurb * settle;
-  p.y += sin(tgt.x * 0.005 + uTime * 0.7 + aSeed.w) * 2.0 * uTurb;
-  // 빛 물결: 6.5초마다 왼쪽에서 오른쪽으로 지나감
-  float d = tgt.x / uPW - fract(uTime / 6.5) * 1.4 + 0.2, pulse = exp(-d * d * 90.0);
-  p += curl(tgt * 0.012, uTime * 0.8) * 16.0 * pulse * uTurb;
-  b = 0.78 + 0.32 * sin(uTime * (1.2 + aSeed.z * 3.5) + aSeed.w * 6.283) + 1.1 * pulse + 0.6 * (1.0 - settle);
+  // 내려앉은 뒤
+  float age = tau - arr, settle = smoothstep(0.0, 3.0, age);
+  vec2 p = tgt;
+  if (is(uHold, 1.0)) p.x = mod(tgt.x + age * uDrift, uPW);
+  else if (is(uHold, 2.0)) p.y = aBand.y + (tgt.y - aBand.y) * (1.0 + 0.22 * uTurb * sin(uTime * 6.2832 / uBreath + aBand.x * 0.9) * settle);
+  else if (is(uHold, 3.0)) p.y += sin(tgt.x * 0.005 - uTime * 6.2832 / uBreath + aBand.x * 0.8) * 10.0 * uTurb * settle;
+  p += curl(tgt * 0.0045 * uNoise + aSeed.zw, t * 0.04) * 4.0 * uTurb * settle;
+  p.y += sin(tgt.x * 0.004 + t * 0.22 + aSeed.w) * 1.5 * uTurb;
+  // 빛 물결: 왼쪽에서 오른쪽으로 지나감
+  float d = p.x / uPW - fract(uTime / uWavePer) * 1.6 + 0.3, pulse = exp(-d * d * 30.0) * uWaveAmp;
+  p += curl(tgt * 0.012 * uNoise, t * 0.15) * 5.0 * pulse * uTurb;
+  b = 0.85 + 0.16 * uTwAmt * sin(uTime * (0.25 + aSeed.z * 0.7) * uTwSpd + aSeed.w * 6.283) + 0.35 * pulse + 0.2 * (1.0 - settle);
+  if (is(uHold, 2.0)) b += 0.12 * uTurb * sin(uTime * 6.2832 / uBreath + aBand.x * 0.9);
   a = 1.0;
   return vec3(p, pulse * 0.5);
 }
 void main() {
   float a, b;
+  vec2 tgt = vec2(aTarget.x, aBand.y + (aTarget.y - aBand.y) * uBandScale + (aSeed.x + aSeed.z - 1.0) * uFeather);
+  float key = orderKey(aTarget.x / uPW);
   bool forced = uRelAge >= 0.0;
-  vec3 bp = basePos(forced ? uTauSnap : uTau, a, b);
+  vec3 bp = basePos(forced ? uTauSnap : uTau, tgt, key, a, b);
   vec2 p = bp.xy;
-  // 떠남: 왼쪽부터 바람에 흩날리듯 오른쪽으로
-  float lv = forced ? max(uRelAge - aT.w, uTauSnap - aT.z + uRelAge) : uTau - aT.z;
-  if (lv > 0.0) {
-    vec2 c = curl(p * 0.004 + aSeed.xy * 2.0, uTime * 0.4);
-    p.x += lv * (160.0 + aSeed.x * 520.0) + lv * lv * 240.0;
-    p += c * lv * 110.0 * (0.4 + uTurb * 0.6);
-    p.y += lv * (aSeed.y - 0.5) * 60.0;
-    a *= exp(-lv * 1.25);
-    b += 0.9 * exp(-lv * 2.5);
+  // 떠남: 그림을 바꾸거나 뺄 때, 채워진 순서대로 빠져나감
+  if (forced) {
+    float lv = (uRelAge - (uLeave * key + aSeed.z * 0.22 * uLeave)) * uExitSpd;
+    if (lv > 0.0) {
+      vec2 c = curl(p * 0.004 * uNoise + aSeed.xy * 2.0, uTime * 0.08);
+      float fade = 0.42;
+      if (is(uExit, 1.0)) { p.y -= lv * (10.0 + aSeed.x * 30.0) + lv * lv * 22.0; p.x += c.x * lv * 20.0; fade = 0.35; }
+      else if (is(uExit, 2.0)) { p += c * lv * 12.0; fade = 0.9; b += 0.2 * exp(-lv); }
+      else if (is(uExit, 3.0)) { p.y += lv * (15.0 + aSeed.x * 60.0) + lv * lv * 6.0; p.x += c.x * lv * 30.0; fade = 0.38; }
+      else if (is(uExit, 4.0)) { float an = lv * (0.6 + aSeed.y) * (aSeed.z > 0.5 ? 1.0 : -1.0); vec2 o = p - vec2(uPW * 0.5, uPH * 0.5); p = vec2(uPW * 0.5, uPH * 0.5) + mat2(cos(an), sin(an), -sin(an), cos(an)) * o * (1.0 + lv * 0.08); fade = 0.4; }
+      else { p.x += lv * (35.0 + aSeed.x * 110.0) + lv * lv * 14.0; p += c * lv * 40.0 * (0.4 + uTurb * 0.6); p.y += lv * (aSeed.y - 0.5) * 18.0; }
+      a *= exp(-lv * fade);
+      b += 0.25 * exp(-lv);
+    }
   }
-  vCol = aColor * b * uGain; vA = a;
-  gl_PointSize = uSize * (0.55 + aSeed.w * 0.9) * (1.0 + bp.z * 0.9);
+  vec3 col = mix(vec3(dot(aColor, vec3(0.2126, 0.7152, 0.0722))), aColor, uSat);
+  vCol = max(col, 0.0) * b * uGain; vA = a;
+  gl_PointSize = max(0.5, uSize * (1.0 + (aSeed.w - 0.5) * uSizeVar) * (1.0 + bp.z * 0.9));
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 0.0, 1.0);
   if (a < 0.003) gl_Position = vec4(3.0, 3.0, 3.0, 1.0);
 }`;
@@ -231,41 +359,44 @@ void main() {
 // 아이들: 올렸던 그림의 알갱이가 옅게 떠돌며 숨 쉼. 시작 쪽(왼쪽)으로 천천히 거꾸로 흐름
 const IDLE_VERT = /* glsl */`
 attribute vec2 aTarget; attribute vec3 aColor; attribute vec4 aSeed;
-uniform float uTime, uA, uSize, uGain, uPW, uPH;
+uniform float uTime, uIA, uSize, uSizeVar, uGain, uSat, uPW, uPH, uIGain, uISpd, uIBreath;
 varying vec3 vCol; varying float vA;
 ${NOISE}
 void main() {
-  float sp = 6.0 + aSeed.x * 20.0;
+  float sp = (2.0 + aSeed.x * 7.0) * uISpd;
   vec2 p = vec2(mod(aTarget.x - uTime * sp, uPW + 40.0) - 20.0, aTarget.y);
-  p += curl(p * 0.003 + aSeed.zw, uTime * 0.05) * 14.0;
-  p.y += sin(uTime * 0.21 + aSeed.z * 6.283) * 6.0;
-  float breath = 0.55 + 0.45 * sin(uTime * 6.2832 / 7.0);
-  float pch = smoothstep(0.35, 0.8, noise(vec3(p.x * 0.0025 + uTime * 0.04, aTarget.y * 0.01, aSeed.y * 0.0)));
-  float tw = 0.5 + 0.5 * sin(uTime * (0.6 + aSeed.y * 2.2) + aSeed.w * 6.283);
-  bool mote = aSeed.w > 0.985;
-  vA = uA * (mote ? 0.9 * tw : (0.08 + 0.5 * pch) * (0.35 + 0.65 * tw)) * (0.45 + 0.55 * breath);
-  vCol = (mote ? mix(aColor, vec3(1.0), 0.5) * 1.6 : aColor) * uGain;
-  gl_PointSize = uSize * (mote ? 1.6 : 0.6 + aSeed.w * 0.7);
+  p += curl(p * 0.003 + aSeed.zw, uTime * 0.02 * max(uISpd, 0.2)) * 14.0;
+  p.y += sin(uTime * 0.08 * max(uISpd, 0.2) + aSeed.z * 6.283) * 5.0;
+  float breath = 0.55 + 0.45 * sin(uTime * 6.2832 / uIBreath);
+  float pch = smoothstep(0.35, 0.8, noise(vec3(p.x * 0.0025 + uTime * 0.015 * uISpd, aTarget.y * 0.01, 0.0)));
+  float tw = 0.5 + 0.5 * sin(uTime * (0.15 + aSeed.y * 0.5) + aSeed.w * 6.283);
+  bool mote = aSeed.w > 0.994;
+  vA = uIA * uIGain * (mote ? 0.6 * tw : (0.08 + 0.5 * pch) * (0.35 + 0.65 * tw)) * (0.45 + 0.55 * breath);
+  vec3 col = mix(vec3(dot(aColor, vec3(0.2126, 0.7152, 0.0722))), aColor, uSat);
+  vCol = (mote ? mix(col, vec3(1.0), 0.5) * 1.6 : col) * uGain;
+  gl_PointSize = max(0.5, uSize * (mote ? 1.6 : 0.6 + aSeed.w * 0.7 * (0.3 + uSizeVar)));
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 0.0, 1.0);
   if (vA < 0.003) gl_Position = vec4(3.0, 3.0, 3.0, 1.0);
 }`;
 
+// 조절값 uniform은 모든 입자 재질이 같은 객체를 나눠 씀
+const SU = { uTime: { value: 0 }, uPW: { value: CF.PW }, uPH: { value: CF.PH }, uL0: { value: CF.L0 } };
+PARAMS.forEach(p => { if (p.u) SU['u' + p.k[0].toUpperCase() + p.k.slice(1)] = { value: opt[p.k] }; });
+const uName = k => 'u' + k[0].toUpperCase() + k.slice(1);
 function pointsMesh(n, vert, uniforms, attrs) {
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
   for (const [name, size] of attrs) g.setAttribute(name, new THREE.BufferAttribute(new Float32Array(n * size), size));
-  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(CF.PW / 2, CF.PH / 2, 0), 1e5);
   const m = new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: FRAG, uniforms, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending });
   const pts = new THREE.Points(g, m); pts.frustumCulled = false; pScene.add(pts);
   return pts;
 }
-const common = () => ({ uTime: { value: 0 }, uSize: { value: opt.size }, uGain: { value: opt.gain }, uPW: { value: CF.PW } });
 const slots = [0, 1].map(() => {
-  const pts = pointsMesh(CF.N, SHOW_VERT, { ...common(), uTau: { value: -1 }, uRelAge: { value: -1 }, uTauSnap: { value: 0 }, uTurb: { value: opt.turb } }, [['aTarget', 2], ['aColor', 3], ['aSeed', 4], ['aT', 4]]);
-  pts.visible = false;
+  const pts = pointsMesh(CF.NMAX, SHOW_VERT, { ...SU, uTau: { value: -1 }, uRelAge: { value: -1 }, uTauSnap: { value: 0 }, uRank: { value: new Array(16).fill(0) } }, [['aTarget', 2], ['aColor', 3], ['aSeed', 4], ['aBand', 2]]);
+  pts.visible = false; pts.geometry.setDrawRange(0, opt.count);
   return { pts, show: null };
 });
-const idlePts = pointsMesh(CF.NI, IDLE_VERT, { ...common(), uA: { value: 1 }, uPH: { value: CF.PH } }, [['aTarget', 2], ['aColor', 3], ['aSeed', 4]]);
+const idlePts = pointsMesh(CF.NI, IDLE_VERT, { ...SU, uIA: { value: 1 } }, [['aTarget', 2], ['aColor', 3], ['aSeed', 4]]);
 
 /* ───────── 그림 → 띠 ───────── */
 const PENTA = [0, 2, 4, 7, 9];
@@ -334,7 +465,7 @@ function bandsOf(img, rect) {
     }
   }
   for (let i = 1; i < segs.length; i++) if (dist(mean(segs[i]), mean(segs[i - 1])) < 26) { merge(segs[i - 1], segs[i]); segs.splice(i--, 1); }
-  return segs.map(s => {
+  return segs.slice(0, 16).map(s => {
     const a = Math.floor(s.y0 + (s.y1 - s.y0) * 0.2), b = Math.max(a + 1, Math.ceil(s.y1 - (s.y1 - s.y0) * 0.2)), col = [0, 0, 0];
     for (let y = a; y < b; y++) rows[y].forEach((v, k) => col[k] += v / (b - a));
     const rgb = col.map(v => Math.min(255, Math.max(0, Math.round((v - 10) * 1.1)))); // 사진 색을 빛으로 쏠 때 조금 또렷하게
@@ -343,32 +474,42 @@ function bandsOf(img, rect) {
   });
 }
 const linCol = rgb => new THREE.Color().setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, THREE.SRGBColorSpace);
+// 띠가 출발하는 차례 (0, 1, 2…)
+function ranksOf(bands) {
+  const n = bands.length, idx = bands.map((b, i) => i);
+  switch (opt.bandOrder) {
+    case 1: return idx.map(i => n - 1 - i);
+    case 2: case 3: { const s = idx.slice().sort((a, b) => opt.bandOrder === 2 ? bands[b].w - bands[a].w : bands[a].w - bands[b].w); const r = []; s.forEach((i, k) => r[i] = k); return r; }
+    case 4: return idx.map(() => 0);
+    default: return idx;
+  }
+}
+function applyRanks(s) {
+  s.rank = ranksOf(s.bands);
+  if (s.slot) { const R = s.slot.pts.material.uniforms.uRank.value; R.fill(0); s.rank.forEach((r, i) => R[i] = r); }
+}
 
 /* ───────── 그림 하나를 입자로 ───────── */
-const invEaseOut = u => 1 - Math.cbrt(1 - Math.min(1, Math.max(0, u)));
 function fillSlot(slot, show) {
   const g = slot.pts.geometry, A = n => g.getAttribute(n).array;
-  const tg = A('aTarget'), co = A('aColor'), sd = A('aSeed'), tt = A('aT');
+  const tg = A('aTarget'), co = A('aColor'), sd = A('aSeed'), bd = A('aBand');
   const cum = []; let acc = 0; show.bands.forEach(b => cum.push(acc += b.w));
-  const cols = show.bands.map(b => { const c = linCol(b.rgb); const l = c.r * .2126 + c.g * .7152 + c.b * .0722; return l < 0.02 ? c.multiplyScalar(0.6).addScalar(0.012) : c; });
-  const glw = show.bands.map(b => { const c = linCol(b.rgb); return c.r * .2126 + c.g * .7152 + c.b * .0722 < 0.02 ? 0.1 : 0.55; }); // 검은 띠의 반짝임은 희미하게
-  for (let j = 0; j < CF.N; j++) {
+  const lum = c => c.r * .2126 + c.g * .7152 + c.b * .0722;
+  const cols = show.bands.map(b => { const c = linCol(b.rgb); return lum(c) < 0.02 ? c.multiplyScalar(0.6).addScalar(0.012) : c; });
+  const glw = cols.map(c => lum(c) < 0.03 ? 0.1 : 0.55); // 검은 띠의 반짝임은 희미하게
+  for (let j = 0; j < CF.NMAX; j++) {
     const r = Math.random() * acc; let i = 0; while (i < cum.length - 1 && r > cum[i]) i++;
-    const b = show.bands[i], u = Math.random(), v = b.y0 + Math.random() * (b.y1 - b.y0);
-    tg[2 * j] = u * CF.PW; tg[2 * j + 1] = (1 - v) * CF.PH;
-    const c = cols[i], jit = 0.82 + Math.random() * 0.36, glint = Math.random() < 0.025;
-    const gw = glw[i]; co[3 * j] = glint ? c.r * 0.5 + gw : c.r * jit; co[3 * j + 1] = glint ? c.g * 0.5 + gw : c.g * jit; co[3 * j + 2] = glint ? c.b * 0.5 + gw : c.b * jit;
-    const s0 = Math.random(), s1 = Math.random(), s2 = Math.random(), s3 = glint ? 0.95 + Math.random() * 0.05 : Math.random();
-    sd[4 * j] = s0; sd[4 * j + 1] = s1; sd[4 * j + 2] = s2; sd[4 * j + 3] = s3;
-    const L = CF.L0 + i * CF.GAP, arr = L + CF.TRAVEL * invEaseOut(u) + s1 * 0.45;
-    tt[4 * j] = Math.max(L, arr - (0.45 + u * 1.1 + s2 * 0.5));
-    tt[4 * j + 1] = arr;
-    tt[4 * j + 2] = CF.REL + CF.RELD * 0.8 * u + s0 * 0.5;
-    tt[4 * j + 3] = 2.2 * u + s2 * 0.45;
+    const b = show.bands[i], v = b.y0 + Math.random() * (b.y1 - b.y0);
+    tg[2 * j] = Math.random() * CF.PW; tg[2 * j + 1] = (1 - v) * CF.PH;
+    bd[2 * j] = i; bd[2 * j + 1] = (1 - (b.y0 + b.y1) / 2) * CF.PH;
+    const c = cols[i], jit = 0.82 + Math.random() * 0.36, glint = Math.random() < 0.01, gw = glw[i];
+    co[3 * j] = glint ? c.r * 0.5 + gw : c.r * jit; co[3 * j + 1] = glint ? c.g * 0.5 + gw : c.g * jit; co[3 * j + 2] = glint ? c.b * 0.5 + gw : c.b * jit;
+    sd[4 * j] = Math.random(); sd[4 * j + 1] = Math.random(); sd[4 * j + 2] = Math.random(); sd[4 * j + 3] = glint ? 0.95 + Math.random() * 0.05 : Math.random();
   }
-  ['aTarget', 'aColor', 'aSeed', 'aT'].forEach(n => g.getAttribute(n).needsUpdate = true);
+  ['aTarget', 'aColor', 'aSeed', 'aBand'].forEach(n => g.getAttribute(n).needsUpdate = true);
   slot.show = show; show.slot = slot; slot.pts.visible = true;
   const U = slot.pts.material.uniforms; U.uRelAge.value = -1; U.uTau.value = -1;
+  applyRanks(show);
 }
 const IDLE_BANDS = [{ y0: .16, y1: .34, w: .18, rgb: [214, 200, 176] }, { y0: .46, y1: .58, w: .12, rgb: [170, 184, 200] }, { y0: .7, y1: .86, w: .16, rgb: [200, 176, 170] }];
 function fillIdle() {
@@ -386,10 +527,11 @@ function fillIdle() {
   ['aTarget', 'aColor', 'aSeed'].forEach(n => g.getAttribute(n).needsUpdate = true);
 }
 
-/* ───────── 상태 ───────── */
+/* ───────── 상태 ─────────
+   한 번 올린 그림은 다른 그림을 올리거나 뺄 때까지 계속 머묾 (반복하지 않음) */
 const field = { cur: null, hist: [], idleA: 1, drop: 1 };
 const tnow = () => performance.now() / 1000;
-const phaseOf = (s, now) => now < s.t0 ? -1 : (now - s.t0) % CF.CYCLE;
+const phaseOf = (s, now) => now < s.t0 ? -1 : now - s.t0;
 function placeImage(img, name, key, rect) {
   if (field.cur?.key === key) return;
   let bands;
@@ -399,7 +541,7 @@ function placeImage(img, name, key, rect) {
   const face = document.createElement('canvas'), fk = 512 / Math.max(rect[2], rect[3]);
   face.width = Math.round(rect[2] * fk); face.height = Math.round(rect[3] * fk);
   face.getContext('2d').drawImage(img, rect[0], rect[1], rect[2], rect[3], 0, 0, face.width, face.height);
-  const show = { key, name, bands, face, t0: now + (had ? 0.9 : 0.35), cycle: -2, launched: new Set(), voices: [] };
+  const show = { key, name, bands, face, t0: now + (had ? opt.delay : 0.6), launched: new Set(), voices: [] };
   const slot = slots.find(s => !s.show) || slots.find(s => s.show !== field.cur) || slots[0];
   if (slot.show) { sndRelease(slot.show, 0.3); slot.show = null; }
   fillSlot(slot, show);
@@ -411,11 +553,16 @@ function placeImage(img, name, key, rect) {
 function releaseShow(s, now) {
   s.relAt = now; s.tauSnap = phaseOf(s, now);
   const U = s.slot.pts.material.uniforms; U.uTauSnap.value = s.tauSnap; U.uRelAge.value = 0;
-  sndRelease(s, 2.8);
+  sndRelease(s, Math.max(1.5, opt.leave + 2));
 }
 function removeImage() {
   if (!field.cur) return;
   releaseShow(field.cur, tnow()); field.cur = null; buildPedestalArt(); renderUI();
+}
+// 지금 그림을 처음부터 다시 흘러나오게 (조절값 확인용)
+function replay() {
+  const s = field.cur; if (!s) return;
+  sndRelease(s, 0.6); s.t0 = tnow() + 0.3; s.launched = new Set();
 }
 
 /* ───────── 소리 ─────────
@@ -431,8 +578,8 @@ function sndInit() {
   const n = ctx.sampleRate * 3.6, ir = ctx.createBuffer(2, n, ctx.sampleRate);
   for (let ch = 0; ch < 2; ch++) { const a = ir.getChannelData(ch); for (let i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.8); }
   const verb = ctx.createConvolver(); verb.buffer = ir;
-  const wet = ctx.createGain(); wet.gain.value = 0.5;
-  snd.bus.connect(comp); snd.bus.connect(verb); verb.connect(wet); wet.connect(comp);
+  snd.wet = ctx.createGain(); snd.wet.gain.value = opt.verb;
+  snd.bus.connect(comp); snd.bus.connect(verb); verb.connect(snd.wet); snd.wet.connect(comp);
   comp.connect(snd.master); snd.master.connect(ctx.destination);
   // 아이들: 낮은 5도 울림 + 숨소리 같은 걸러진 잡음
   snd.idle = ctx.createGain(); snd.idle.gain.value = 0; snd.idle.connect(snd.bus);
@@ -451,7 +598,7 @@ function sndSet(on) {
   const t = snd.ctx.currentTime;
   snd.master.gain.cancelScheduledValues(t);
   if (on) {
-    snd.ctx.resume(); snd.master.gain.setTargetAtTime(0.9, t, 0.2);
+    snd.ctx.resume(); snd.master.gain.setTargetAtTime(opt.vol, t, 0.2);
     const s = field.cur; // 이미 나와 있는 띠는 머무는 소리만 이어 붙임
     if (s) s.launched.forEach(i => sndLaunch(s, i, true));
   } else {
@@ -462,21 +609,22 @@ function sndSet(on) {
 function sndLaunch(s, i, quiet = false) {
   if (!snd.on) return;
   const ctx = snd.ctx, t = ctx.currentTime, b = s.bands[i], f = mtof(b.midi), dir = opt.dir === 'rtl' ? -1 : 1;
-  if (!quiet) {
+  if (!quiet && opt.bell > 0) {
     const pan = ctx.createStereoPanner(); pan.connect(snd.bus);
-    pan.pan.setValueAtTime(-0.85 * dir, t); pan.pan.linearRampToValueAtTime(0.85 * dir, t + CF.TRAVEL);
+    pan.pan.setValueAtTime(-0.85 * dir, t); pan.pan.linearRampToValueAtTime(0.85 * dir, t + Math.max(0.5, opt.travel));
     const bell = ctx.createGain(); bell.connect(pan);
-    bell.gain.setValueAtTime(0, t); bell.gain.linearRampToValueAtTime(0.1 + 0.16 * Math.sqrt(b.w), t + 0.01); bell.gain.exponentialRampToValueAtTime(0.0008, t + 3.4);
-    [[1, 1], [2.005, 0.32], [3.01, 0.1]].forEach(([m, a]) => { const o = ctx.createOscillator(); o.frequency.value = f * m; const g = ctx.createGain(); g.gain.value = a; o.connect(g).connect(bell); o.start(t); o.stop(t + 3.6); });
+    bell.gain.setValueAtTime(0, t); bell.gain.linearRampToValueAtTime((0.08 + 0.13 * Math.sqrt(b.w)) * opt.bell, t + 0.06); bell.gain.exponentialRampToValueAtTime(0.0008, t + opt.bellLen);
+    [[1, 1], [2.005, 0.32], [3.01, 0.1]].forEach(([m, a]) => { const o = ctx.createOscillator(); o.frequency.value = f * m; const g = ctx.createGain(); g.gain.value = a; o.connect(g).connect(bell); o.start(t); o.stop(t + opt.bellLen + 0.2); });
   }
-  const pad = ctx.createGain(); pad.gain.setValueAtTime(0, t); pad.gain.linearRampToValueAtTime(b.pad, t + 2.5);
+  if (opt.pad <= 0) return;
+  const pad = ctx.createGain(); pad.gain.setValueAtTime(0, t); pad.gain.linearRampToValueAtTime(b.pad * opt.pad, t + opt.padIn);
   const pp = ctx.createStereoPanner(); pp.pan.value = s.bands.length > 1 ? (i / (s.bands.length - 1) - 0.5) * 0.7 : 0;
   const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = b.kind === 'low' ? 260 : 500 + b.sat * 2400; lp.Q.value = 0.5;
   lp.connect(pad).connect(pp).connect(snd.bus);
   const oscs = (b.kind === 'tone' ? [['triangle', -6], ['triangle', 6]] : [['sine', 0], ['sine', b.kind === 'air' ? 1200 : 700]]).map(([type, cents]) => {
     const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = cents; o.connect(lp); o.start(t); return o;
   });
-  if (b.kind === 'air') { const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.23; lg.gain.value = b.pad * 0.6; lfo.connect(lg).connect(pad.gain); lfo.start(t); oscs.push(lfo); }
+  if (b.kind === 'air') { const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.1; lg.gain.value = b.pad * opt.pad * 0.6; lfo.connect(lg).connect(pad.gain); lfo.start(t); oscs.push(lfo); }
   s.voices.push({ g: pad.gain, oscs });
 }
 function sndRelease(s, dur) {
@@ -606,7 +754,7 @@ function renderCaption() {
 new ResizeObserver(resize).observe(main);
 
 /* ───────── UI ───────── */
-const PRESETS = [1, 2, 3, 4, 5, 6, 7].map(k => ({ key: 'cf' + k, name: `색면화 ${k}`, src: `cf${k}.jpg` }));
+const IMAGES = [1, 2, 3, 4, 5, 6, 7].map(k => ({ key: 'cf' + k, name: `색면화 ${k}`, src: `cf${k}.jpg` }));
 function presetImg(ps) {
   if (!ps.img) { ps.img = new Image(); ps.img.src = ps.src; }
   return ps.img.complete && ps.img.naturalWidth ? Promise.resolve(ps.img) : new Promise((ok, no) => { ps.img.addEventListener('load', () => ok(ps.img), { once: true }); ps.img.addEventListener('error', no, { once: true }); });
@@ -617,7 +765,7 @@ function loadUserImage(file) {
   im.onload = () => placeImage(im, file.name.replace(/\.[^.]+$/, ''), 'u:' + file.name + file.size, autoCrop(im));
   im.src = URL.createObjectURL(file);
 }
-PRESETS.forEach(ps => {
+IMAGES.forEach(ps => {
   const b = document.createElement('button'); b.dataset.k = ps.key; b.title = ps.name; b.setAttribute('aria-label', ps.name + ' 좌대에 올리기');
   b.innerHTML = `<img src="${ps.src}" alt="">`;
   b.onclick = () => presetImg(ps).then(im => placeImage(im, ps.name, ps.key, [0, 0, im.naturalWidth, im.naturalHeight])).catch(() => { });
@@ -626,6 +774,7 @@ PRESETS.forEach(ps => {
 { const b = document.createElement('button'); b.className = 'up'; b.innerHTML = '내 이미지<br>올리기'; b.onclick = () => $('#file').click(); $('#thumbs').appendChild(b); }
 $('#file').onchange = e => { loadUserImage(e.target.files[0]); e.target.value = ''; };
 $('#off').onclick = removeImage;
+$('#replay').onclick = replay;
 $('#sound').onclick = () => { sndSet(!snd.on); $('#sound').classList.toggle('on', snd.on); $('#sound').textContent = snd.on ? '소리 끄기' : '소리 켜기'; renderState(); };
 main.addEventListener('dragover', e => e.preventDefault());
 main.addEventListener('drop', e => { e.preventDefault(); loadUserImage(e.dataTransfer.files[0]); });
@@ -636,27 +785,75 @@ function seg(id, key, after) {
 }
 seg('mode', 'mode', resize);
 seg('dir', 'dir', applyDir);
-[['gain', v => v.toFixed(2)], ['size', v => v.toFixed(1)], ['turb', v => v.toFixed(2)], ['bloom', v => v.toFixed(2)]].forEach(([k, fmt]) => {
-  const el = $('#' + k), out = $('#' + k + '-o');
-  const set = () => {
-    opt[k] = +el.value; out.textContent = fmt(opt[k]);
-    const U = k === 'gain' ? 'uGain' : k === 'size' ? 'uSize' : k === 'turb' ? 'uTurb' : null;
-    if (U) [...slots.map(s => s.pts), idlePts].forEach(p => { if (p.material.uniforms[U]) p.material.uniforms[U].value = opt[k]; });
-    if (k === 'bloom') bloom.strength = opt[k];
-  };
-  el.value = opt[k]; set(); el.oninput = () => { set(); savePrefs(); };
+
+// 조절값 하나를 화면·소리에 반영
+function apply(k) {
+  const v = opt[k];
+  if (SU[uName(k)]) SU[uName(k)].value = v;
+  if (k === 'count') slots.forEach(s => s.pts.geometry.setDrawRange(0, v));
+  if (k === 'bloom') bloom.strength = v;
+  if (k === 'bloomR') bloom.radius = v;
+  if (k === 'bloomT') bloom.threshold = v;
+  if (k === 'bandOrder') slots.forEach(s => s.show && applyRanks(s.show));
+  if (snd.ctx) {
+    const t = snd.ctx.currentTime;
+    if (k === 'vol' && snd.on) snd.master.gain.setTargetAtTime(v, t, 0.1);
+    if (k === 'verb') snd.wet.gain.setTargetAtTime(v, t, 0.1);
+  }
+}
+const ctlEls = {};
+function paintCtl(p) {
+  const el = ctlEls[p.k]; if (!el) return;
+  if (p.seg) el.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === opt[p.k]));
+  else { el.querySelector('input').value = opt[p.k]; el.querySelector('output').textContent = p.f(opt[p.k]); }
+}
+function paintWhen() { PARAMS.forEach(p => { if (p.when) ctlEls[p.k].classList.toggle('dim', !p.when(opt)); }); }
+function setOpt(k, v) { opt[k] = v; apply(k); paintCtl(PARAMS.find(p => p.k === k)); paintWhen(); savePrefs(); renderJSON(); }
+GROUPS.forEach(([id, title, open, items]) => {
+  const d = document.createElement('details'); d.className = 'grp'; d.open = open;
+  d.innerHTML = `<summary>${title}<button class="rs" type="button">기본값</button></summary>`;
+  d.querySelector('.rs').onclick = e => { e.preventDefault(); e.stopPropagation(); items.forEach(p => setOpt(p.k, p.d)); };
+  items.forEach(p => {
+    const c = document.createElement('div'); c.className = 'ctl'; ctlEls[p.k] = c;
+    if (p.seg) {
+      c.innerHTML = `<div class="lab">${p.l}</div><div class="btns">${p.seg.map((s, i) => `<button class="b" type="button" data-i="${i}">${s}</button>`).join('')}</div>`;
+      c.querySelectorAll('button').forEach(b => b.onclick = () => setOpt(p.k, +b.dataset.i));
+    } else {
+      const id = 'p-' + p.k;
+      c.innerHTML = `<div class="lab"><label for="${id}">${p.l}</label><output></output></div><input type="range" id="${id}" min="${p.min}" max="${p.max}" step="${p.step}">`;
+      c.querySelector('input').oninput = e => setOpt(p.k, +e.target.value);
+    }
+    d.appendChild(c); paintCtl(p);
+  });
+  $('#groups').appendChild(d);
 });
+PRESETS.forEach(([name, vals]) => {
+  const b = document.createElement('button'); b.className = 'b'; b.type = 'button'; b.textContent = name;
+  b.onclick = () => { GROUPS.filter(g => g[0] !== 'sound').flatMap(g => g[3]).forEach(p => setOpt(p.k, vals[p.k] ?? p.d)); replay(); }; // 소리 설정은 그대로 둠
+  $('#presets').appendChild(b);
+});
+PARAMS.forEach(p => apply(p.k)); paintWhen();
+function renderJSON() { const o = {}; PARAMS.forEach(p => o[p.k] = opt[p.k]); $('#json').value = JSON.stringify(o); }
+$('#j-copy').onclick = async () => { const ta = $('#json'); try { await navigator.clipboard.writeText(ta.value); $('#j-msg').textContent = '복사했어요.'; } catch (e) { ta.select(); $('#j-msg').textContent = '자동 복사가 막혀 있어요. 선택된 글자를 ⌘C로 복사하세요.'; } };
+$('#j-load').onclick = () => {
+  try {
+    const o = JSON.parse($('#json').value); let n = 0;
+    PARAMS.forEach(p => { if (typeof o[p.k] === 'number') { setOpt(p.k, p.seg ? Math.max(0, Math.min(p.seg.length - 1, Math.round(o[p.k]))) : Math.max(p.min, Math.min(p.max, o[p.k]))); n++; } });
+    $('#j-msg').textContent = `${n}개 값을 불러왔어요.`; replay();
+  } catch (e) { $('#j-msg').textContent = '불러오지 못했어요: JSON 형식을 확인하세요.'; }
+};
+renderJSON();
 function renderUI() {
   document.querySelectorAll('#thumbs button[data-k]').forEach(b => b.classList.toggle('on', b.dataset.k === field.cur?.key));
-  $('#off').disabled = !field.cur;
+  $('#off').disabled = $('#replay').disabled = !field.cur;
   renderState();
 }
 function renderState() {
   const s = field.cur, el = $('#state');
-  if (!s) { el.innerHTML = `<b>아이들</b> · 올렸던 그림 ${field.hist.length}점의 알갱이가 떠돌고 있어요<small>7초 주기로 숨 쉼 · ${snd.on ? '소리 켜짐' : '소리 꺼짐'}</small>`; return; }
-  const tau = phaseOf(s, tnow()), lastL = CF.L0 + (s.bands.length - 1) * CF.GAP;
-  const stage = tau < 0 ? '준비' : tau < lastL + CF.TRAVEL + 1 ? '쏘아지는 중' : tau < CF.REL ? '머무는 중' : tau < CF.REL + CF.RELD + 2 ? '흩날리는 중' : '쉼';
-  el.innerHTML = `<div class="chips">${s.bands.map(b => `<i style="flex:${b.w};background:${b.hex}"></i>`).join('')}</div><b>${s.name}</b> · 띠 ${s.bands.length}개 · ${stage}<small>${Math.max(0, tau).toFixed(0)} / ${CF.CYCLE}초 루프 · ${snd.on ? '소리 켜짐' : '소리 꺼짐'}</small>`;
+  if (!s) { el.innerHTML = `<b>아이들</b> · 올렸던 그림 ${field.hist.length}점의 알갱이가 떠돌고 있어요<small>${opt.iBreath}초 주기로 숨 쉼 · ${snd.on ? '소리 켜짐' : '소리 꺼짐'}</small>`; return; }
+  const tau = phaseOf(s, tnow()), lastL = CF.L0 + Math.max(...s.rank) * opt.gap;
+  const stage = tau < 0 ? '준비' : tau < lastL + opt.travel + opt.jit + 1 ? '흘러나오는 중' : '머무는 중 (다음 그림을 올릴 때까지)';
+  el.innerHTML = `<div class="chips">${s.bands.map(b => `<i style="flex:${b.w};background:${b.hex}"></i>`).join('')}</div><b>${s.name}</b> · 띠 ${s.bands.length}개 · ${stage}<small>${Math.max(0, tau).toFixed(0)}초째 · ${snd.on ? '소리 켜짐' : '소리 꺼짐'}</small>`;
 }
 setInterval(renderState, 500);
 
@@ -665,10 +862,9 @@ const clock = new THREE.Clock();
 let fpsN = 0, fpsT = 0;
 function spillOf(s, now) {
   // 지금 벽에 남아 있는 비율(대략)과 띠 평균색
-  const tau = s.relAt != null ? -1 : phaseOf(s, now);
-  let k = 0;
-  if (s.relAt != null) k = Math.max(0, 1 - (now - s.relAt) / 2.5);
-  else if (tau >= 0) k = tau < CF.L0 + CF.TRAVEL ? (tau - CF.L0) / CF.TRAVEL : tau < CF.REL ? 1 : Math.max(0, 1 - (tau - CF.REL) / CF.RELD);
+  let k;
+  if (s.relAt != null) k = 1 - (now - s.relAt) / Math.max(1, opt.leave + 3 / opt.exitSpd);
+  else { const tau = phaseOf(s, now); k = tau < 0 ? 0 : (tau - CF.L0) / Math.max(0.5, opt.travel + Math.max(...s.rank) * opt.gap); }
   const c = new THREE.Color(0, 0, 0); s.bands.forEach(b => c.add(linCol(b.rgb).multiplyScalar(b.w)));
   return c.multiplyScalar(Math.max(0, Math.min(1, k)));
 }
@@ -677,32 +873,30 @@ function frame(nowMs) {
   const dt = Math.min(clock.getDelta(), 0.05), now = nowMs / 1000;
   if (tween) tween(nowMs); else controls.update();
   const cur = field.cur;
-  field.idleA = THREE.MathUtils.clamp(field.idleA + (cur ? -dt / 1.5 : dt / 3), 0, 1);
-  // 소리 이벤트
+  field.idleA = THREE.MathUtils.clamp(field.idleA + (cur ? -dt / 3 : dt / 6), 0, 1);
+  // 소리: 띠가 출발할 때
   if (cur) {
-    const tau = phaseOf(cur, now), cyc = now < cur.t0 ? -1 : Math.floor((now - cur.t0) / CF.CYCLE);
-    if (cyc !== cur.cycle) { cur.cycle = cyc; cur.launched = new Set(); cur.relDone = false; }
-    if (tau >= 0) cur.bands.forEach((b, i) => { if (tau >= CF.L0 + i * CF.GAP && !cur.launched.has(i)) { cur.launched.add(i); sndLaunch(cur, i); } });
-    if (tau >= CF.REL && !cur.relDone) { cur.relDone = true; sndRelease(cur, CF.RELD); }
+    const tau = phaseOf(cur, now);
+    if (tau >= 0) cur.bands.forEach((b, i) => { if (tau >= CF.L0 + cur.rank[i] * opt.gap && !cur.launched.has(i)) { cur.launched.add(i); sndLaunch(cur, i); } });
   }
   if (snd.on) {
-    const t = snd.ctx.currentTime, br = 0.5 + 0.5 * Math.sin(now * 2 * Math.PI / 7);
+    const t = snd.ctx.currentTime, br = 0.5 + 0.5 * Math.sin(now * 2 * Math.PI / opt.iBreath);
     snd.idle.gain.setTargetAtTime(field.idleA * 0.05 * (0.6 + 0.4 * br), t, 0.25);
     snd.breath.gain.setTargetAtTime(field.idleA * 0.035 * br * br, t, 0.25);
   }
-  // 입자 uniform
+  SU.uTime.value = now;
   const spill = new THREE.Color(0, 0, 0);
   slots.forEach(sl => {
-    const s = sl.show, U = sl.pts.material.uniforms; U.uTime.value = now;
+    const s = sl.show, U = sl.pts.material.uniforms;
     if (!s) return;
-    if (s.relAt != null) { U.uRelAge.value = now - s.relAt; if (now - s.relAt > CF.XF) { sl.show = null; sl.pts.visible = false; return; } }
+    if (s.relAt != null) { U.uRelAge.value = now - s.relAt; if (now - s.relAt > Math.min(CF.XF, opt.leave + 6 + 8 / opt.exitSpd)) { sl.show = null; sl.pts.visible = false; return; } }
     else U.uTau.value = phaseOf(s, now);
     spill.add(spillOf(s, now));
   });
-  idlePts.material.uniforms.uTime.value = now; idlePts.material.uniforms.uA.value = field.idleA;
+  idlePts.material.uniforms.uIA.value = field.idleA;
   idlePts.visible = field.idleA > 0.003;
-  halo.material.opacity = field.idleA * (0.45 + 0.35 * Math.sin(now * 2 * Math.PI / 7));
-  if (art && field.drop < 1) { field.drop = Math.min(1, field.drop + dt / 0.45); art.position.y = 0.0125 + 0.18 * Math.pow(1 - field.drop, 3); }
+  halo.material.opacity = field.idleA * (0.45 + 0.3 * Math.sin(now * 2 * Math.PI / opt.iBreath));
+  if (art && field.drop < 1) { field.drop = Math.min(1, field.drop + dt / 1.2); art.position.y = 0.0125 + 0.18 * Math.pow(1 - field.drop, 3); }
   else if (art) art.position.y = 0.0125;
   const sp = spill.clone().multiplyScalar(opt.gain * 0.6).addScalar(0.02 * field.idleA);
   [spillS, spillE].forEach(l => { l.color.copy(sp).multiplyScalar(1 / Math.max(0.001, Math.max(sp.r, sp.g, sp.b))); l.intensity = 22 * Math.max(sp.r, sp.g, sp.b); });
