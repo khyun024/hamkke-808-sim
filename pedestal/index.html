@@ -48,6 +48,11 @@ h2 { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--mute
 #info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; }
 #info dt { color: var(--muted); font-size: 12px; white-space: nowrap; }
 #info dd { margin: 0; font-size: 12px; line-height: 1.5; }
+#info dt.thin { color: #e8893a; font-weight: 700; }
+.lbl.thin { border-left-color: #e8893a; }
+.fig { margin: 0 0 10px; background: #fff; border-radius: 6px; padding: 6px 4px 4px; }
+.fig svg { display: block; width: 100%; height: auto; font: 10px var(--sans); }
+.fig figcaption { font-size: 11px; color: #6f6a61; text-align: center; margin-top: 2px; }
 #info p { margin: 0; font-size: 12px; line-height: 1.6; color: var(--muted); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; margin-top: 8px; }
 .grid label { display: flex; flex-direction: column; gap: 3px; color: var(--muted); font-size: 11.5px; }
@@ -69,6 +74,7 @@ summary { cursor: pointer; font-size: 12px; color: var(--muted); }
     <header>
       <h1>색면화 좌대 제작안</h1>
       <p>좌대 두 개의 크기와 면마다 낼 홈·구멍이에요. 모델이나 아래 버튼에서 면을 누르면 그 면의 치수가 나와요. 왼쪽·오른쪽은 관객이 정면에서 볼 때 기준이에요.</p>
+      <p><a href="request/" style="color:var(--accent);font-weight:600">제작 요청서 한 장으로 보기 →</a></p>
     </header>
     <div id="peds"></div>
     <div id="info"></div>
@@ -100,9 +106,9 @@ const mm = v => v / 1000;
 
 /* ───────── 치수 (mm) ─────────
    좌표: 정면 −Z(관객), 뒤 +Z, 관객 기준 왼쪽 = +X, 오른쪽 = −X. ① 원점, ② 오른쪽(−X)에 간격 gap */
-const FIX = { W: 600, D: 600, H: 900, side: 18, top: 30, step: 5, pocketDepth: 10, stepW: 18, frame: 20, hole: 80, notchW: 30, back: 12, stop: 15 };
-const P = { canvas: 242, clear: 2.5, remain: 5, bar: 20, b2H: 600, gap: 300, pc1W: 210, pc1D: 450, pc1H: 490, spkD: 234, spkH: 306, pc2W: 210, pc2D: 450, pc2H: 490 };
-const PARAMS = [['canvas', '캔버스 한 변'], ['clear', '포켓 여유 / 한쪽'], ['remain', '리더 위 남길 두께'], ['b2H', '② 높이'], ['gap', '두 좌대 사이']];
+const FIX = { W: 600, D: 600, H: 900, side: 18, top: 18, topU: 15, plate: 3, frame: 20, hole: 80, notchW: 30, back: 12, stop: 15, lift: 30 }; // lift: 바닥판을 바닥에서 띄우는 높이 (밑으로 선이 들어옴)
+const P = { canvas: 242, clear: 2.5, bar: 20, b2H: 600, gap: 300, pc1W: 210, pc1D: 450, pc1H: 490, spkD: 234, spkH: 306, pc2W: 210, pc2D: 450, pc2H: 490 };
+const PARAMS = [['canvas', '캔버스 한 변'], ['clear', '구멍 여유 / 한쪽'], ['b2H', '② 높이'], ['gap', '두 좌대 사이']];
 const view = { ghost: true, eq: false, lid: false };
 let sel = null; // 선택한 면 'A.top' 같은 키
 
@@ -170,19 +176,18 @@ function tube(parent, pts, r = 4, mat = M.cable) {
 
 /* ───────── 좌대 치수·가공 (사이드바와 라벨이 같이 씀) ───────── */
 function dims() {
-  const pocket = P.canvas + 2 * P.clear, stepS = pocket + 2 * FIX.stepW, floorT = FIX.top - FIX.step - FIX.pocketDepth;
-  const remain = Math.min(floorT, Math.max(0.5, P.remain)), rz = pocket / 2 - P.clear - P.bar / 2; // 리더: 뒤쪽 각재 가운데 아래
+  const pocket = P.canvas + 2 * P.clear, rz = pocket / 2 - P.clear - P.bar / 2; // 리더: 캔버스 한 귀퉁이 아래 (관객 왼쪽·뒤, +X +Z). 어느 귀퉁이든 됨
   const A = { key: 'A', name: '① 색면화 좌대', W: FIX.W, D: FIX.D, H: FIX.H, top: FIX.top, x: 0 };
   const B = { key: 'B', name: '② 추가 좌대', W: FIX.W, D: FIX.D, H: P.b2H, top: FIX.side, x: -(FIX.W + P.gap) };
-  [A, B].forEach(S => { S.iw = S.W - 2 * FIX.side; S.ih = S.H - FIX.side - S.top; S.hs = S.H - S.top; S.vy = [FIX.side + 70, S.hs - 90]; });
-  const gy = FIX.side + P.pc1W + P.spkH / 2, gz = FIX.D / 2 - FIX.side - 30 - P.pc1D / 2; // 스피커 그릴 중심
-  return { pocket, stepS, floorT, remain, rz, A, B, gy, gz, hz: FIX.D / 2 - FIX.side - 70 };
+  [A, B].forEach(S => { S.fl = FIX.lift + FIX.side; S.iw = S.W - 2 * FIX.side; S.ih = S.H - S.top - S.fl; S.hs = S.H - S.top; S.vy = [S.fl + 70, S.hs - 90]; }); // fl = 안쪽 바닥 높이
+  const gy = FIX.lift + FIX.side + P.pc1W + P.spkH / 2, gz = FIX.D / 2 - FIX.side - 30 - P.pc1D / 2; // 스피커 자리 (눕힌 PC 위)
+  return { pocket, rz, A, B, gy, gz, hz: FIX.D / 2 - FIX.side - 70 };
 }
 const FACES = [['top', '상판'], ['front', '정면'], ['left', '왼쪽'], ['right', '오른쪽'], ['back', '뒤판'], ['bottom', '바닥']];
 // 면 하나의 제작 정보: 크기 + [항목, 내용, 라벨 위치(좌대 기준 mm)]
 function spec(key) {
   const d = dims(), [p, f] = key.split('.'), S = d[p], fromBack = z => FIX.D / 2 - z, t = FIX.side;
-  const vent = (y) => `200 × 60 · 중심이 바닥에서 ${y}, 뒤 모서리에서 ${fromBack(60)}`;
+  const vent = (y) => `200 × 60 · 중심이 바닥에서 ${y}, 뒤 모서리에서 ${fromBack(60)} · 문의: 안의 PC 열을 빼려는 구멍, 낼 수 있는지 (다른 형태도 좋고 어려우면 생략)`;
   const back = [
     ['방식', '뒤 개구부에 쏙 끼워 뒷면과 평평하게. 당겨서 떼고 밀어 넣어 닫음 (경첩·나사 없음)'],
     ['멈춤 각재', `${FIX.stop} × ${FIX.stop}, 개구부 안쪽 네 둘레, 뒤 모서리에서 ${FIX.back} 들어간 자리`, [S.iw / 2 - 40, FIX.side + 40, FIX.D / 2 + 30]],
@@ -190,30 +195,78 @@ function spec(key) {
     ['손가락 구멍', 'Ø25, 위쪽 가운데 (위에서 60)', [0, S.hs - 60 + 40, FIX.D / 2 + 30]],
   ];
   const T = {
-    'A.top': { size: '600 × 600 × 30', items: [
-      ['파는 순서', '위에서부터 단차 5 → 포켓 10 → 남는 바닥 15'],
-      ['손가락 단차', `${d.stepS} × ${d.stepS}, 깊이 5`, [d.stepS / 2, S.H + 15, -d.stepS / 2]],
-      ['캔버스 포켓', `${d.pocket} × ${d.pocket}, 깊이 10 (캔버스 ${P.canvas} + 한쪽 ${P.clear}) · 윗모서리 2 모따기`, [0, S.H + 55, -d.pocket / 2]],
-      ['손잡이 홈', '포켓 왼쪽·오른쪽 변 가운데, 폭 30 반달, 포켓 바닥까지', [d.pocket / 2 + 10, S.H + 25, 0]],
-      ['리더 홈 (아랫면)', `60 × 45, 깊이 ${d.floorT - d.remain} (위에 나무 ${d.remain} 남김) · 캔버스 틀 아래 아무 곳 (스티커가 틀 네 변에 다 붙음)`, [0, S.hs - 25, d.rz + 40]],
-      ['방향 표시', '▲ 각인, 단차 뒤쪽 가장자리 가운데 (그림 위쪽 맞추기용)', [0, S.H + 20, d.stepS / 2 + 30]],
+    'A.top': { size: `600 × 600 × ${FIX.top} (위판 ${FIX.topU} + 받침판 ${FIX.plate})`, fig: topFigs(d), items: [
+      ['용도', `색면화 캔버스(4호 S, ${P.canvas} × ${P.canvas}, 틀 높이 ${FIX.frame})를 올려 두는 자리. 캔버스를 올리면 모서리의 NFC 스티커가 읽혀 그 그림의 영상·소리로 바뀌고, 빼면 쉬는 화면으로 돌아감`],
+      ['캔버스 구멍', `${d.pocket} × ${d.pocket}, 위판 ${FIX.topU}을 끝까지 뚫음 · 캔버스보다 한쪽 ${P.clear} 크게 (크기 편차·천 두께에도 끼지 않게) · 윗모서리 2 모따기 (내려놓으면 미끄러져 자리 잡게)`, [0, S.H + 55, -d.pocket / 2]],
+      ['깊이', `${FIX.topU} (위판 두께 그대로) → 캔버스 틀 ${FIX.frame} 중 ${FIX.topU}가 잠기고 ${FIX.frame - FIX.topU}가 위로 솟음 (집기 쉽게, 그림이 상판 위로 보이게)`],
+      ['손잡이 홈', `구멍 왼쪽·오른쪽 변 가운데, 폭 ${FIX.notchW} 반달, 위판까지 뚫음 · 손가락을 넣어 캔버스를 들어 올림`, [d.pocket / 2 + 10, S.H + 25, 0]],
+      ['얇게 만들 곳', `<b>받침판 ${FIX.plate}mm</b> 나무판(합판·MDF). 위판 아랫면 전체에 붙여 구멍 바닥이 됨. 리더가 이 판 바로 밑에서 스티커를 읽으므로 두께를 ${FIX.plate}mm로, 많아도 5mm를 넘기지 않음 · 캔버스를 빼도 안이 안 보임 · 구멍으로 보이는 면은 상판과 같은 색`, [-S.W / 2 + 90, S.H - FIX.topU - 10, -S.D / 2 + 40], 'thin'],
+      ['리더 자리', `받침판 바로 밑, 구멍 한 귀퉁이 아래 (예: 관객 왼쪽·뒤, 중심에서 왼쪽 ${d.rz}·뒤 ${d.rz}) · NFC 스티커가 캔버스 네 모서리에 있어 어느 귀퉁이든 됨 · 리더는 저희가 붙임 · 태그까지 약 ${FIX.plate + 1}mm`, [d.rz + 30, S.hs - 25, d.rz + 40]],
+      ['금속 금지', '받침판·리더 둘레 5cm 안에 나사·타카·철물·금속 도료 없이, 받침판은 목공 본드로만 붙임 (금속이 있으면 태그가 안 읽힘)'],
     ] },
     'B.top': { size: '600 × 600 × 18', items: [['가공', '없음, 측판 위에 고정']] },
     'A.front': { size: `${S.iw} × ${S.hs} × ${t} (양 측판 사이)`, items: [['가공', '없음']] },
     'B.front': { size: `${S.iw} × ${S.hs} × ${t} (양 측판 사이)`, items: [['가공', '없음']] },
     'A.left': { size: `${FIX.D} × ${S.hs} × ${t}`, items: [
       ['배기 구멍', vent(S.vy[1]), [S.W / 2 + 10, S.vy[1] + 45, 60]],
-      ['스피커 구멍', `250 × 300 · 중심이 바닥에서 ${d.gy}, 뒤 모서리에서 ${fromBack(d.gz)} · 안쪽에 펀칭 철판이나 스피커 천`, [S.W / 2 + 10, d.gy - 175, d.gz]],
     ] },
     'B.left': { size: `${FIX.D} × ${S.hs} × ${t}`, items: [['배기 구멍', vent(S.vy[1]), [S.W / 2 + 10, S.vy[1] + 45, 60]]] },
     'A.right': { size: `${FIX.D} × ${S.hs} × ${t}`, items: [['흡기 구멍', vent(S.vy[0]), [-S.W / 2 - 10, S.vy[0] + 45, 60]]] },
     'B.right': { size: `${FIX.D} × ${S.hs} × ${t}`, items: [['흡기 구멍', vent(S.vy[0]), [-S.W / 2 - 10, S.vy[0] + 45, 60]]] },
     'A.back': { size: `${S.iw - 2} × ${S.ih - 2} × ${FIX.back} 합판 · 떼는 판`, items: back },
     'B.back': { size: `${S.iw - 2} × ${S.ih - 2} × ${FIX.back} 합판 · 떼는 판`, items: back },
-    'A.bottom': { size: `600 × 600 × ${t}`, items: [['선 구멍', `Ø${FIX.hole} · 좌우 가운데, 뒤 모서리에서 ${fromBack(d.hz)} · 브러시 그로밋`, [0, 45, d.hz + 30]]] },
+    'A.bottom': { size: `${S.iw} × ${FIX.D - t} × ${t} (측판 사이, 정면판 뒤)`, items: [
+      ['높이', `바닥에서 ${FIX.lift} 띄워 붙임. 측판·정면판은 바닥까지 내려와서 앞·옆에서는 안 보임`, [0, S.fl + 20, -FIX.D / 2 + 60]],
+      ['선 들어오는 길', `뒤쪽 아래 ${FIX.lift} 틈 → 바닥판 밑 → 선 구멍으로 올라옴`, [0, FIX.lift / 2, FIX.D / 2 + 30]],
+      ['선 구멍', `Ø${FIX.hole} · 좌우 가운데, 뒤 모서리에서 ${fromBack(d.hz)} · 브러시 그로밋`, [0, S.fl + 45, d.hz + 30]],
+    ] },
   };
-  T['B.bottom'] = T['A.bottom'];
+  T['B.bottom'] = { ...T['A.bottom'], size: `${S.iw} × ${FIX.D - t} × ${t} (측판 사이, 정면판 뒤)` };
   return { title: S.name + ' · ' + FACES.find(x => x[0] === f)[1] + (f === 'left' || f === 'right' ? ' 측판' : f === 'front' ? '판' : f === 'bottom' ? '판' : ''), ...T[key] };
+}
+
+// ① 상판 그림 두 장: 위에서 본 모습(실제 비율), 자른 모습(두께는 과장). 흰 바탕에 회색 판, 얇은 받침판만 주황
+function topFigs(d) {
+  const pk = d.pocket, ink = '#23211d', mute = '#6f6a61', wood = '#e6dfcf', edge = '#9a948a', thin = '#e8893a';
+  const t = (x, y, s, o = '') => `<text x="${x}" y="${y}" ${o}>${s}</text>`;
+  // 위에서 본 모습: 600 → 150px. 앞(관객)이 아래, 관객 왼쪽이 그림 왼쪽
+  const k = 0.25, cx = 150, cy = 88, X = v => cx + v * k, Y = v => cy + v * k, h = pk / 2, nr = FIX.notchW / 2;
+  const hole = `M${X(-h)},${Y(-h)} H${X(h)} V${Y(-nr)} A${nr * k},${nr * k} 0 0 1 ${X(h)},${Y(nr)} V${Y(h)} H${X(-h)} V${Y(nr)} A${nr * k},${nr * k} 0 0 1 ${X(-h)},${Y(-nr)} Z`;
+  const rx = X(-d.rz), ry = Y(-d.rz);
+  const plan = `<svg viewBox="0 0 300 186" role="img" aria-label="상판을 위에서 본 모습">
+    <rect x="${X(-300)}" y="${Y(-300)}" width="150" height="150" fill="${wood}" stroke="${edge}"/>
+    <path d="${hole}" fill="${thin}" fill-opacity=".35" stroke="${ink}" stroke-width="1"/>
+    <rect x="${rx - 7.5}" y="${ry - 5.6}" width="15" height="11.2" fill="none" stroke="#1f6fb5" stroke-dasharray="2 2"/>
+    <line x1="${rx - 8}" y1="${ry}" x2="${X(-300) - 4}" y2="${ry}" stroke="${mute}" stroke-width=".6"/>
+    ${t(X(-300) - 6, ry - 3, '리더 자리', `text-anchor="end" fill="${ink}"`)}${t(X(-300) - 6, ry + 9, '(밑, 저희가)', `text-anchor="end" fill="${mute}"`)}
+    <line x1="${X(h) + 4}" y1="${Y(0)}" x2="${X(300) + 4}" y2="${Y(0)}" stroke="${mute}" stroke-width=".6"/>
+    ${t(X(300) + 6, Y(0) + 3, '손잡이 홈', `fill="${ink}"`)}${t(X(300) + 6, Y(0) + 15, '폭 ' + FIX.notchW, `fill="${mute}"`)}
+    ${t(cx, Y(0) - 3, '캔버스 구멍', `text-anchor="middle" fill="${ink}" font-weight="600" font-size="9"`)}${t(cx, Y(0) + 9, pk + ' × ' + pk, `text-anchor="middle" fill="${ink}" font-size="9"`)}
+    ${t(cx, Y(-300) - 4, '뒤', `text-anchor="middle" fill="${mute}"`)}${t(cx, Y(300) + 14, '정면 (관객) · 600', `text-anchor="middle" fill="${mute}"`)}
+  </svg>`;
+  // 자른 모습: 가로 0.45px/mm, 세로 2.2px/mm (두께가 보이게 과장)
+  const sx = v => 15 + (v + 300) * 0.45, sy = v => 62 + v * 2.2, cs = P.canvas, bw = P.bar, U = FIX.topU, PL = FIX.plate, fr = FIX.frame;
+  const r = (x0, y0, x1, y1, f, o = '') => `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="${f}" ${o}/>`;
+  const sec = `<svg viewBox="0 0 300 172" role="img" aria-label="상판을 자른 모습">
+    <line x1="${sx(-h)}" y1="24" x2="${sx(h)}" y2="24" stroke="${ink}" stroke-width=".7"/>
+    <line x1="${sx(-h)}" y1="19" x2="${sx(-h)}" y2="${sy(0)}" stroke="${mute}" stroke-width=".5" stroke-dasharray="2 2"/><line x1="${sx(h)}" y1="19" x2="${sx(h)}" y2="${sy(0)}" stroke="${mute}" stroke-width=".5" stroke-dasharray="2 2"/>
+    ${t(150, 18, '캔버스 구멍 ' + pk + ' (캔버스 ' + cs + ' + 한쪽 ' + P.clear + ')', `text-anchor="middle" fill="${ink}" font-weight="600"`)}
+    ${r(sx(-300), sy(0), sx(-h), sy(U), wood, `stroke="${edge}"`)}${r(sx(h), sy(0), sx(300), sy(U), wood, `stroke="${edge}"`)}
+    ${r(sx(-300), sy(U), sx(300), sy(U + PL), thin, `stroke="${ink}" stroke-width=".6"`)}
+    ${r(sx(-300), sy(U + PL), sx(-282), 160, wood, `stroke="${edge}"`)}${r(sx(282), sy(U + PL), sx(300), 160, wood, `stroke="${edge}"`)}
+    ${r(sx(-cs / 2), sy(U - fr), sx(-cs / 2 + bw), sy(U), '#c9a774')}${r(sx(cs / 2 - bw), sy(U - fr), sx(cs / 2), sy(U), '#c9a774')}
+    ${r(sx(-cs / 2), sy(U - fr) - 2, sx(cs / 2), sy(U - fr) + 1, '#6b8fb5')}
+    ${[-1, 1].map(s2 => r(sx(s2 * (cs - bw) / 2 - 12.5), sy(U) - 2, sx(s2 * (cs - bw) / 2 + 12.5), sy(U), '#31b36b')).join('')}
+    ${r(sx(d.rz - 30), sy(U + PL) + 1, sx(d.rz + 30), sy(U + PL) + 5, '#1f6fb5')}
+    ${t(sx(-300) + 6, sy(U / 2) + 4, '위판 ' + U, `fill="${ink}"`)}
+    ${t(sx(-h) + 4, sy(U - fr) - 5, '틀 ' + fr + ' · ' + (fr - U) + ' 솟음', `fill="${ink}"`)}
+    ${t(sx(-300) + 6, sy(U + PL) + 14, '받침판 ' + PL + ' · 얇게', `fill="${thin}" font-weight="700"`)}
+    ${t(sx(-300) + 6, sy(U + PL) + 26, '목공 본드로만, 금속 X', `fill="${mute}"`)}
+    ${t(sx(d.rz), sy(U + PL) + 17, '리더', `text-anchor="middle" fill="#1f6fb5" font-weight="600"`)}
+    ${t(sx(d.rz), sy(U + PL) + 29, '스티커까지 약 ' + (PL + 1), `text-anchor="middle" fill="${mute}"`)}
+    ${t(sx(0), sy(U) + 0 - 12, 'NFC 스티커 (모서리)', `text-anchor="middle" fill="#2c7a4b"`)}
+  </svg>`;
+  return `<figure class="fig">${plan}<figcaption>위에서 본 모습</figcaption></figure><figure class="fig">${sec}<figcaption>자른 모습 · 두께는 크게 그림</figcaption></figure>`;
 }
 
 /* ───────── 좌대 하나: 측판·정면판·바닥판·떼는 뒤판 + 환기 구멍 ───────── */
@@ -223,15 +276,17 @@ function body(g, S, d) {
   box(g, t, hs, D, W / 2 - t / 2, hs / 2, 0, faceMat(k + '.left'), true, k + '.left');      // 왼쪽 측판 +X
   box(g, t, hs, D, -W / 2 + t / 2, hs / 2, 0, faceMat(k + '.right'), true, k + '.right');  // 오른쪽 측판 −X
   box(g, iw, hs, t, 0, hs / 2, -D / 2 + t / 2, faceMat(k + '.front'), true, k + '.front'); // 정면판 −Z
-  const bot = sq(null, W / 2); bot.holes.push(new THREE.Path().absarc(0, mm(d.hz), mm(FIX.hole / 2), 0, Math.PI * 2, true));
-  slab(g, bot, t, t, faceMat(k + '.bottom'), k + '.bottom');
-  const grom = new THREE.Mesh(new THREE.TorusGeometry(mm(FIX.hole / 2), mm(3), 8, 32), M.black); grom.rotation.x = Math.PI / 2; grom.position.set(0, mm(t + 1), mm(d.hz)); g.add(grom);
+  // 바닥판: 측판 사이·정면판 뒤, 바닥에서 lift만큼 띄움. 뒤쪽 아래 틈으로 선이 들어와 선 구멍으로 올라옴
+  const fl = S.fl, bot = new THREE.Shape(); bot.moveTo(mm(-iw / 2), mm(-D / 2 + t)); bot.lineTo(mm(iw / 2), mm(-D / 2 + t)); bot.lineTo(mm(iw / 2), mm(D / 2)); bot.lineTo(mm(-iw / 2), mm(D / 2)); bot.closePath();
+  bot.holes.push(new THREE.Path().absarc(0, mm(d.hz), mm(FIX.hole / 2), 0, Math.PI * 2, true));
+  slab(g, bot, t, fl, faceMat(k + '.bottom'), k + '.bottom');
+  const grom = new THREE.Mesh(new THREE.TorusGeometry(mm(FIX.hole / 2), mm(3), 8, 32), M.black); grom.rotation.x = Math.PI / 2; grom.position.set(0, mm(fl + 1), mm(d.hz)); g.add(grom);
   // 뒤: 개구부 안쪽 둘레에 멈춤 각재, 그 앞에 12mm 뒤판이 쏙 들어가 뒷면과 평평. 자석 4개로 붙음
   const zs = D / 2 - FIX.back - FIX.stop / 2, s = FIX.stop, bm = faceMat(k + '.back', 0xe2dccf, 0.4);
   box(g, iw, s, s, 0, H - S.top - s / 2, zs, bm, true, k + '.back');
-  box(g, iw, s, s, 0, t + s / 2, zs, bm, true, k + '.back');
-  [-1, 1].forEach(sx => box(g, s, ih - 2 * s, s, sx * (iw / 2 - s / 2), t + ih / 2, zs, bm, true, k + '.back'));
-  const lid = new THREE.Group(); lid.position.set(0, mm(t + ih / 2), mm(D / 2 - FIX.back / 2)); g.add(lid);
+  box(g, iw, s, s, 0, fl + s / 2, zs, bm, true, k + '.back');
+  [-1, 1].forEach(sx => box(g, s, ih - 2 * s, s, sx * (iw / 2 - s / 2), fl + ih / 2, zs, bm, true, k + '.back'));
+  const lid = new THREE.Group(); lid.position.set(0, mm(fl + ih / 2), mm(D / 2 - FIX.back / 2)); g.add(lid);
   box(lid, iw - 2, ih - 2, FIX.back, 0, 0, 0, faceMat(k + '.back', 0xd9d1bf, 0.45), true, k + '.back');
   const fh = new THREE.Mesh(new THREE.CylinderGeometry(mm(12.5), mm(12.5), mm(FIX.back + 1), 24), M.black); fh.rotation.x = Math.PI / 2; fh.position.set(0, mm(ih / 2 - 60), 0); fh.userData.face = k + '.back'; lid.add(fh);
   [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy]) => box(lid, 12, 12, 3, sx * (iw / 2 - s / 2), sy * (ih / 2 - s / 2), -FIX.back / 2 - 1.5, M.metal, false, k + '.back'));
@@ -244,17 +299,17 @@ function body(g, S, d) {
 
 // 안에 들어갈 것(보기 토글): PC, 스피커, 리더, 팬, 선
 function equipment(A, B, d) {
-  const t = FIX.side, S = d.A, pz = d.gz;
-  box(A, P.pc1H, P.pc1W, P.pc1D, 0, t + P.pc1W / 2, pz, M.pc, false);                       // ① PC 눕힘
+  const t = FIX.side, S = d.A, pz = d.gz, fl = S.fl;
+  box(A, P.pc1H, P.pc1W, P.pc1D, 0, fl + P.pc1W / 2, pz, M.pc, false);                       // ① PC 눕힘
   const sx = Math.min(P.pc1H / 2, S.W / 2 - t - 10) - P.spkD / 2, sr = mm(P.spkD / 2);
-  const sp = new THREE.Mesh(new THREE.CylinderGeometry(sr, sr, mm(P.spkH), 40), M.pc); sp.position.set(mm(sx), mm(t + P.pc1W + P.spkH / 2), mm(pz)); A.add(sp);
-  box(A, 56, 1.6, 41, 0, S.hs + (d.floorT - d.remain) - 2, d.rz, M.board, false);            // RC522 (리더 홈 안)
+  const sp = new THREE.Mesh(new THREE.CylinderGeometry(sr, sr, mm(P.spkH), 40), M.pc); sp.position.set(mm(sx), mm(fl + P.pc1W + P.spkH / 2), mm(pz)); A.add(sp);
+  box(A, 56, 1.6, 41, d.rz, S.hs - 1, d.rz, M.board, false);                                   // RC522 (받침판 바로 밑)
   box(A, 68.6, 1.6, 53.4, -90, S.hs - 14, 60, M.uno, false);
   const pb = (G, SS, w, h, dd) => { const z = FIX.D / 2 - t - 30 - dd / 2;
-    [[-30, 0], [-10, 1], [10, 2], [30, 3]].forEach(([dx, i]) => tube(G, [[dx, t + 60 + i * 15, z + dd / 2], [dx * 0.5, t + 30, d.hz - 10], [dx * 0.3, t - 5, d.hz], [dx * 0.3, 3, d.hz + 60], [dx * 0.6, 3, FIX.D / 2 + 400]], i === 0 ? 5 : 3.5));
+    [[-30, 0], [-10, 1], [10, 2], [30, 3]].forEach(([dx, i]) => tube(G, [[dx, fl + 60 + i * 15, z + dd / 2], [dx * 0.5, fl + 30, d.hz - 10], [dx * 0.3, fl - 8, d.hz], [dx * 0.3, FIX.lift / 2, d.hz + 60], [dx * 0.6, 4, FIX.D / 2 + 400]], i === 0 ? 5 : 3.5));
     box(G, 25, 80, 80, SS.W / 2 - t - 14, SS.vy[1], 60, M.black, false); };                  // USB 팬
   pb(A, S, P.pc1H, P.pc1W, P.pc1D);
-  box(B, P.pc2W, P.pc2H, P.pc2D, 0, t + P.pc2H / 2, FIX.D / 2 - t - 30 - P.pc2D / 2, M.pc, false); // ② PC 세움
+  box(B, P.pc2W, P.pc2H, P.pc2D, 0, fl + P.pc2H / 2, FIX.D / 2 - t - 30 - P.pc2D / 2, M.pc, false); // ② PC 세움
   pb(B, d.B, P.pc2W, P.pc2H, P.pc2D);
 }
 
@@ -263,38 +318,30 @@ function build() {
   doors.length = 0;
   if (world) { scene.remove(world); world.traverse(o => { if (o.isCSS2DObject) o.element.remove(); o.geometry?.dispose(); }); }
   world = new THREE.Group(); scene.add(world);
-  const d = dims(), S = d.A, { step, pocketDepth, frame } = FIX;
+  const d = dims(), S = d.A, { frame } = FIX;
   const A = new THREE.Group(); world.add(A); body(A, S, d);
   const B = new THREE.Group(); B.position.x = mm(d.B.x); world.add(B); body(B, d.B, d);
   slab(B, sq(null, d.B.W / 2), d.B.top, d.B.H, faceMat('B.top', 0xe6dfcf, 0.55), 'B.top');
 
-  // ① 상판: 위에서부터 단차층(5) · 포켓층(10, 손잡이 홈) · 남는 바닥(15 = 리더 위 remain + 아래 리더 홈층)
+  // ① 상판: 위판(구멍 + 손잡이 반달 홈 관통) + 아래 얇은 받침판. 캔버스는 받침판 위에 앉고 리더는 받침판 바로 밑
   const tm = faceMat('A.top', 0xe6dfcf, 0.55), H = S.H;
-  const s1 = sq(null, S.W / 2); s1.holes.push(sq(null, d.stepS / 2, new THREE.Path())); slab(A, s1, step, H, tm, 'A.top');
   const s2 = sq(null, S.W / 2), h = mm(d.pocket / 2), nr = mm(FIX.notchW / 2), hole = new THREE.Path();
   hole.moveTo(-h, -h); hole.lineTo(h, -h); hole.lineTo(h, -nr); hole.absarc(h, 0, nr, -Math.PI / 2, Math.PI / 2, false); hole.lineTo(h, h); hole.lineTo(-h, h); hole.lineTo(-h, nr); hole.absarc(-h, 0, nr, Math.PI / 2, Math.PI * 1.5, false); hole.closePath();
-  s2.holes.push(hole); slab(A, s2, pocketDepth, H - step, tm, 'A.top');
-  slab(A, sq(null, S.W / 2), d.remain, H - step - pocketDepth, tm, 'A.top');
-  const rw = 60, rd = 45, s3 = sq(null, S.W / 2), rh = new THREE.Path();
-  rh.moveTo(mm(-rw / 2), mm(d.rz - rd / 2)); rh.lineTo(mm(rw / 2), mm(d.rz - rd / 2)); rh.lineTo(mm(rw / 2), mm(d.rz + rd / 2)); rh.lineTo(mm(-rw / 2), mm(d.rz + rd / 2)); rh.closePath();
-  s3.holes.push(rh); if (d.floorT - d.remain > 0.1) slab(A, s3, d.floorT - d.remain, H - step - pocketDepth - d.remain, tm, 'A.top');
-  const tri = new THREE.Shape(); tri.moveTo(mm(-14), mm(-8)); tri.lineTo(mm(14), mm(-8)); tri.lineTo(0, mm(16)); tri.closePath();
-  const triM = new THREE.Mesh(new THREE.ShapeGeometry(tri), new THREE.MeshStandardMaterial({ color: 0x2f7fd6, roughness: .6 }));
-  triM.rotation.x = -Math.PI / 2; triM.position.set(0, mm(H + 0.6), mm(d.stepS / 2 + 26)); A.add(triM);
-  // ① 스피커 구멍 (왼쪽 측판)
-  box(A, 3, 300, 250, S.W / 2 + 1.5, d.gy, d.gz, M.black, false, 'A.left');
-  // 캔버스 (포켓 바닥에 앉아 위로 5 솟음) + 틀 네 변 아랫면 NFC 스티커
+  s2.holes.push(hole); slab(A, s2, FIX.topU, H, tm, 'A.top');
+  const pm = sel === 'A.top' ? new THREE.MeshStandardMaterial({ color: 0xe8893a, roughness: .8 }) : faceMat('A.top', 0xd8cfbd, 0.7); // 얇게 만들 받침판: 상판을 고르면 주황
+  slab(A, sq(null, S.W / 2), FIX.plate, H - FIX.topU, pm, 'A.top');
+  // 캔버스 (받침판 위에 앉아 위로 5 솟음) + 틀 네 모서리 아랫면 NFC 스티커
   canvasG = new THREE.Group(); A.add(canvasG);
   const cs = P.canvas, bw = P.bar;
   [[0, -(cs - bw) / 2, cs, bw], [0, (cs - bw) / 2, cs, bw], [-(cs - bw) / 2, 0, bw, cs - 2 * bw], [(cs - bw) / 2, 0, bw, cs - 2 * bw]].forEach(([x, z, w, dd]) => box(canvasG, w, frame - 1, dd, x, frame / 2 - 0.5, z, M.frame));
   const face = new THREE.Mesh(new THREE.BoxGeometry(mm(cs), mm(1), mm(cs)), [M.frame, M.frame, new THREE.MeshStandardMaterial({ map: canvasTex, roughness: .9 }), M.frame, M.frame, M.frame]);
   face.position.y = mm(frame - 0.5); face.rotation.y = Math.PI; canvasG.add(face);
-  [[0, 1], [0, -1], [1, 0], [-1, 0]].forEach(([sx, sz]) => { const tg = new THREE.Mesh(new THREE.CylinderGeometry(mm(12.5), mm(12.5), mm(0.6), 24), M.tag); tg.position.set(mm(sx * (cs - bw) / 2), mm(-0.3), mm(sz * (cs - bw) / 2)); canvasG.add(tg); });
-  canvasG.userData.y0 = H - step - pocketDepth;
+  [[1, 1], [-1, 1], [1, -1], [-1, -1]].forEach(([sx, sz]) => { const tg = new THREE.Mesh(new THREE.CylinderGeometry(mm(12.5), mm(12.5), mm(0.6), 24), M.tag); tg.position.set(mm(sx * (cs - bw) / 2), mm(-0.3), mm(sz * (cs - bw) / 2)); canvasG.add(tg); });
+  canvasG.userData.y0 = H - FIX.topU;
 
   if (view.eq) equipment(A, B, d);
   // 선택한 면의 라벨
-  if (sel) { const sp = spec(sel), G = sel[0] === 'A' ? A : B; sp.items.forEach(([n, , pos]) => pos && label(G, '<b>' + n + '</b>', ...pos)); }
+  if (sel) { const sp = spec(sel), G = sel[0] === 'A' ? A : B; sp.items.forEach(([n, , pos, c]) => pos && label(G, c === 'thin' ? `<b>얇게 ${FIX.plate}mm</b> · 받침판` : '<b>' + n + '</b>', ...pos, c)); }
   renderInfo();
 }
 
@@ -302,7 +349,7 @@ function build() {
 function renderPeds() {
   const d = dims();
   $('#peds').innerHTML = [d.A, d.B].map(S => `<div class="ped"><div class="t"><b>${S.name}</b><span>${S.W} × ${S.D} × ${S.H}</span></div>
-    <div class="hint">판 ${FIX.side} · 상판 ${S.top}${S.key === 'A' ? ' · 캔버스 포켓' : ' · 고정'}</div>
+    <div class="hint">판 ${FIX.side} · 상판 ${S.key === 'A' ? `${FIX.topU}+${FIX.plate} · 캔버스 구멍 · <b style="color:#e8893a">받침판 ${FIX.plate} 얇게</b>` : S.top + ' · 고정'}</div>
     <div class="faces">${FACES.map(([f, n]) => { const k = S.key + '.' + f, plain = spec(k).items[0][1].startsWith('없음'); return `<button class="b${plain ? ' plain' : ''}${sel === k ? ' on' : ''}" data-k="${k}">${n}</button>`; }).join('')}</div></div>`).join('');
   $('#peds').querySelectorAll('button').forEach(b => b.onclick = () => select(b.dataset.k, true));
 }
@@ -310,7 +357,7 @@ function renderInfo() {
   renderPeds();
   if (!sel) { $('#info').innerHTML = `<p>면을 고르세요. 회색 버튼은 가공이 없는 면이에요.</p>`; return; }
   const sp = spec(sel);
-  $('#info').innerHTML = `<h3>${sp.title}</h3><div class="size">${sp.size}</div><dl>${sp.items.map(([n, v]) => `<dt>${n}</dt><dd>${v}</dd>`).join('')}</dl>`;
+  $('#info').innerHTML = `<h3>${sp.title}</h3><div class="size">${sp.size}</div>${sp.fig || ''}<dl>${sp.items.map(([n, v, , c]) => `<dt class="${c || ''}">${n}</dt><dd>${v}</dd>`).join('')}</dl>`;
 }
 
 /* ───────── 선택 · 카메라 ───────── */
