@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>함께누리전 설치 시뮬레이션</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +38,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-s
 .btns { display: flex; flex-wrap: wrap; gap: 6px; }
 button.b { border: 1px solid var(--line); background: var(--field); color: var(--fg); border-radius: 6px; padding: 6px 10px; font: 500 12px var(--sans); cursor: pointer; }
 button.b:hover { border-color: var(--accent); }
+button.b:disabled { opacity: .45; cursor: default; border-color: var(--line); }
 button.b.on, button.b.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 button.b:focus-visible, .tabs button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .row { display: grid; grid-template-columns: 112px 1fr; align-items: center; gap: 8px; min-height: 28px; }
@@ -78,6 +81,21 @@ button.b:focus-visible, .tabs button:focus-visible, input:focus-visible, select:
 .warns { display: flex; flex-direction: column; gap: 4px; }
 .warn { background: var(--warn-soft); color: var(--warn); border-radius: 5px; padding: 5px 8px; font-size: 11.5px; }
 .okmsg { color: var(--ok); font-size: 11.5px; }
+/* 색면화 흐름 */
+.cf-thumbs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.cf-thumbs button { padding: 0; border: 1px solid var(--line); border-radius: 5px; background: var(--field); cursor: pointer; aspect-ratio: 1; overflow: hidden; }
+.cf-thumbs button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cf-thumbs button.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.cf-thumbs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+label.b { border: 1px solid var(--line); background: var(--field); color: var(--fg); border-radius: 6px; padding: 6px 10px; font: 500 12px var(--sans); cursor: pointer; }
+label.b:hover { border-color: var(--accent); }
+.cf-state { margin-top: 8px; font-size: 12px; line-height: 1.5; }
+.cf-state small { display: block; color: var(--muted); font: 11px var(--mono); }
+.cf-bands { display: flex; flex-direction: column; height: 46px; width: 46px; border-radius: 3px; overflow: hidden; float: right; margin-left: 8px; border: 1px solid var(--line); }
+#cf-strip { position: absolute; right: 12px; bottom: 34px; width: min(560px, calc(100% - 24px)); background: #000; border: 1px solid #3a4246; border-radius: 6px; padding: 4px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+#cf-strip canvas { width: 100%; height: auto; display: block; }
+#cf-strip .cap { display: flex; justify-content: space-between; color: #9aa4a9; font: 10px var(--mono); padding: 3px 2px 0; }
+#cf-strip .corner { position: absolute; top: 4px; bottom: 20px; width: 0; border-left: 1px dashed rgba(255,255,255,.35); }
 textarea#json { width: 100%; min-height: 90px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 11px/1.4 var(--mono); padding: 6px; resize: vertical; box-sizing: border-box; }
 
 /* 뷰포트 */
@@ -161,11 +179,28 @@ textarea#json { width: 100%; min-height: 90px; background: var(--field); color: 
         </div>
       </div>
       <div class="sec">
+        <h2>색면화 · 좌대에 그림 올리기</h2>
+        <div class="cf-thumbs" id="cf-thumbs"></div>
+        <div class="btns" style="margin-top:8px">
+          <label class="b" for="cf-file">내 이미지 올리기</label><input type="file" id="cf-file" accept="image/*" hidden>
+          <button class="b" id="cf-off">그림 빼기</button>
+          <button class="b" id="cf-sound">소리 켜기</button>
+          <button class="b" id="cf-look">색면화 실로 이동</button>
+        </div>
+        <div class="btns" id="cf-dir" style="margin-top:6px">
+          <button class="b" data-v="ltr">왼쪽 벽 쪽 → 오른쪽 벽</button>
+          <button class="b" data-v="rtl">반대로</button>
+        </div>
+        <div class="checks" style="margin-top:8px"><label><input type="checkbox" id="c-strip"> 펼친 화면 (정면 + 오른쪽 벽)</label></div>
+        <div class="cf-state" id="cf-state"></div>
+        <p class="hint" style="margin-top:6px">그림을 고르면 띠가 위에서부터 하나씩 빛 입자로 풀려 정면 벽에서 모서리를 돌아 오른쪽 벽까지 흐르고, 띠마다 음이 하나씩 쌓여요. 26초 한 바퀴를 계속 반복하고, 다른 그림을 고르면 앞 그림이 흩어지는 동안 다음 그림이 이어 나와요. 그림을 빼면 지금까지 올린 그림의 띠가 벽에 옅게 남아 숨 쉬는 아이들 상태가 되고, 좌대 위에 그림 놓을 자리가 빛나요. 이미지 파일을 3D 화면에 끌어다 놓아도 돼요.</p>
+      </div>
+      <div class="sec">
         <h2>색면화 · 중앙 좌대</h2>
         <div class="row"><label for="v-pedW">가로</label><div class="ctl"><input type="number" id="v-pedW" step="0.05" min="0.2" max="3"><span class="unit">m</span></div></div>
         <div class="row"><label for="v-pedD">세로</label><div class="ctl"><input type="number" id="v-pedD" step="0.05" min="0.2" max="3"><span class="unit">m</span></div></div>
         <div class="row"><label for="v-pedH">높이</label><div class="ctl"><input type="number" id="v-pedH" step="0.05" min="0.1" max="2"><span class="unit">m</span></div></div>
-        <p class="hint">크기가 정해지지 않아 60×60×90cm로 잡았어요. 위의 주황 판은 작품 자리 표시예요.</p>
+        <p class="hint">크기가 정해지지 않아 60×60×90cm로 잡았어요. 올린 그림은 가로 30cm 캔버스로 눕혀 놓았어요.</p>
       </div>
       <div class="sec">
         <h2>공간 치수 (가정값)</h2>
@@ -235,6 +270,7 @@ textarea#json { width: 100%; min-height: 90px; background: var(--field); color: 
     <div id="info" hidden></div>
     <div id="walkhint" hidden>걷기 모드 · WASD/방향키 이동 · 드래그로 둘러보기 · Esc 종료</div>
     <div id="scale"></div>
+    <div id="cf-strip" hidden><div class="corner" id="cf-corner"></div><div class="cap"><span id="cf-capL"></span><span id="cf-capR"></span></div></div>
   </main>
 </div>
 
@@ -261,7 +297,7 @@ const v3 = (px, py, y = 0) => new THREE.Vector3(X(px), y, Z(py));
 const V2 = p => new THREE.Vector2(X(p[0]), Z(p[1]));
 
 const dims = { wallH: 3.6, ceilH: 3.75, pedW: 0.6, pedD: 0.6, pedH: 0.9 };
-const view = { gallery: 80, exposure: 100, work: true, equip: true, zone: false, zoning: false, people: true, frustum: true, cone: true, power: true, spkPos: 'A', spkDir: 'room' };
+const view = { gallery: 80, exposure: 100, work: true, equip: true, zone: false, zoning: false, people: true, frustum: true, cone: true, power: true, spkPos: 'A', spkDir: 'room', fieldDir: 'ltr', strip: true };
 const BASE_EXPOSURE = 0.02;
 
 /* ───────── 렌더러 ───────── */
@@ -755,11 +791,10 @@ function buildWorld() {
   // 색면화 중앙 좌대 (+ 작품 자리 표시)
   const pedG = new THREE.Group();
   const pedM = new THREE.Mesh(new THREE.BoxGeometry(dims.pedW, dims.pedH, dims.pedD), MAT.white); pedM.position.y = dims.pedH / 2; pedG.add(pedM);
-  const pedArt = new THREE.Mesh(new THREE.BoxGeometry(dims.pedW * 0.75, 0.03, dims.pedD * 0.75), new THREE.MeshStandardMaterial({ color: 0xd98c6a, roughness: .8 }));
-  pedArt.position.y = dims.pedH + 0.015; pedG.add(pedArt);
   pedG.position.copy(v3(948, 728)); shadowed(pedG); world.add(pedG); occluders.push(pedM);
+  pedTop = new THREE.Group(); pedTop.position.y = dims.pedH; pedG.add(pedTop); fieldPedestal();
   const cm = v => Math.round(v * 100);
-  selectable('ped', pedG, { title: '색면화 좌대', who: '워크숍존 · 색면화', desc: `색면화 방 가운데 좌대예요. 크기가 정해지지 않아 ${cm(dims.pedW)}×${cm(dims.pedD)}×${cm(dims.pedH)}cm로 잡았고, 보기 탭에서 바꿀 수 있어요. 위의 주황 판은 작품 자리 표시예요.`, equip: [] });
+  selectable('ped', pedG, { title: '색면화 좌대', who: '워크숍존 · 색면화', desc: `색면화 방 가운데 좌대예요. 크기가 정해지지 않아 ${cm(dims.pedW)}×${cm(dims.pedD)}×${cm(dims.pedH)}cm로 잡았고, 보기 탭에서 바꿀 수 있어요. 그림을 올리면 띠가 정면·오른쪽 벽으로 흘러나가고, 비어 있으면 놓을 자리가 빛나요.`, equip: [] });
   label('색면화 좌대', `${cm(dims.pedW)}×${cm(dims.pedD)}×${cm(dims.pedH)}cm`, 'work', v3(948, 728, dims.pedH + 0.45));
 
   // 협동화 · 색면화 실 라벨
@@ -865,9 +900,9 @@ const ASPECT = { '16:9': 16 / 9, '16:10': 1.6, '4:3': 4 / 3 };
 const PCOLORS = ['#3fb6dc', '#e2725b', '#8bc34a', '#c48be0', '#f0c04a', '#5ad1b0'];
 const DEFAULTS = [
   { id: 'p1', name: '협동화 프로젝터', model: '미정 · 단채널', surface: 'hyup', mount: 'ceiling', lumens: 6000, resW: 1920, resH: 1080, aspect: '16:9', trWide: 0.8, trTele: 1.0, zoom: 0, shiftV: -45, shiftH: 0, shiftVMax: 60, shiftVMin: -60, shiftHMax: 20, distance: 4.6, offset: 0, lensH: 3.3, yaw: 0, pitch: 0, content: 'grid', mask: false, on: true },
-  // 색면화: 왼쪽 벽은 투사 없음. 정면·오른쪽은 벽을 꽉 덮고 넘치는 부분은 마스킹 (coverFit으로 거리·시프트 계산)
-  { id: 'p3', name: '색면화 · 정면', model: '미정 · 다채널 1/2', surface: 'sf', mount: 'ceiling', lumens: 6000, resW: 1920, resH: 1080, aspect: '16:9', trWide: 0.5, trTele: 0.5, zoom: 0, shiftV: -36, shiftH: 0, shiftVMax: 60, shiftVMin: -60, shiftHMax: 20, distance: 3.7, offset: 0, lensH: 3.3, yaw: 0, pitch: 0, content: 'color', mask: true, on: true },
-  { id: 'p4', name: '색면화 · 오른쪽', model: '미정 · 다채널 2/2', surface: 'sr', mount: 'ceiling', lumens: 6000, resW: 1920, resH: 1080, aspect: '16:9', trWide: 0.5, trTele: 0.5, zoom: 0, shiftV: -41, shiftH: 0, shiftVMax: 60, shiftVMin: -60, shiftHMax: 20, distance: 3.2, offset: 0, lensH: 3.3, yaw: 0, pitch: 0, content: 'color', mask: true, on: true },
+  // 색면화: 왼쪽 벽은 투사 없음. 정면·오른쪽은 좌대에 올린 그림의 띠가 이어 흐르는 한 화면(field). 벽을 꽉 덮고 넘치는 부분은 마스킹 (coverFit으로 거리·시프트 계산)
+  { id: 'p3', name: '색면화 · 정면', model: '미정 · 다채널 1/2', surface: 'sf', mount: 'ceiling', lumens: 6000, resW: 1920, resH: 1080, aspect: '16:9', trWide: 0.5, trTele: 0.5, zoom: 0, shiftV: -36, shiftH: 0, shiftVMax: 60, shiftVMin: -60, shiftHMax: 20, distance: 3.7, offset: 0, lensH: 3.3, yaw: 0, pitch: 0, content: 'field', mask: true, on: true },
+  { id: 'p4', name: '색면화 · 오른쪽', model: '미정 · 다채널 2/2', surface: 'sr', mount: 'ceiling', lumens: 6000, resW: 1920, resH: 1080, aspect: '16:9', trWide: 0.5, trTele: 0.5, zoom: 0, shiftV: -41, shiftH: 0, shiftVMax: 60, shiftVMin: -60, shiftHMax: 20, distance: 3.2, offset: 0, lensH: 3.3, yaw: 0, pitch: 0, content: 'field', mask: true, on: true },
 ];
 const STORE = 'hamkke-808-projectors-v2';
 let projectors = [];
@@ -917,6 +952,8 @@ function coverFit(p) {
   }
 }
 if (!projectors.length) projectors = freshDefaults();
+// 예전 저장값: 색면화 두 벽의 '색면' 콘텐츠를 좌대 연동 흐름으로
+projectors.forEach(p => { if (p.content === 'color' && (p.surface === 'sf' || p.surface === 'sr')) p.content = 'field'; });
 let selP = projectors[0]?.id;
 const pRuntime = new Map(); // id → { light, root, body, pole, lines, canvas, ctx, tex, media, label }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(projectors)); } catch (e) { } }
@@ -1121,7 +1158,8 @@ function drawProjector(p, m, rt) {
   const T = Math.tan(rt.light.angle), N = rt.N;
   const x0 = (0.5 + (m.cx - m.w) / (2 * T)) * N, x1 = (0.5 + (m.cx + m.w) / (2 * T)) * N;
   const y0 = (0.5 - (m.cy + m.h) / (2 * T)) * N, y1 = (0.5 - (m.cy - m.h) / (2 * T)) * N;
-  contentDraw(p, rt.ctx, N, [x0, y0, x1 - x0, y1 - y0], projectors.indexOf(p));
+  if (p.content === 'field') drawField(p, m, rt);
+  else contentDraw(p, rt.ctx, N, [x0, y0, x1 - x0, y1 - y0], projectors.indexOf(p));
   if (p.mask && m.wallTan) {
     const c = rt.ctx; c.save();
     c.globalCompositeOperation = 'destination-in'; c.globalAlpha = 1; c.fillStyle = '#000'; c.beginPath();
@@ -1178,6 +1216,402 @@ function syncProjector(p) {
   rt.lab.visible = view.equip;
 }
 function syncAll() { projectors.forEach(syncProjector); }
+
+/* ───────── 색면화 흐름 ─────────
+   좌대에 그림을 올리면 가로 띠를 읽어서, 띠마다 위에서부터 차례로 빛 입자로 풀려 나와
+   정면 벽(왼쪽 벽 쪽 끝) → 모서리 → 오른쪽 벽 끝까지 흐름. 두 벽을 이은 한 장의 펼친 화면(파노라마)에 그리고,
+   프로젝터마다 자기 벽 구간만 잘라 투사함. 26초 한 바퀴: 출발(띠마다 0.75초 간격) → 머묾 → 오른쪽으로 흩어짐 → 쉼. */
+const CF = { PW: 2048, PH: 576, CYCLE: 26, L0: 0.6, GAP: 0.75, TRAVEL: 5.5, REL: 19, RELD: 4.5, XF: 2.8, MAXP: 2200 };
+const FIELD_PATH = [['sf', false], ['sr', true]]; // [투사면, 벽 방향을 뒤집어 잇는지]: 정면은 서→동, 오른쪽 벽은 모서리(남)→북
+const cfCanvas = document.createElement('canvas'); cfCanvas.width = CF.PW; cfCanvas.height = CF.PH;
+const cfx = cfCanvas.getContext('2d');
+const field = { cur: null, out: [], hist: [], parts: [], idleA: 1, seq: 0, mesh: null, halo: null, drop: 1 };
+const tnow = () => performance.now() / 1000;
+const easeOut = k => 1 - Math.pow(1 - k, 3);
+const easeIO = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+let cfLayout = null;
+function fieldLayout() {
+  if (cfLayout) return cfLayout;
+  let u = 0;
+  const segs = FIELD_PATH.map(([id, rev]) => { const L = surfGeom(id).L; const s = { id, rev, u0: u, L }; u += L; return s; });
+  return (cfLayout = { segs, total: u });
+}
+
+// 띠 색 → 음: 유채색은 색상으로 5음계 음을, 밝기로 옥타브를 고름. 검정은 낮은 울림, 흰색은 높은 숨
+const PENTA = [0, 2, 4, 7, 9];
+function rgbHsl([r, g, b]) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return [0, 0, l];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [(h * 60 + 360) % 360, s, l];
+}
+function bandVoice(rgb) {
+  const [h, s, l] = rgbHsl(rgb);
+  let midi, kind = 'tone';
+  if (l < 0.17) { midi = 36; kind = 'low'; }
+  else if (l > 0.82 && s < 0.4) { midi = 84; kind = 'air'; }
+  else if (s < 0.18) midi = l < 0.5 ? 55 : 67;
+  else midi = (l < 0.36 ? 48 : l < 0.62 ? 60 : 72) + PENTA[Math.floor(((h + 18) % 360) / 72)];
+  return { midi, kind, sat: s };
+}
+// 사진에서 캔버스 영역 찾기: 테두리 색을 배경으로 보고, 배경과 다른 픽셀이 35% 넘는 행·열의 범위
+function autoCrop(img) {
+  const W = img.naturalWidth, H = img.naturalHeight, k = 160 / Math.max(W, H);
+  const w = Math.max(8, Math.round(W * k)), h = Math.max(8, Math.round(H * k));
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, w, h);
+  const d = g.getImageData(0, 0, w, h).data, px = (x, y) => { const i = (y * w + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+  const b = Math.max(2, Math.round(Math.min(w, h) * 0.04)), bg = [0, 0, 0]; let n = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (x < b || y < b || x >= w - b || y >= h - b) { const p = px(x, y); bg[0] += p[0]; bg[1] += p[1]; bg[2] += p[2]; n++; }
+  bg.forEach((v, i) => bg[i] = v / n);
+  const on = (x, y) => { const p = px(x, y); return Math.hypot(p[0] - bg[0], p[1] - bg[1], p[2] - bg[2]) > 40; };
+  const rows = [], cols = [];
+  for (let y = 0; y < h; y++) { let m = 0; for (let x = 0; x < w; x++) m += on(x, y); if (m / w > 0.35) rows.push(y); }
+  for (let x = 0; x < w; x++) { let m = 0; for (let y = 0; y < h; y++) m += on(x, y); if (m / h > 0.35) cols.push(x); }
+  if (rows.length < h * 0.2 || cols.length < w * 0.2) return [0, 0, W, H];
+  const x0 = cols[0], x1 = cols[cols.length - 1] + 1, y0 = rows[0], y1 = rows[rows.length - 1] + 1;
+  const ix = (x1 - x0) * 0.02, iy = (y1 - y0) * 0.02;
+  return [(x0 + ix) / k, (y0 + iy) / k, (x1 - x0 - 2 * ix) / k, (y1 - y0 - 2 * iy) / k];
+}
+// 가로 띠 읽기: 가운데 70% 폭의 행 평균색을 위에서 아래로 훑어, 색이 크게 바뀌는 곳에서 자름
+function bandsOf(img, rect) {
+  const [sx, sy, sw, sh] = rect, C = 40, R = 240;
+  const c = document.createElement('canvas'); c.width = C; c.height = R;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, sx + sw * 0.15, sy, sw * 0.7, sh, 0, 0, C, R);
+  const d = g.getImageData(0, 0, C, R).data, rows = [];
+  for (let y = 0; y < R; y++) { const a = [0, 0, 0]; for (let x = 0; x < C; x++) { const i = (y * C + x) * 4; a[0] += d[i]; a[1] += d[i + 1]; a[2] += d[i + 2]; } rows.push(a.map(v => v / C)); }
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  const mean = s => s.sum.map(v => v / s.n);
+  const add = (s, y) => { s.y1 = y + 1; s.n++; rows[y].forEach((v, k) => s.sum[k] += v); };
+  const merge = (a, b) => { a.y0 = Math.min(a.y0, b.y0); a.y1 = Math.max(a.y1, b.y1); a.n += b.n; a.sum = a.sum.map((v, k) => v + b.sum[k]); };
+  const segs = [{ y0: 0, y1: 1, n: 1, sum: rows[0].slice() }];
+  for (let y = 1; y < R; y++) {
+    const s = segs[segs.length - 1], m = mean(s);
+    if (dist(rows[y], m) > 38 && dist(rows[Math.min(R - 1, y + 2)], m) > 38) segs.push({ y0: y, y1: y + 1, n: 1, sum: rows[y].slice() });
+    else add(s, y);
+  }
+  // 경계 번짐으로 생긴 얇은 조각은 색이 가까운 이웃에 붙이고, 비슷한 이웃끼리는 합침
+  for (let again = true; again;) {
+    again = false;
+    for (let i = 0; i < segs.length && segs.length > 1; i++) {
+      if (segs[i].n >= R * 0.02) continue;
+      const L = segs[i - 1], N = segs[i + 1], m = mean(segs[i]);
+      merge(!L ? N : !N ? L : dist(m, mean(L)) <= dist(m, mean(N)) ? L : N, segs[i]);
+      segs.splice(i, 1); again = true; break;
+    }
+  }
+  for (let i = 1; i < segs.length; i++) if (dist(mean(segs[i]), mean(segs[i - 1])) < 26) { merge(segs[i - 1], segs[i]); segs.splice(i--, 1); }
+  return segs.map(s => {
+    const a = Math.floor(s.y0 + (s.y1 - s.y0) * 0.2), b = Math.max(a + 1, Math.ceil(s.y1 - (s.y1 - s.y0) * 0.2)), col = [0, 0, 0];
+    for (let y = a; y < b; y++) rows[y].forEach((v, k) => col[k] += v / (b - a));
+    const rgb = col.map(v => Math.min(255, Math.max(0, Math.round((v - 10) * 1.1)))); // 사진 색을 빛으로 쏠 때 조금 또렷하게
+    const w = (s.y1 - s.y0) / R;
+    return { y0: s.y0 / R, y1: s.y1 / R, w, rgb: rgb.join(','), hex: '#' + rgb.map(v => v.toString(16).padStart(2, '0')).join(''), pad: 0.025 + 0.11 * Math.sqrt(w), ...bandVoice(rgb) };
+  });
+}
+
+/* 소리: 띠가 출발할 때 종소리 하나(흐름을 따라 왼쪽 → 오른쪽으로 이동), 띠가 남아 있는 동안 머무는 소리. 두께가 두꺼울수록 크게 */
+const snd = { ctx: null, on: false };
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function sndInit() {
+  if (snd.ctx) return;
+  const ctx = snd.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3;
+  snd.master = ctx.createGain(); snd.master.gain.value = 0;
+  snd.bus = ctx.createGain();
+  const n = ctx.sampleRate * 3.6, ir = ctx.createBuffer(2, n, ctx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const a = ir.getChannelData(ch); for (let i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.8); }
+  const verb = ctx.createConvolver(); verb.buffer = ir;
+  const wet = ctx.createGain(); wet.gain.value = 0.5;
+  snd.bus.connect(comp); snd.bus.connect(verb); verb.connect(wet); wet.connect(comp);
+  comp.connect(snd.master); snd.master.connect(ctx.destination);
+  // 아이들: 낮은 5도 울림 + 숨소리 같은 걸러진 잡음
+  snd.idle = ctx.createGain(); snd.idle.gain.value = 0; snd.idle.connect(snd.bus);
+  [[48, 0.5], [55, 0.32], [60, 0.12]].forEach(([m, a]) => { const o = ctx.createOscillator(); o.frequency.value = mtof(m); const g = ctx.createGain(); g.gain.value = a; o.connect(g).connect(snd.idle); o.start(); });
+  const nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), na = nb.getChannelData(0);
+  for (let i = 0; i < na.length; i++) na[i] = Math.random() * 2 - 1;
+  const ns = ctx.createBufferSource(); ns.buffer = nb; ns.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 650; bp.Q.value = 0.6;
+  snd.breath = ctx.createGain(); snd.breath.gain.value = 0;
+  ns.connect(bp).connect(snd.breath).connect(snd.bus); ns.start();
+}
+function sndSet(on) {
+  if (on) sndInit();
+  snd.on = on;
+  if (!snd.ctx) return;
+  const t = snd.ctx.currentTime;
+  if (on) {
+    snd.ctx.resume();
+    snd.master.gain.cancelScheduledValues(t); snd.master.gain.setTargetAtTime(0.9, t, 0.2);
+    const s = field.cur; // 이미 나와 있는 띠는 머무는 소리만 이어 붙임
+    if (s && s.relAt == null) s.launched?.forEach(i => sndLaunch(s, i, true));
+  } else {
+    snd.master.gain.cancelScheduledValues(t); snd.master.gain.setTargetAtTime(0, t, 0.15);
+    [field.cur, ...field.out].forEach(s => s && sndRelease(s, 0.3));
+  }
+}
+function sndLaunch(s, i, quiet = false) {
+  if (!snd.on) return;
+  const ctx = snd.ctx, t = ctx.currentTime, b = s.bands[i], f = mtof(b.midi), dir = view.fieldDir === 'rtl' ? -1 : 1;
+  if (!quiet) {
+    const pan = ctx.createStereoPanner(); pan.connect(snd.bus);
+    pan.pan.setValueAtTime(-0.85 * dir, t); pan.pan.linearRampToValueAtTime(0.85 * dir, t + CF.TRAVEL);
+    const bell = ctx.createGain(); bell.connect(pan);
+    bell.gain.setValueAtTime(0, t); bell.gain.linearRampToValueAtTime(0.1 + 0.16 * Math.sqrt(b.w), t + 0.01); bell.gain.exponentialRampToValueAtTime(0.0008, t + 3.4);
+    [[1, 1], [2.005, 0.32], [3.01, 0.1]].forEach(([m, a]) => { const o = ctx.createOscillator(); o.frequency.value = f * m; const g = ctx.createGain(); g.gain.value = a; o.connect(g).connect(bell); o.start(t); o.stop(t + 3.6); });
+  }
+  const pad = ctx.createGain(); pad.gain.setValueAtTime(0, t); pad.gain.linearRampToValueAtTime(b.pad, t + 2.5);
+  const pp = ctx.createStereoPanner(); pp.pan.value = s.bands.length > 1 ? (i / (s.bands.length - 1) - 0.5) * 0.7 : 0;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = b.kind === 'low' ? 260 : 500 + b.sat * 2400; lp.Q.value = 0.5;
+  lp.connect(pad).connect(pp).connect(snd.bus);
+  const oscs = (b.kind === 'tone' ? [['triangle', -6], ['triangle', 6]] : [['sine', 0], ['sine', b.kind === 'air' ? 1200 : 1200 * 0.5833]]).map(([type, cents]) => {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = cents; o.connect(lp); o.start(t); return o;
+  });
+  if (b.kind === 'air') { const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.23; lg.gain.value = b.pad * 0.6; lfo.connect(lg).connect(pad.gain); lfo.start(t); oscs.push(lfo); }
+  s.voices.push({ g: pad.gain, oscs });
+}
+function sndRelease(s, dur) {
+  if (!snd.ctx) { s.voices = []; return; }
+  const t = snd.ctx.currentTime;
+  s.voices.forEach(v => {
+    if (v.g.cancelAndHoldAtTime) v.g.cancelAndHoldAtTime(t); else { v.g.cancelScheduledValues(t); v.g.setValueAtTime(v.g.value, t); }
+    v.g.linearRampToValueAtTime(0, t + dur); v.oscs.forEach(o => o.stop(t + dur + 0.1));
+  });
+  s.voices = [];
+}
+
+// 한 바퀴 안의 시간(τ)에서 띠 i가 펼친 화면에서 차지하는 구간 [시작, 끝, 밝기]
+function natExtent(i, tau) {
+  const L = CF.L0 + i * CF.GAP;
+  if (tau < L) return null;
+  if (tau < CF.REL) return [0, CF.PW * easeOut(Math.min(1, (tau - L) / CF.TRAVEL)), Math.min(1, (tau - L) / 1.2), tau - L < CF.TRAVEL];
+  const r = (tau - CF.REL) / CF.RELD;
+  return r < 1 ? [CF.PW * easeIO(r), CF.PW, 1 - r * 0.35, false, true] : null;
+}
+const phaseOf = (s, now) => now < s.t0 ? -1 : (now - s.t0) % CF.CYCLE;
+function extentOf(s, i, now) {
+  if (s.relAt == null) return natExtent(i, phaseOf(s, now));
+  const e = s.snap[i]; if (!e) return null;
+  const r = (now - s.relAt) / CF.XF; if (r >= 1) return null;
+  return [e[0] + (e[1] - e[0]) * easeIO(r), e[1], e[2] * (1 - r * 0.35), false, true];
+}
+function spawn(x, y, vx, vy, life, rgb, w, a, lead = null) {
+  if (field.parts.length >= CF.MAXP) return;
+  field.parts.push({ x, y, vx, vy, life, max: life, rgb, w, a, lead });
+}
+const streakTex = (() => {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, 512, 128);
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 150; i++) { const v = 226 + rnd() * 29 | 0; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(rnd() * 512, rnd() * 128, 40 + rnd() * 260, 1 + rnd() * 2.5); }
+  return cfx.createPattern(c, 'repeat');
+})();
+const IDLE_BANDS = [{ y0: .18, y1: .34, rgb: '214,200,176' }, { y0: .46, y1: .58, rgb: '170,184,200' }, { y0: .7, y1: .86, rgb: '200,176,170' }];
+
+function fieldTick(dt) {
+  const now = tnow(), { PW, PH } = CF, ctx = cfx;
+  const cur = field.cur;
+  // 아이들 밝기: 그림이 없으면 2.5초에 걸쳐 올라오고, 올리면 내려감
+  field.idleA = THREE.MathUtils.clamp(field.idleA + (cur ? -dt / 1.5 : dt / 2.5), 0, 1);
+  // 소리 이벤트
+  if (cur) {
+    const tau = phaseOf(cur, now), cyc = now < cur.t0 ? -1 : Math.floor((now - cur.t0) / CF.CYCLE);
+    if (cyc !== cur.cycle) { cur.cycle = cyc; cur.launched = new Set(); cur.relDone = false; }
+    if (tau >= 0) cur.bands.forEach((b, i) => { if (tau >= CF.L0 + i * CF.GAP && !cur.launched.has(i)) { cur.launched.add(i); sndLaunch(cur, i); } });
+    if (tau >= CF.REL && !cur.relDone) { cur.relDone = true; sndRelease(cur, CF.RELD); }
+  }
+  field.out = field.out.filter(s => now - s.relAt < CF.XF);
+  if (snd.on) {
+    const t = snd.ctx.currentTime, br = 0.5 + 0.5 * Math.sin(now * 2 * Math.PI / 7);
+    snd.idle.gain.setTargetAtTime(field.idleA * 0.05 * (0.6 + 0.4 * br), t, 0.25);
+    snd.breath.gain.setTargetAtTime(field.idleA * 0.035 * br * br, t, 0.25);
+  }
+
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, PW, PH);
+  ctx.globalCompositeOperation = 'lighter';
+  // 아이들: 지금까지 올린 그림의 띠가 옅게 겹쳐 숨 쉬며 거꾸로(시작 쪽으로) 흐름
+  const A = field.idleA;
+  if (A > 0.01) {
+    const hist = field.hist.length ? field.hist.map(h => h.bands) : [IDLE_BANDS];
+    const br = (0.72 + 0.28 * Math.sin(now * 2 * Math.PI / 7)) / Math.sqrt(hist.length); // 여러 점이 겹쳐도 너무 밝아지지 않게
+    hist.forEach((bands, j) => bands.forEach((b, i) => {
+      const y0 = b.y0 * PH + Math.sin(now * 0.21 + j * 1.7 + i) * 7, h = (b.y1 - b.y0) * PH;
+      const g = ctx.createLinearGradient(0, 0, PW, 0);
+      for (let k = 0; k <= 8; k++) g.addColorStop(k / 8, `rgba(${b.rgb},${A * br * (0.07 + 0.12 * (0.5 + 0.5 * Math.sin(k / 8 * 6.1 + j * 2.1 + i * 0.9 + now * 0.32)))})`);
+      ctx.fillStyle = g; ctx.fillRect(0, y0, PW, h);
+    }));
+    const n = Math.random() < 34 * A * dt ? 1 : 0;
+    for (let k = 0; k < n; k++) {
+      const bs = hist[Math.random() * hist.length | 0], b = bs[Math.random() * bs.length | 0];
+      spawn(PW * (0.15 + Math.random() * 0.85), PH * (b.y0 + Math.random() * (b.y1 - b.y0)), -(30 + Math.random() * 50), (Math.random() - 0.5) * 6, 4 + Math.random() * 3, b.rgb, 1.6, 0.45 * A);
+    }
+  }
+  // 그림: 내보내는 중인 앞 그림 + 지금 그림
+  const fronts = new Map();
+  for (const s of [...field.out, cur]) {
+    if (!s) continue;
+    const breath = s.relAt == null ? 0.9 + 0.08 * Math.sin(now * 0.9) : 1;
+    s.bands.forEach((b, i) => {
+      const e = extentOf(s, i, now); if (!e) return;
+      const [xs, xe, a, moving, leaving] = e, y0 = b.y0 * PH, h = (b.y1 - b.y0) * PH;
+      if (s === cur) fronts.set(i, moving ? xe : PW + 999);
+      ctx.fillStyle = `rgba(${b.rgb},${0.9 * a * breath})`; ctx.fillRect(xs, y0, xe - xs, h);
+      if (moving) { // 앞머리 빛
+        const g = ctx.createLinearGradient(xe - 260, 0, xe + 14, 0);
+        g.addColorStop(0, `rgba(${b.rgb},0)`); g.addColorStop(0.92, `rgba(255,255,255,${0.5 * a})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g; ctx.fillRect(xe - 260, y0, 274, h);
+        const rate = (900 * b.w + 70) * dt;
+        for (let k = 0, n = Math.floor(rate + Math.random()); k < n; k++) spawn(Math.random() * 30, y0 + Math.random() * h, 1300 + Math.random() * 1100, 0, 3, b.rgb, 1.2 + Math.random() * 1.6, 0.9, { s, i, over: 10 + Math.random() * 70 });
+      } else if (leaving) { // 흩어지는 가장자리
+        const g = ctx.createLinearGradient(xs - 8, 0, xs + 90, 0);
+        g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.15, `rgba(255,255,255,${0.35 * a})`); g.addColorStop(1, `rgba(${b.rgb},0)`);
+        ctx.fillStyle = g; ctx.fillRect(xs - 8, y0, 98, h);
+        const rate = (700 * b.w + 40) * dt;
+        for (let k = 0, n = Math.floor(rate + Math.random()); k < n; k++) spawn(xs + Math.random() * 20, y0 + Math.random() * h, 220 + Math.random() * 420, (Math.random() - 0.5) * 70, 0.8 + Math.random() * 0.9, b.rgb, 1.6 + Math.random() * 2.2, 0.8);
+      } else if (Math.random() < (70 * b.w + 6) * dt) { // 머무는 동안 띠 안을 지나가는 반짝임
+        spawn(0, y0 + Math.random() * h, 500 + Math.random() * 500, 0, 5, b.rgb, 1 + Math.random(), 0.45);
+      }
+    });
+  }
+  // 붓결: 띠 위에 가로 결을 곱해 칠한 느낌을 남김
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.save(); ctx.translate((now * 38) % 512, 0); ctx.fillStyle = streakTex; ctx.fillRect(-512, 0, PW + 512, PH); ctx.restore();
+  // 입자
+  ctx.globalCompositeOperation = 'lighter';
+  const P = field.parts;
+  for (let k = P.length - 1; k >= 0; k--) {
+    const p = P[k];
+    p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+    if (p.lead && (p.lead.s !== cur || p.x > (fronts.get(p.lead.i) ?? -1) + p.lead.over)) p.life = Math.min(p.life, 0.12);
+    if (p.life <= 0 || p.x > PW + 40 || p.x < -40) { P[k] = P[P.length - 1]; P.pop(); continue; }
+    const age = p.max - p.life, al = p.a * Math.min(1, age / 0.12) * Math.min(1, p.life / 0.35);
+    const len = Math.min(140, Math.abs(p.vx) * 0.035 + 2);
+    ctx.strokeStyle = `rgba(${p.rgb},${al})`; ctx.lineWidth = p.w;
+    ctx.beginPath(); ctx.moveTo(p.x - Math.sign(p.vx) * len, p.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    if (p.w > 1.8) { ctx.strokeStyle = `rgba(255,255,255,${al * 0.5})`; ctx.lineWidth = p.w * 0.4; ctx.stroke(); }
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  // 좌대 위 놓을 자리 빛 · 그림 내려놓기
+  if (field.halo) field.halo.material.opacity = A * (0.4 + 0.35 * Math.sin(now * 2 * Math.PI / 7));
+  if (field.mesh && field.drop < 1) { field.drop = Math.min(1, field.drop + dt / 0.45); field.mesh.position.y = 0.0125 + 0.18 * (1 - easeOut(field.drop)); }
+}
+
+// 프로젝터 한 대: 자기 벽이 펼친 화면에서 차지하는 구간을 잘라, 렌즈 화각 안의 벽 사각형에 맞춰 그림
+function drawField(p, m, rt) {
+  const c = rt.ctx, N = rt.N, T = Math.tan(rt.light.angle);
+  c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#000'; c.fillRect(0, 0, N, N);
+  const { segs, total } = fieldLayout(), seg = segs.find(s => s.id === p.surface);
+  if (!seg || !m.wallTan) return;
+  const Q = m.wallTan.map(([tx, ty]) => [(0.5 + tx / (2 * T)) * N, (0.5 - ty / (2 * T)) * N]); // 바닥 s=0, 바닥 s=L, 위 s=L, 위 s=0
+  let ua = seg.rev ? seg.u0 + seg.L : seg.u0, ub = seg.rev ? seg.u0 : seg.u0 + seg.L;
+  if (view.fieldDir === 'rtl') { ua = total - ua; ub = total - ub; }
+  const k = CF.PW / total, xa = ua * k, xb = ub * k;
+  // 펼친 화면 (xa, 위) → Q3, (xb, 위) → Q2, (xa, 아래) → Q0
+  const a = (Q[2][0] - Q[3][0]) / (xb - xa), b = (Q[2][1] - Q[3][1]) / (xb - xa), cc = (Q[0][0] - Q[3][0]) / CF.PH, d = (Q[0][1] - Q[3][1]) / CF.PH;
+  c.save(); c.beginPath(); Q.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath(); c.clip();
+  c.setTransform(a, b, cc, d, Q[3][0] - a * xa, Q[3][1] - b * xa);
+  const x0 = Math.min(xa, xb), w = Math.abs(xb - xa);
+  c.drawImage(cfCanvas, x0, 0, w, CF.PH, x0, 0, w, CF.PH);
+  c.restore(); c.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+// 좌대 위: 빈 자리 안내 빛, 올린 그림(가로 30cm 캔버스를 눕혀 놓음)
+let pedTop = null;
+const haloTex = canvasTex(256, 256, (g, w, h) => {
+  g.clearRect(0, 0, w, h); g.strokeStyle = '#fff'; g.lineWidth = 6; g.shadowColor = '#fff'; g.shadowBlur = 22;
+  g.strokeRect(46, 46, w - 92, h - 92); g.shadowBlur = 0; g.lineWidth = 2; g.strokeRect(46, 46, w - 92, h - 92);
+});
+function fieldPedestal() {
+  if (!pedTop) return;
+  if (!field.halo) {
+    field.halo = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.42), new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: 0 }));
+    field.halo.rotation.x = -Math.PI / 2; field.halo.position.y = 0.003;
+  }
+  pedTop.add(field.halo);
+  if (field.mesh) { field.mesh.parent?.remove(field.mesh); field.mesh.material[2].map?.dispose(); field.mesh.geometry.dispose(); field.mesh = null; }
+  const s = field.cur; if (!s) return;
+  const t = new THREE.CanvasTexture(s.face); t.colorSpace = THREE.SRGBColorSpace;
+  const side = new THREE.MeshStandardMaterial({ color: 0xeeeae2, roughness: .9 });
+  const W = 0.3, D = W * s.face.height / s.face.width;
+  field.mesh = new THREE.Mesh(new THREE.BoxGeometry(W, 0.025, D), [side, side, new THREE.MeshStandardMaterial({ map: t, roughness: .85 }), side, side, side]);
+  field.mesh.rotation.y = Math.PI; // 그림 위쪽이 정면 벽 쪽 (입구에서 다가가면 바로 보임)
+  field.mesh.castShadow = true; field.mesh.userData.sel = 'ped';
+  pedTop.add(field.mesh);
+}
+
+function placeImage(img, name, key, rect) {
+  if (field.cur?.key === key) return;
+  let bands;
+  try { bands = bandsOf(img, rect); } catch (e) { $('#cf-state').innerHTML = '이미지 색을 읽지 못했어요. 파일을 직접 열었다면(file://) 로컬 서버나 배포 주소로 열어 주세요.'; return; }
+  const now = tnow();
+  const face = document.createElement('canvas'), fk = 512 / Math.max(rect[2], rect[3]);
+  face.width = Math.round(rect[2] * fk); face.height = Math.round(rect[3] * fk);
+  face.getContext('2d').drawImage(img, rect[0], rect[1], rect[2], rect[3], 0, 0, face.width, face.height);
+  const had = !!field.cur;
+  if (field.cur) releaseShow(field.cur, now);
+  field.cur = { id: ++field.seq, key, name, bands, face, t0: now + (had ? 0.9 : 0.35), cycle: -2, launched: new Set(), voices: [] };
+  field.hist = [{ key, bands }, ...field.hist.filter(h => h.key !== key)].slice(0, 7);
+  field.drop = 0; fieldPedestal(); renderCfUI();
+}
+function releaseShow(s, now) {
+  s.snap = s.bands.map((b, i) => { const e = s.relAt == null ? natExtent(i, phaseOf(s, now)) : null; return e && e[1] > e[0] + 1 ? e : null; });
+  s.relAt = now; field.out.push(s); sndRelease(s, CF.XF);
+}
+function removeImage() {
+  if (!field.cur) return;
+  releaseShow(field.cur, tnow()); field.cur = null; fieldPedestal(); renderCfUI();
+}
+const CF_PRESETS = [1, 2, 3, 4, 5, 6, 7].map(k => ({ key: 'cf' + k, name: `색면화 ${k}`, src: `colorfield/cf${k}.jpg` }));
+function presetImg(ps) {
+  if (!ps.img) { ps.img = new Image(); ps.img.src = ps.src; }
+  return ps.img.complete && ps.img.naturalWidth ? Promise.resolve(ps.img) : new Promise((ok, no) => { ps.img.addEventListener('load', () => ok(ps.img), { once: true }); ps.img.addEventListener('error', no, { once: true }); });
+}
+function loadUserImage(file) {
+  if (!file?.type.startsWith('image')) return;
+  const im = new Image();
+  im.onload = () => placeImage(im, file.name.replace(/\.[^.]+$/, ''), 'u:' + file.name + file.size, autoCrop(im));
+  im.src = URL.createObjectURL(file);
+}
+function renderCfUI() {
+  document.querySelectorAll('#cf-thumbs button').forEach(b => b.classList.toggle('on', b.dataset.k === field.cur?.key));
+  $('#cf-off').disabled = !field.cur;
+  renderCfState();
+}
+function renderCfState() {
+  const s = field.cur, el = $('#cf-state');
+  if (!s) { el.innerHTML = `<b>아이들</b> · 올렸던 그림 ${field.hist.length}점이 벽에 옅게 남아 있어요<small>7초 간격으로 숨 쉬듯 밝아졌다 어두워짐</small>`; return; }
+  const tau = phaseOf(s, tnow()), lastL = CF.L0 + (s.bands.length - 1) * CF.GAP;
+  const stage = tau < 0 ? '준비' : tau < lastL + CF.TRAVEL ? '띠가 풀려 나오는 중' : tau < CF.REL ? '머무는 중' : tau < CF.REL + CF.RELD ? '흩어지는 중' : '쉼';
+  el.innerHTML = `<div class="cf-bands">${s.bands.map(b => `<i style="flex:${b.w};background:${b.hex}"></i>`).join('')}</div><b>${s.name}</b> · 띠 ${s.bands.length}개 · ${stage}<small>${Math.max(0, tau).toFixed(0)} / ${CF.CYCLE}초 루프 · ${snd.on ? '소리 켜짐' : '소리 꺼짐'}</small>`;
+}
+{
+  const th = $('#cf-thumbs');
+  CF_PRESETS.forEach(ps => {
+    const b = document.createElement('button'); b.dataset.k = ps.key; b.title = ps.name; b.setAttribute('aria-label', ps.name + ' 좌대에 올리기');
+    b.innerHTML = `<img src="${ps.src}" alt="" loading="lazy">`;
+    b.onclick = () => presetImg(ps).then(im => placeImage(im, ps.name, ps.key, [0, 0, im.naturalWidth, im.naturalHeight])).catch(() => { });
+    th.appendChild(b);
+  });
+  $('#cf-file').onchange = e => { loadUserImage(e.target.files[0]); e.target.value = ''; };
+  $('#cf-off').onclick = removeImage;
+  $('#cf-sound').onclick = () => { sndSet(!snd.on); $('#cf-sound').classList.toggle('on', snd.on); $('#cf-sound').textContent = snd.on ? '소리 끄기' : '소리 켜기'; renderCfState(); };
+  host.addEventListener('dragover', e => { e.preventDefault(); });
+  host.addEventListener('drop', e => { e.preventDefault(); loadUserImage(e.dataTransfer.files[0]); });
+  const strip = $('#cf-strip'); strip.prepend(cfCanvas);
+  setInterval(renderCfState, 500);
+}
+function renderStrip() {
+  const { segs, total } = fieldLayout(), ltr = view.fieldDir !== 'rtl';
+  $('#cf-strip').hidden = !view.strip;
+  const first = ltr ? segs[0] : segs[1];
+  $('#cf-corner').style.left = `calc(4px + (100% - 8px) * ${first.L / total})`;
+  $('#cf-capL').textContent = ltr ? `시작 · 정면 벽 ${first.L.toFixed(1)} m` : `시작 · 오른쪽 벽 ${first.L.toFixed(1)} m`;
+  $('#cf-capR').textContent = ltr ? `모서리 → 오른쪽 벽 ${segs[1].L.toFixed(1)} m · 끝` : `모서리 → 정면 벽 ${segs[0].L.toFixed(1)} m · 끝`;
+}
 
 /* ───────── 보기 상태 적용 ───────── */
 function applyView() {
@@ -1322,6 +1756,9 @@ function segBtns(wrapId, key, after) {
 }
 segBtns('spk-pos', 'spkPos', () => { buildSpeaker(); select('speaker'); });
 segBtns('spk-dir', 'spkDir', () => { buildSpeaker(); select('speaker'); });
+segBtns('cf-dir', 'fieldDir', renderStrip);
+{ const c = $('#c-strip'); c.checked = view.strip; c.onchange = () => { view.strip = c.checked; renderStrip(); }; }
+$('#cf-look').onclick = () => { view.gallery = 10; $('#v-gallery').value = $('#v-gallery-n').value = 10; applyView(); goView('color'); };
 ['wallH', 'ceilH'].forEach(k => {
   const el = $('#v-' + k); el.value = dims[k];
   el.onchange = () => { const v = +el.value; if (!(v > 1)) return; dims[k] = v; if (dims.ceilH < dims.wallH) dims.ceilH = dims.wallH; $('#v-ceilH').value = dims.ceilH; buildWorld(); };
@@ -1371,7 +1808,7 @@ const FIELDS = [
   { k: 'model', l: '모델명', type: 'text' },
   { k: 'surface', l: '투사면', type: 'select', opts: () => Object.entries(SURF).map(([id, s]) => [id, s.name]) },
   { k: 'mount', l: '설치 방식', type: 'select', opts: () => [['ceiling', '천장 매달기'], ['stand', '바닥 · 스탠드']] },
-  { k: 'content', l: '투사 콘텐츠', type: 'select', opts: () => [['grid', '테스트 그리드'], ['color', '색면'], ['white', '흰 화면'], ['media', '파일 (이미지·영상)']] },
+  { k: 'content', l: '투사 콘텐츠', type: 'select', opts: () => [['grid', '테스트 그리드'], ['field', '색면화 흐름 (좌대 연동)'], ['color', '색면'],['white', '흰 화면'], ['media', '파일 (이미지·영상)']] },
   { k: 'mask', l: '벽 밖 마스킹', type: 'check' },
   { k: 'on', l: '전원', type: 'check' },
   { grp: '사양' },
@@ -1637,7 +2074,7 @@ function occludeLabels() {
 
 /* ───────── 루프 ───────── */
 const clock = new THREE.Clock();
-let videoTick = 0;
+let videoTick = 0, cfDt = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(clock.getDelta(), 0.05);
@@ -1652,6 +2089,11 @@ function frame(now) {
     camera.rotation.set(pitch, yaw, 0, 'YXZ');
   } else controls.update();
   if (ceilingGroup) ceilingGroup.visible = camera.position.y < dims.ceilH + 0.2;
+  cfDt += dt;
+  if ((videoTick & 1) === 0) {
+    fieldTick(cfDt); cfDt = 0;
+    projectors.forEach(p => { const rt = pRuntime.get(p.id); if (p.content === 'field' && p.on && rt?.math) drawProjector(p, rt.math, rt); });
+  }
   if ((videoTick++ & 1) === 0) pRuntime.forEach((rt, id) => { if (rt.isVideo && rt.media?.readyState >= 2) { const p = projectors.find(q => q.id === id); if (p?.content === 'media') drawProjector(p, rt.math, rt); } });
   if (selBox.visible) selBox.update();
   if ((videoTick % 12) === 0) occludeLabels();
@@ -1664,6 +2106,7 @@ buildWorld();
 syncAll();
 renderHud();
 renderProjUI();
+renderCfUI(); renderStrip();
 resize();
 { const [p, t] = VIEWS[0][2](); camera.position.copy(p); controls.target.copy(t); }
 requestAnimationFrame(frame);
