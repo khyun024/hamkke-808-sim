@@ -197,9 +197,9 @@ function spec(key) {
   const T = {
     'A.top': { size: `600 × 600 × ${FIX.top} (위판 ${FIX.topU} + 받침판 ${FIX.plate})`, fig: topFigs(d), items: [
       ['용도', `색면화 캔버스(4호 S, ${P.canvas} × ${P.canvas}, 틀 높이 ${FIX.frame})를 올려 두는 자리. 캔버스를 올리면 모서리의 NFC 스티커가 읽혀 그 그림의 영상·소리로 바뀌고, 빼면 쉬는 화면으로 돌아감`],
-      ['캔버스 구멍', `${d.pocket} × ${d.pocket}, 위판 ${FIX.topU}을 끝까지 뚫음 · 캔버스보다 한쪽 ${P.clear} 크게 (크기 편차·천 두께에도 끼지 않게) · 윗모서리 2 모따기 (내려놓으면 미끄러져 자리 잡게)`, [0, S.H + 55, -d.pocket / 2]],
+      ['캔버스 구멍', `${d.pocket} × ${d.pocket}, 위판 ${FIX.topU}을 끝까지 뚫음 · 캔버스보다 한쪽 ${P.clear} 크게 (크기 편차·천 두께에도 끼지 않게) · 구멍 위쪽 테두리 네 변 2 모따기 (내려놓으면 미끄러져 자리 잡게)`, [0, S.H + 55, -d.pocket / 2]],
       ['깊이', `${FIX.topU} (위판 두께 그대로) → 캔버스 틀 ${FIX.frame} 중 ${FIX.topU}가 잠기고 ${FIX.frame - FIX.topU}가 위로 솟음 (집기 쉽게, 그림이 상판 위로 보이게)`],
-      ['손잡이 홈', `구멍 왼쪽·오른쪽 변 가운데, 폭 ${FIX.notchW} 반달, 위판까지 뚫음 · 손가락을 넣어 캔버스를 들어 올림`, [d.pocket / 2 + 10, S.H + 25, 0]],
+      ['손잡이 홈 2개', `구멍 왼쪽 변·오른쪽 변 가운데에 하나씩, 폭 ${FIX.notchW} 반달, 위판까지 뚫음 · 손가락을 넣어 캔버스를 들어 올림`, [d.pocket / 2 + 10, S.H + 25, 0]],
       ['얇게 만들 곳', `<b>받침판 ${FIX.plate}mm</b> 나무판(합판·MDF). 위판 아랫면 전체에 붙여 구멍 바닥이 됨. 리더가 이 판 바로 밑에서 스티커를 읽으므로 두께를 ${FIX.plate}mm로, 많아도 5mm를 넘기지 않음 · 캔버스를 빼도 안이 안 보임 · 구멍으로 보이는 면은 상판과 같은 색`, [-S.W / 2 + 90, S.H - FIX.topU - 10, -S.D / 2 + 40], 'thin'],
       ['리더 자리', `받침판 바로 밑, 구멍 한 귀퉁이 아래 (예: 관객 왼쪽·뒤, 중심에서 왼쪽 ${d.rz}·뒤 ${d.rz}) · NFC 스티커가 캔버스 네 모서리에 있어 어느 귀퉁이든 됨 · 리더는 저희가 붙임 · 태그까지 약 ${FIX.plate + 1}mm`, [d.rz + 30, S.hs - 25, d.rz + 40]],
       ['금속 금지', '받침판·리더 둘레 5cm 안에 나사·타카·철물·금속 도료 없이, 받침판은 목공 본드로만 붙임 (금속이 있으면 태그가 안 읽힘)'],
@@ -240,7 +240,7 @@ function topFigs(d) {
     <line x1="${rx - 8}" y1="${ry}" x2="${X(-300) - 4}" y2="${ry}" stroke="${mute}" stroke-width=".6"/>
     ${t(X(-300) - 6, ry - 3, '리더 자리', `text-anchor="end" fill="${ink}"`)}${t(X(-300) - 6, ry + 9, '(밑, 저희가)', `text-anchor="end" fill="${mute}"`)}
     <line x1="${X(h) + 4}" y1="${Y(0)}" x2="${X(300) + 4}" y2="${Y(0)}" stroke="${mute}" stroke-width=".6"/>
-    ${t(X(300) + 6, Y(0) + 3, '손잡이 홈', `fill="${ink}"`)}${t(X(300) + 6, Y(0) + 15, '폭 ' + FIX.notchW, `fill="${mute}"`)}
+    ${t(X(300) + 6, Y(0) + 3, '손잡이 홈 2개', `fill="${ink}"`)}${t(X(300) + 6, Y(0) + 15, '양쪽, 폭 ' + FIX.notchW, `fill="${mute}"`)}
     ${t(cx, Y(0) - 3, '캔버스 구멍', `text-anchor="middle" fill="${ink}" font-weight="600" font-size="9"`)}${t(cx, Y(0) + 9, pk + ' × ' + pk, `text-anchor="middle" fill="${ink}" font-size="9"`)}
     ${t(cx, Y(-300) - 4, '뒤', `text-anchor="middle" fill="${mute}"`)}${t(cx, Y(300) + 14, '정면 (관객) · 600', `text-anchor="middle" fill="${mute}"`)}
   </svg>`;
