@@ -1,54 +1,58 @@
 <!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>색면화 좌대 수정안</title>
+<title>색면화 좌대 제작안</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: 왼쪽 3D 모델, 오른쪽 설명·치수 패널. 좁은 화면에서는 위아래로 */
+/* Layout: 왼쪽 3D 모델(면을 눌러 선택), 오른쪽 선택한 면의 치수·가공. 좁은 화면에서는 위아래로 */
 :root {
   --bg: #f3f1ec; --panel: #fbfaf7; --fg: #23211d; --muted: #6f6a61; --line: #dcd7ce; --field: #ffffff;
-  --accent: #2f7fd6; --accent-ink: #ffffff; --warn: #b4531a; --ok: #2c7a4b;
+  --accent: #2f7fd6; --accent-ink: #ffffff; --soft: #e6f0fb;
   --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141412; --panel: #1b1a18; --fg: #ebe7df; --muted: #a39d92; --line: #2f2d29; --field: #23221f; --accent: #6aaef0; --accent-ink: #0b1c2e; --warn: #f0a560; --ok: #6fcf97; color-scheme: dark; } }
-:root[data-theme="dark"] { --bg: #141412; --panel: #1b1a18; --fg: #ebe7df; --muted: #a39d92; --line: #2f2d29; --field: #23221f; --accent: #6aaef0; --accent-ink: #0b1c2e; --warn: #f0a560; --ok: #6fcf97; color-scheme: dark; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141412; --panel: #1b1a18; --fg: #ebe7df; --muted: #a39d92; --line: #2f2d29; --field: #23221f; --accent: #6aaef0; --accent-ink: #0b1c2e; --soft: #1d2a38; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #141412; --panel: #1b1a18; --fg: #ebe7df; --muted: #a39d92; --line: #2f2d29; --field: #23221f; --accent: #6aaef0; --accent-ink: #0b1c2e; --soft: #1d2a38; color-scheme: dark; }
 [hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 13px; overflow: hidden; }
-#app { display: grid; grid-template-columns: 1fr 360px; height: 100%; }
+#app { display: grid; grid-template-columns: 1fr 340px; height: 100%; }
 main { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 main canvas { display: block; }
 .labels { position: absolute; inset: 0; pointer-events: none; }
-.lbl { background: rgba(255,255,255,.94); color: #23211d; border-radius: 4px; padding: 2px 6px; font: 500 11px var(--sans); white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.18); border-left: 3px solid #9a948a; }
-.lbl.new { border-left-color: var(--accent); }
+.lbl { background: rgba(255,255,255,.95); color: #23211d; border-radius: 4px; padding: 2px 6px; font: 500 11px var(--sans); white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.18); border-left: 3px solid #2f7fd6; }
+.lbl.name { border-left-color: #9a948a; font-weight: 700; font-size: 12px; }
 .lbl b { font-weight: 700; }
 #hud { position: absolute; left: 12px; top: 12px; display: flex; flex-wrap: wrap; gap: 6px; max-width: calc(100% - 24px); }
 #hint { position: absolute; left: 12px; bottom: 10px; font: 11px var(--mono); color: var(--muted); }
-aside { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 16px 18px 28px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+aside { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 16px 18px 28px; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 h1 { font-size: 17px; margin: 0; }
 header p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
-header a { color: var(--accent); }
-h2 { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; text-transform: uppercase; }
+h2 { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
 .b { border: 1px solid var(--line); background: var(--field); color: var(--fg); border-radius: 6px; padding: 5px 9px; font: 500 12px var(--sans); cursor: pointer; }
 .b:hover { border-color: var(--accent); }
 .b.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.b:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-ol.chg { margin: 0; padding-left: 18px; line-height: 1.6; }
-ol.chg li { margin-bottom: 4px; }
-ol.chg small { display: block; color: var(--muted); font-size: 11.5px; }
-dl.chk { display: grid; grid-template-columns: 1fr auto; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 7px; overflow: hidden; margin: 0; }
-dl.chk dt, dl.chk dd { background: var(--field); margin: 0; padding: 6px 9px; }
-dl.chk dt { color: var(--muted); font-size: 12px; }
-dl.chk dd { font: 500 12px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
-dl.chk dd.bad { color: var(--warn); }
-dl.chk dd.good { color: var(--ok); }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+.b:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ped { border: 1px solid var(--line); border-radius: 8px; padding: 10px 11px; background: var(--field); }
+.ped .t { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ped .t b { font-size: 13px; }
+.ped .t span { font: 500 12px var(--mono); color: var(--muted); }
+.ped .faces { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.ped .faces .b { padding: 4px 8px; font-size: 11.5px; }
+.ped .faces .b.plain { color: var(--muted); }
+#info { border-radius: 8px; background: var(--soft); padding: 11px 12px; }
+#info h3 { margin: 0; font-size: 14px; }
+#info .size { font: 500 12px var(--mono); margin: 2px 0 8px; }
+#info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; }
+#info dt { color: var(--muted); font-size: 12px; white-space: nowrap; }
+#info dd { margin: 0; font-size: 12px; line-height: 1.5; }
+#info p { margin: 0; font-size: 12px; line-height: 1.6; color: var(--muted); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; margin-top: 8px; }
 .grid label { display: flex; flex-direction: column; gap: 3px; color: var(--muted); font-size: 11.5px; }
 .grid input { background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 5px; padding: 5px 7px; font: 12px var(--mono); min-width: 0; }
-.sub { grid-column: 1 / -1; font-size: 11.5px; font-weight: 600; margin-top: 6px; }
+summary { cursor: pointer; font-size: 12px; color: var(--muted); }
 .hint { color: var(--muted); font-size: 11.5px; line-height: 1.6; margin: 0; }
 @media (max-width: 820px) {
   #app { grid-template-columns: 1fr; grid-template-rows: 55% 45%; }
@@ -59,40 +63,24 @@ dl.chk dd.good { color: var(--ok); }
 <div id="app">
   <main id="main">
     <div id="hud"></div>
-    <div id="hint">드래그 회전 · 휠 확대 · 우클릭 이동 · 단위 mm</div>
+    <div id="hint">면을 누르면 치수 · 드래그 회전 · 휠 확대 · 단위 mm</div>
   </main>
   <aside>
     <header>
-      <h1>색면화 좌대 · 수정안</h1>
-      <p>제작 전 검토용. 기존 구조(<a href="https://saekmyeon-pedestal.oho-77.workers.dev" target="_blank" rel="noopener">색면화 좌대 3D</a>)는 그대로 두고 바꾸는 곳만 파란 라벨로 표시했어요. 오른쪽은 데스크톱 한 대만 넣는 추가 좌대로, 바닥 크기는 같고 높이만 낮췄어요. 「뒤판 밀어 열기」를 누르면 두 좌대 뒤판이 옆으로 스르륵 빠져요.</p>
+      <h1>색면화 좌대 제작안</h1>
+      <p>좌대 두 개의 크기와 면마다 낼 홈·구멍이에요. 모델이나 아래 버튼에서 면을 누르면 그 면의 치수가 나와요. 왼쪽·오른쪽은 관객이 정면에서 볼 때 기준이에요.</p>
     </header>
+    <div id="peds"></div>
+    <div id="info"></div>
     <div>
       <h2>보기</h2>
       <div style="display:flex;flex-wrap:wrap;gap:6px" id="toggles"></div>
     </div>
-    <div>
-      <h2>바꾸는 곳</h2>
-      <ol class="chg">
-        <li><b>리더 자리 홈</b> · 상판 아랫면을 파서 나무를 <span data-v="remain"></span>mm만 남김<small>15mm 그대로면 판독이 불확실해서. 상판은 새로 짜지 않음</small></li>
-        <li><b>포켓 여유</b> · 한쪽 <span data-v="clear"></span>mm → 안쪽 포켓 <span data-v="pocket"></span>mm<small>캔버스 크기 편차·옆면 천 두께로 끼지 않게</small></li>
-        <li><b>손잡이 홈</b> · 마주 보는 두 변, 폭 30mm 반달 홈<small>포켓 바닥까지 파서 캔버스를 쉽게 들어 올림</small></li>
-        <li><b>선 구멍</b> · Ø40 → Ø80, 브러시 그로밋, 아랫면 뒤쪽 · 두 좌대 모두<small>전원 플러그(약 Ø40)와 HDMI·소리 선이 한꺼번에 넉넉히 지나가게</small></li>
-        <li><b>미닫이 뒤판</b> · 뒷면 위·아래에 홈 각재를 대고 12mm 합판 뒤판을 끼움. 옆으로 스르륵 밀어 빼냄 · 두 좌대 모두<small>필통 뚜껑처럼 여닫음. 경첩·자석·나사 없음. 홈은 판보다 1~2mm 넉넉히 파고 초를 칠하면 부드러움. 손가락 홈(세로 140mm)으로 밀고, 빼낼 쪽 옆에 판 폭만큼(약 64cm) 비워 둠</small></li>
-        <li><b>놓는 방향 표시</b> · 상판 단차 뒤쪽 가장자리에 ▲ 각인, 캔버스 틀 윗변 바깥에 같은 색 점<small>점과 ▲를 맞춰 위에서 내려놓으면 그림이 똑바로 들어감. 포켓 윗모서리는 2mm 모따기해서 자연스럽게 미끄러져 앉게</small></li>
-        <li><b>추가 좌대</b> · 색면화 좌대와 같은 바닥 크기, 높이만 낮춤 <span data-v="b2"></span>mm<small>판 18mm, 위판은 고정. 뒤판은 ①과 같은 미닫이로 반대쪽(바깥)으로 빼서 두 좌대 사이는 비워 둠. 상판 포켓·리더 없이 흡기·배기 구멍과 Ø80 선 구멍만 내면 됨</small></li>
-        <li><b>스피커 자리</b> · 색면화 PC를 눕히고 그 위에 스피커(하만카돈 Aura Studio 5, Ø234×306)를 올림. 관객 왼쪽 측판에 그릴 250×300<small>측판을 그만큼 따내고 펀칭 철판이나 스피커 천을 뒤에서 덧댐. 막힌 나무 상자 안이면 소리가 많이 먹히고, 리더와도 30cm 넘게 떨어짐</small></li>
-      </ol>
-      <p class="hint" style="margin-top:8px">NFC 태그는 캔버스 틀 네 귀퉁이 아랫면에 하나씩 붙여서(작품당 4장), 어느 방향으로 올려도 한 장이 리더 위에 오게 해요. 리더·아두이노 부착과 USB 팬은 저희가 해요.</p>
-    </div>
-    <div>
-      <h2>치수 검토 (자동 계산)</h2>
-      <dl class="chk" id="chk"></dl>
-    </div>
-    <div>
-      <h2>값 바꿔 보기 (mm)</h2>
+    <details>
+      <summary>치수 바꿔 보기</summary>
       <div class="grid" id="params"></div>
-      <p class="hint" style="margin-top:8px">몸체 600 × 600 × 900, 측·바닥판 18, 상판 30, 점검 개구부 504 × 792는 기존 안 그대로예요.</p>
-    </div>
+    </details>
+    <p class="hint">안에 넣는 장비(PC·스피커·NFC 리더·USB 팬)는 저희가 설치해요. 좌대는 상자와 홈·구멍까지만 부탁드려요.</p>
   </aside>
 </div>
 
@@ -111,16 +99,12 @@ const $ = s => document.querySelector(s);
 const mm = v => v / 1000;
 
 /* ───────── 치수 (mm) ─────────
-   좌표: 정면 −Z(관객), 후면 +Z(점검 뚜껑판), 관객 기준 오른쪽 = −X. 기존 제작안과 같은 방향 */
-const FIX = { W: 600, D: 600, H: 900, side: 18, top: 30, step: 5, pocketDepth: 10, stepW: 18, frame: 20, hole: 80, notchW: 30 };
-const P = { canvas: 242, clear: 2.5, remain: 5, bar: 20, tag: 25, pc1W: 210, pc1D: 450, pc1H: 490, spkD: 234, spkH: 306, b2W: 600, b2D: 600, b2H: 600, pc2W: 210, pc2D: 450, pc2H: 490, gap: 300 };
-const PARAMS = [
-  ['sub', '색면화 좌대'], ['canvas', '캔버스 한 변'], ['clear', '포켓 여유 / 측'], ['remain', '리더 위 남는 두께'], ['bar', '왁구 각재 폭'], ['tag', 'NFC 태그 지름'],
-  ['pc1W', 'PC 폭 (눕히면 높이)'], ['pc1D', 'PC 깊이'], ['pc1H', 'PC 높이 (눕히면 폭)'], ['spkD', '스피커 지름'], ['spkH', '스피커 높이'],
-  ['sub', '추가 좌대 (데스크톱만)'], ['b2W', '외형 폭'], ['b2D', '외형 깊이'], ['b2H', '외형 높이'], ['pc2W', 'PC 폭'], ['pc2D', 'PC 깊이'], ['pc2H', 'PC 높이'], ['gap', '두 좌대 사이 간격'],
-];
-const view = { ghost: true, lid: false, lift: false, labels: true };
-const doors = []; let openT = 0, lastT = 0; // 미닫이 뒤판: 0 닫힘 → 1 다 빠짐, 매 프레임 view.lid 쪽으로 움직임
+   좌표: 정면 −Z(관객), 뒤 +Z, 관객 기준 왼쪽 = +X, 오른쪽 = −X. ① 원점, ② 오른쪽(−X)에 간격 gap */
+const FIX = { W: 600, D: 600, H: 900, side: 18, top: 30, step: 5, pocketDepth: 10, stepW: 18, frame: 20, hole: 80, notchW: 30, back: 12, stop: 15 };
+const P = { canvas: 242, clear: 2.5, remain: 5, bar: 20, b2H: 600, gap: 300, pc1W: 210, pc1D: 450, pc1H: 490, spkD: 234, spkH: 306, pc2W: 210, pc2D: 450, pc2H: 490 };
+const PARAMS = [['canvas', '캔버스 한 변'], ['clear', '포켓 여유 / 한쪽'], ['remain', '리더 위 남길 두께'], ['b2H', '② 높이'], ['gap', '두 좌대 사이']];
+const view = { ghost: true, eq: false, lid: false };
+let sel = null; // 선택한 면 'A.top' 같은 키
 
 /* ───────── 장면 ───────── */
 const main = $('#main');
@@ -135,8 +119,8 @@ const dark = matchMedia('(prefers-color-scheme: dark)').matches;
 scene.background = new THREE.Color(dark ? 0x1d1c1a : 0xe9e6df);
 const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 50);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.target.set(-0.45, 0.5, 0);
-camera.position.set(0.55, 1.6, -3.1);
+controls.enableDamping = true; controls.target.set(-0.45, 0.45, 0);
+camera.position.set(0.75, 1.65, -2.9);
 scene.add(new THREE.HemisphereLight(0xffffff, 0x8a857c, 1.6));
 const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(1.5, 3, -2); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -2, right: 2, top: 2, bottom: -2 }); scene.add(sun);
@@ -144,207 +128,231 @@ const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.MeshStanda
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 
 const canvasTex = new THREE.TextureLoader().load('../colorfield/cf7.jpg'); canvasTex.colorSpace = THREE.SRGBColorSpace;
+// 면 재질: 선택한 면은 파랗게 진하게
+const faceMat = (key, base = 0xefe9dd, op = 0.28) => {
+  const on = key === sel, o = view.ghost ? (on ? 0.7 : op) : 1;
+  return new THREE.MeshStandardMaterial({ color: on ? 0x8fc0f2 : base, roughness: .85, transparent: o < 1, opacity: o, depthWrite: o >= 1 });
+};
 const M = {
-  wood: () => new THREE.MeshStandardMaterial({ color: 0xefe9dd, roughness: .85, transparent: true, opacity: view.ghost ? 0.28 : 1, depthWrite: !view.ghost }),
-  top: () => new THREE.MeshStandardMaterial({ color: 0xe6dfcf, roughness: .8, transparent: true, opacity: view.ghost ? 0.55 : 1, depthWrite: !view.ghost }),
   pc: new THREE.MeshStandardMaterial({ color: 0x3a3d42, roughness: .5, metalness: .3 }),
   board: new THREE.MeshStandardMaterial({ color: 0x1f6fb5, roughness: .6 }),
   uno: new THREE.MeshStandardMaterial({ color: 0x0f7f86, roughness: .6 }),
   tag: new THREE.MeshStandardMaterial({ color: 0x31b36b, roughness: .5 }),
   black: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: .7 }),
   cable: new THREE.MeshStandardMaterial({ color: 0x222222, roughness: .6 }),
-  usb: new THREE.MeshStandardMaterial({ color: 0x8a8f96, roughness: .6 }),
-  lid: () => new THREE.MeshStandardMaterial({ color: 0xd9d1bf, roughness: .8, transparent: true, opacity: view.ghost ? 0.45 : 1, depthWrite: !view.ghost }),
   frame: new THREE.MeshStandardMaterial({ color: 0xc9a774, roughness: .8 }),
-  screw: new THREE.MeshStandardMaterial({ color: 0x9aa0a6, metalness: .8, roughness: .3 }),
+  metal: new THREE.MeshStandardMaterial({ color: 0x9aa0a6, metalness: .8, roughness: .3 }),
 };
 let world = null;
 const edgeMat = new THREE.LineBasicMaterial({ color: 0x6f6a61, transparent: true, opacity: .55 });
-function add(parent, geo, mat, x, y, z, edges = true) { // 위치는 mm
+function add(parent, geo, mat, x, y, z, edges = true, face) { // 위치는 mm. face = 누르면 고를 면 키
   const m = new THREE.Mesh(geo, mat); m.position.set(mm(x), mm(y), mm(z)); m.castShadow = m.receiveShadow = true; parent.add(m);
   if (edges) m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), edgeMat));
+  if (face) m.userData.face = face;
   return m;
 }
-const box = (parent, w, h, d, x, y, z, mat, edges) => add(parent, new THREE.BoxGeometry(mm(w), mm(h), mm(d)), mat, x, y, z, edges);
+const box = (parent, w, h, d, x, y, z, mat, edges, face) => add(parent, new THREE.BoxGeometry(mm(w), mm(h), mm(d)), mat, x, y, z, edges, face);
 // 평면 모양(XZ, mm)을 아래로 두께만큼 밀어 낸 판. yTop = 윗면 높이
-function slab(parent, shape, thick, yTop, mat) {
+function slab(parent, shape, thick, yTop, mat, face) {
   const g = new THREE.ExtrudeGeometry(shape, { depth: mm(thick), bevelEnabled: false, curveSegments: 24 });
   g.rotateX(Math.PI / 2);
-  return add(parent, g, mat, 0, yTop, 0);
+  return add(parent, g, mat, 0, yTop, 0, true, face);
 }
 const sq = (s, h, path = new THREE.Shape()) => { const a = mm(h); path.moveTo(-a, -a); path.lineTo(a, -a); path.lineTo(a, a); path.lineTo(-a, a); path.closePath(); return path; };
-function label(parent, html, x, y, z, isNew = false) {
-  const el = document.createElement('div'); el.className = 'lbl' + (isNew ? ' new' : ''); el.innerHTML = html;
-  const o = new CSS2DObject(el); o.position.set(mm(x), mm(y), mm(z)); o.userData.lbl = true; parent.add(o); return o;
+function label(parent, html, x, y, z, cls = '') {
+  const el = document.createElement('div'); el.className = 'lbl ' + cls; el.innerHTML = html;
+  const o = new CSS2DObject(el); o.position.set(mm(x), mm(y), mm(z)); parent.add(o); return o;
 }
 function tube(parent, pts, r = 4, mat = M.cable) {
   const c = new THREE.CatmullRomCurve3(pts.map(([x, y, z]) => new THREE.Vector3(mm(x), mm(y), mm(z))));
-  const m = new THREE.Mesh(new THREE.TubeGeometry(c, 40, mm(r), 8), mat); parent.add(m); return m;
+  parent.add(new THREE.Mesh(new THREE.TubeGeometry(c, 40, mm(r), 8), mat));
 }
 
-/* 좌대 하나: 몸체(측판·정면판·바닥판), 미닫이 뒤판, 환기구, 선 구멍, PC. 두 좌대에 같은 구조·라벨.
-   S.dir = 뒤판을 밀어 빼는 방향(+1 = +X, −1 = −X). 두 좌대가 서로 반대쪽으로 빼서 사이 간격은 비워 둠 */
-function body(g, pcW, pcD, pcH, name, S) {
-  const { W, D, H, top } = S, side = FIX.side, ih = H - side - top, iw = W - 2 * side;
-  const wood = M.wood();
-  box(g, side, H - top, D, W / 2 - side / 2, (H - top) / 2, 0, wood);                 // 왼쪽(관객 기준) 측판 +X
-  box(g, side, H - top, D, -W / 2 + side / 2, (H - top) / 2, 0, wood);                // 오른쪽 측판 −X
-  box(g, iw, H - top, side, 0, (H - top) / 2, -D / 2 + side / 2, wood);               // 정면판 −Z
-  // 바닥판 + Ø60 선 구멍 (뒤쪽 가운데)
-  const bot = sq(null, W / 2); const hz = D / 2 - side - 70;
-  bot.holes.push(new THREE.Path().absarc(0, mm(hz), mm(FIX.hole / 2), 0, Math.PI * 2, true));
-  slab(g, bot, side, side, wood);
-  const grom = new THREE.Mesh(new THREE.TorusGeometry(mm(FIX.hole / 2), mm(3), 8, 32), M.black); grom.rotation.x = Math.PI / 2; grom.position.set(0, mm(side + 1), mm(hz)); g.add(grom);
-  // 뒤판 미닫이: 뒷면 위·아래에 홈 레일(받침 + 바깥 턱)을 대고, 12mm 합판 뒤판을 끼워 옆으로 밀어 빼냄. 경첩·자석·나사 없음
-  const rb = 8, rt = H, rail = 15, lip = 30, pt = 12, zp = D / 2 + pt / 2;
-  [[rb, 1], [rt, -1]].forEach(([y, s]) => {
-    box(g, W, rail, pt + 1, 0, y + s * rail / 2, D / 2 + (pt + 1) / 2, wood);       // 받침 (판 두께만큼 띄움)
-    box(g, W, lip, 6, 0, y + s * lip / 2, D / 2 + pt + 1 + 3, wood);                 // 바깥 턱 (판 가장자리를 잡음)
-  });
-  const lh = rt - rb - 2 * rail - 2, ly = (rb + rt) / 2;                         // 받침 사이 높이, 위아래 1mm 여유
-  const lid = new THREE.Group(); g.add(lid);
-  lid.position.set(0, mm(ly), mm(zp));
-  box(lid, W - 2, lh, pt, 0, 0, 0, M.lid());
-  box(lid, 24, 140, 3, S.dir * (W / 2 - 55), 0, pt / 2 + 0.5, M.black, false);       // 손가락 홈 (밀어 빼는 쪽)
-  // 환기: 흡기(오른쪽 측판 아래), 배기(왼쪽 측판 위) + USB 팬
-  const vw = 200, vh = 60;
-  const vent = (x, y, z, w, h) => { for (let i = 0; i < 5; i++) box(g, 4, h / 6, w, x, y - h / 2 + h * (i + 0.5) / 5, z, M.black, false); };
-  vent(-W / 2 - 1, side + 70, 60, vw, vh);
-  vent(W / 2 + 1, H - top - 90, 60, vw, vh);
-  box(g, 25, 80, 80, W / 2 - side - 14, H - top - 90, 60, M.black);
-  // PC (바닥, 뒤쪽 선 구멍 쪽)
-  const pz = D / 2 - side - 30 - pcD / 2;
-  box(g, pcW, pcH, pcD, 0, side + pcH / 2, pz, M.pc);
-  // 선: PC 뒤 → 선 구멍 → 바닥 → 뒤로
-  [[-30, 0], [-10, 1], [10, 2], [30, 3]].forEach(([dx, i]) => tube(g, [[dx, side + 60 + i * 15, pz + pcD / 2], [dx * 0.5, side + 30, hz - 10], [dx * 0.3, side - 5, hz], [dx * 0.3, 3, hz + 60], [dx * 0.6, 3, D / 2 + 400]], i === 0 ? 5 : 3.5));
-  if (view.labels) {
-    const big = label(g, name, 0, H + 150, 0, true); big.element.style.font = '700 13px var(--sans)';
-    label(g, '정면 (관객 쪽)', 0, H * 0.45, -D / 2 - 30);
-    label(g, '<b>미닫이 뒤판</b> · 위·아래 홈에 끼워 옆으로 스르륵 밀어 뺌 (경첩·자석·나사 없음)', 0, ly + 200, D / 2 + 40, true);
-    label(g, '<b>선 구멍 Ø' + FIX.hole + '</b> · 그로밋', 0, 40, hz + 30, true);
-    label(g, '흡기 · 오른쪽 측판 아래', -W / 2 - 10, side + 70, 60);
-    label(g, 'USB 팬 · 배기 · 왼쪽 측판 위', W / 2 + 10, H - top - 40, 60);
-    label(g, 'PC ' + pcW + '×' + pcD + '×' + pcH + (S.flat ? ' · 눕힘' : ''), S.flat ? -pcW / 2 + 60 : 0, side + pcH + 30, pz - pcD / 2 + 40);
-  }
-  doors.push({ g: lid, dir: S.dir, travel: W + 40 });
-  return { lid, hz, pz };
+/* ───────── 좌대 치수·가공 (사이드바와 라벨이 같이 씀) ───────── */
+function dims() {
+  const pocket = P.canvas + 2 * P.clear, stepS = pocket + 2 * FIX.stepW, floorT = FIX.top - FIX.step - FIX.pocketDepth;
+  const remain = Math.min(floorT, Math.max(0.5, P.remain)), rz = pocket / 2 - P.clear - P.bar / 2; // 리더: 뒤쪽 각재 가운데 아래
+  const A = { key: 'A', name: '① 색면화 좌대', W: FIX.W, D: FIX.D, H: FIX.H, top: FIX.top, x: 0 };
+  const B = { key: 'B', name: '② 추가 좌대', W: FIX.W, D: FIX.D, H: P.b2H, top: FIX.side, x: -(FIX.W + P.gap) };
+  [A, B].forEach(S => { S.iw = S.W - 2 * FIX.side; S.ih = S.H - FIX.side - S.top; S.hs = S.H - S.top; S.vy = [FIX.side + 70, S.hs - 90]; });
+  const gy = FIX.side + P.pc1W + P.spkH / 2, gz = FIX.D / 2 - FIX.side - 30 - P.pc1D / 2; // 스피커 그릴 중심
+  return { pocket, stepS, floorT, remain, rz, A, B, gy, gz, hz: FIX.D / 2 - FIX.side - 70 };
+}
+const FACES = [['top', '상판'], ['front', '정면'], ['left', '왼쪽'], ['right', '오른쪽'], ['back', '뒤판'], ['bottom', '바닥']];
+// 면 하나의 제작 정보: 크기 + [항목, 내용, 라벨 위치(좌대 기준 mm)]
+function spec(key) {
+  const d = dims(), [p, f] = key.split('.'), S = d[p], fromBack = z => FIX.D / 2 - z, t = FIX.side;
+  const vent = (y) => `200 × 60 · 중심이 바닥에서 ${y}, 뒤 모서리에서 ${fromBack(60)}`;
+  const back = [
+    ['방식', '뒤 개구부에 쏙 끼워 뒷면과 평평하게. 당겨서 떼고 밀어 넣어 닫음 (경첩·나사 없음)'],
+    ['멈춤 각재', `${FIX.stop} × ${FIX.stop}, 개구부 안쪽 네 둘레, 뒤 모서리에서 ${FIX.back} 들어간 자리`, [S.iw / 2 - 40, FIX.side + 40, FIX.D / 2 + 30]],
+    ['자석', '멈춤 각재 네 귀퉁이에 4개 (뒤판 쪽엔 철판 와셔)'],
+    ['손가락 구멍', 'Ø25, 위쪽 가운데 (위에서 60)', [0, S.hs - 60 + 40, FIX.D / 2 + 30]],
+  ];
+  const T = {
+    'A.top': { size: '600 × 600 × 30', items: [
+      ['파는 순서', '위에서부터 단차 5 → 포켓 10 → 남는 바닥 15'],
+      ['손가락 단차', `${d.stepS} × ${d.stepS}, 깊이 5`, [d.stepS / 2, S.H + 15, -d.stepS / 2]],
+      ['캔버스 포켓', `${d.pocket} × ${d.pocket}, 깊이 10 (캔버스 ${P.canvas} + 한쪽 ${P.clear}) · 윗모서리 2 모따기`, [0, S.H + 55, -d.pocket / 2]],
+      ['손잡이 홈', '포켓 왼쪽·오른쪽 변 가운데, 폭 30 반달, 포켓 바닥까지', [d.pocket / 2 + 10, S.H + 25, 0]],
+      ['리더 홈 (아랫면)', `60 × 45, 깊이 ${d.floorT - d.remain} (위에 나무 ${d.remain} 남김) · 캔버스 틀 아래 아무 곳 (스티커가 틀 네 변에 다 붙음)`, [0, S.hs - 25, d.rz + 40]],
+      ['방향 표시', '▲ 각인, 단차 뒤쪽 가장자리 가운데 (그림 위쪽 맞추기용)', [0, S.H + 20, d.stepS / 2 + 30]],
+    ] },
+    'B.top': { size: '600 × 600 × 18', items: [['가공', '없음, 측판 위에 고정']] },
+    'A.front': { size: `${S.iw} × ${S.hs} × ${t} (양 측판 사이)`, items: [['가공', '없음']] },
+    'B.front': { size: `${S.iw} × ${S.hs} × ${t} (양 측판 사이)`, items: [['가공', '없음']] },
+    'A.left': { size: `${FIX.D} × ${S.hs} × ${t}`, items: [
+      ['배기 구멍', vent(S.vy[1]), [S.W / 2 + 10, S.vy[1] + 45, 60]],
+      ['스피커 구멍', `250 × 300 · 중심이 바닥에서 ${d.gy}, 뒤 모서리에서 ${fromBack(d.gz)} · 안쪽에 펀칭 철판이나 스피커 천`, [S.W / 2 + 10, d.gy - 175, d.gz]],
+    ] },
+    'B.left': { size: `${FIX.D} × ${S.hs} × ${t}`, items: [['배기 구멍', vent(S.vy[1]), [S.W / 2 + 10, S.vy[1] + 45, 60]]] },
+    'A.right': { size: `${FIX.D} × ${S.hs} × ${t}`, items: [['흡기 구멍', vent(S.vy[0]), [-S.W / 2 - 10, S.vy[0] + 45, 60]]] },
+    'B.right': { size: `${FIX.D} × ${S.hs} × ${t}`, items: [['흡기 구멍', vent(S.vy[0]), [-S.W / 2 - 10, S.vy[0] + 45, 60]]] },
+    'A.back': { size: `${S.iw - 2} × ${S.ih - 2} × ${FIX.back} 합판 · 떼는 판`, items: back },
+    'B.back': { size: `${S.iw - 2} × ${S.ih - 2} × ${FIX.back} 합판 · 떼는 판`, items: back },
+    'A.bottom': { size: `600 × 600 × ${t}`, items: [['선 구멍', `Ø${FIX.hole} · 좌우 가운데, 뒤 모서리에서 ${fromBack(d.hz)} · 브러시 그로밋`, [0, 45, d.hz + 30]]] },
+  };
+  T['B.bottom'] = T['A.bottom'];
+  return { title: S.name + ' · ' + FACES.find(x => x[0] === f)[1] + (f === 'left' || f === 'right' ? ' 측판' : f === 'front' ? '판' : f === 'bottom' ? '판' : ''), ...T[key] };
 }
 
+/* ───────── 좌대 하나: 측판·정면판·바닥판·떼는 뒤판 + 환기 구멍 ───────── */
+const doorT = {}, doors = []; let liftT = 0, lastT = 0;
+function body(g, S, d) {
+  const { W, D, H, hs, ih, iw, key: k } = S, t = FIX.side;
+  box(g, t, hs, D, W / 2 - t / 2, hs / 2, 0, faceMat(k + '.left'), true, k + '.left');      // 왼쪽 측판 +X
+  box(g, t, hs, D, -W / 2 + t / 2, hs / 2, 0, faceMat(k + '.right'), true, k + '.right');  // 오른쪽 측판 −X
+  box(g, iw, hs, t, 0, hs / 2, -D / 2 + t / 2, faceMat(k + '.front'), true, k + '.front'); // 정면판 −Z
+  const bot = sq(null, W / 2); bot.holes.push(new THREE.Path().absarc(0, mm(d.hz), mm(FIX.hole / 2), 0, Math.PI * 2, true));
+  slab(g, bot, t, t, faceMat(k + '.bottom'), k + '.bottom');
+  const grom = new THREE.Mesh(new THREE.TorusGeometry(mm(FIX.hole / 2), mm(3), 8, 32), M.black); grom.rotation.x = Math.PI / 2; grom.position.set(0, mm(t + 1), mm(d.hz)); g.add(grom);
+  // 뒤: 개구부 안쪽 둘레에 멈춤 각재, 그 앞에 12mm 뒤판이 쏙 들어가 뒷면과 평평. 자석 4개로 붙음
+  const zs = D / 2 - FIX.back - FIX.stop / 2, s = FIX.stop, bm = faceMat(k + '.back', 0xe2dccf, 0.4);
+  box(g, iw, s, s, 0, H - S.top - s / 2, zs, bm, true, k + '.back');
+  box(g, iw, s, s, 0, t + s / 2, zs, bm, true, k + '.back');
+  [-1, 1].forEach(sx => box(g, s, ih - 2 * s, s, sx * (iw / 2 - s / 2), t + ih / 2, zs, bm, true, k + '.back'));
+  const lid = new THREE.Group(); lid.position.set(0, mm(t + ih / 2), mm(D / 2 - FIX.back / 2)); g.add(lid);
+  box(lid, iw - 2, ih - 2, FIX.back, 0, 0, 0, faceMat(k + '.back', 0xd9d1bf, 0.45), true, k + '.back');
+  const fh = new THREE.Mesh(new THREE.CylinderGeometry(mm(12.5), mm(12.5), mm(FIX.back + 1), 24), M.black); fh.rotation.x = Math.PI / 2; fh.position.set(0, mm(ih / 2 - 60), 0); fh.userData.face = k + '.back'; lid.add(fh);
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy]) => box(lid, 12, 12, 3, sx * (iw / 2 - s / 2), sy * (ih / 2 - s / 2), -FIX.back / 2 - 1.5, M.metal, false, k + '.back'));
+  doors.push({ g: lid, key: k, z0: D / 2 - FIX.back / 2 });
+  // 환기 구멍: 흡기 오른쪽 아래, 배기 왼쪽 위
+  const vent = (x, y, face) => { for (let i = 0; i < 5; i++) box(g, 4, 10, 200, x, y - 30 + 60 * (i + 0.5) / 5, 60, M.black, false, face); };
+  vent(-W / 2 - 1, S.vy[0], k + '.right'); vent(W / 2 + 1, S.vy[1], k + '.left');
+  label(g, `${S.name} · ${W} × ${D} × ${H}`, 0, H + 130, 0, 'name');
+}
+
+// 안에 들어갈 것(보기 토글): PC, 스피커, 리더, 팬, 선
+function equipment(A, B, d) {
+  const t = FIX.side, S = d.A, pz = d.gz;
+  box(A, P.pc1H, P.pc1W, P.pc1D, 0, t + P.pc1W / 2, pz, M.pc, false);                       // ① PC 눕힘
+  const sx = Math.min(P.pc1H / 2, S.W / 2 - t - 10) - P.spkD / 2, sr = mm(P.spkD / 2);
+  const sp = new THREE.Mesh(new THREE.CylinderGeometry(sr, sr, mm(P.spkH), 40), M.pc); sp.position.set(mm(sx), mm(t + P.pc1W + P.spkH / 2), mm(pz)); A.add(sp);
+  box(A, 56, 1.6, 41, 0, S.hs + (d.floorT - d.remain) - 2, d.rz, M.board, false);            // RC522 (리더 홈 안)
+  box(A, 68.6, 1.6, 53.4, -90, S.hs - 14, 60, M.uno, false);
+  const pb = (G, SS, w, h, dd) => { const z = FIX.D / 2 - t - 30 - dd / 2;
+    [[-30, 0], [-10, 1], [10, 2], [30, 3]].forEach(([dx, i]) => tube(G, [[dx, t + 60 + i * 15, z + dd / 2], [dx * 0.5, t + 30, d.hz - 10], [dx * 0.3, t - 5, d.hz], [dx * 0.3, 3, d.hz + 60], [dx * 0.6, 3, FIX.D / 2 + 400]], i === 0 ? 5 : 3.5));
+    box(G, 25, 80, 80, SS.W / 2 - t - 14, SS.vy[1], 60, M.black, false); };                  // USB 팬
+  pb(A, S, P.pc1H, P.pc1W, P.pc1D);
+  box(B, P.pc2W, P.pc2H, P.pc2D, 0, t + P.pc2H / 2, FIX.D / 2 - t - 30 - P.pc2D / 2, M.pc, false); // ② PC 세움
+  pb(B, d.B, P.pc2W, P.pc2H, P.pc2D);
+}
+
+let canvasG = null;
 function build() {
   doors.length = 0;
   if (world) { scene.remove(world); world.traverse(o => { if (o.isCSS2DObject) o.element.remove(); o.geometry?.dispose(); }); }
   world = new THREE.Group(); scene.add(world);
-  const { W, D, H, top, step, pocketDepth, stepW, frame } = FIX;
-  const pocket = P.canvas + 2 * P.clear, stepS = pocket + 2 * stepW, floorT = top - step - pocketDepth;
+  const d = dims(), S = d.A, { step, pocketDepth, frame } = FIX;
+  const A = new THREE.Group(); world.add(A); body(A, S, d);
+  const B = new THREE.Group(); B.position.x = mm(d.B.x); world.add(B); body(B, d.B, d);
+  slab(B, sq(null, d.B.W / 2), d.B.top, d.B.H, faceMat('B.top', 0xe6dfcf, 0.55), 'B.top');
 
-  // ── 색면화 좌대 (원점) ──
-  const A = new THREE.Group(); world.add(A);
-  const a = body(A, P.pc1H, P.pc1D, P.pc1W, '① 색면화 좌대 · 캔버스 포켓 + NFC 리더', { W, D, H, top, dir: 1, flat: true }); // PC를 눕혀 넣음
-  // 스피커 (하만카돈 Aura Studio 5, Ø234 × 306): 눕힌 PC 위, 관객 왼쪽(+X) 측판 쪽. 그 측판에 그릴
-  const sy = FIX.side + P.pc1W, sx = Math.min(P.pc1H / 2, W / 2 - FIX.side - 10) - P.spkD / 2, sr = mm(P.spkD / 2);
-  const spk = new THREE.Group(); spk.position.set(mm(sx), mm(sy), mm(a.pz)); A.add(spk);
-  const sBody = new THREE.Mesh(new THREE.CylinderGeometry(sr, sr, mm(P.spkH * 0.62), 40), M.pc); sBody.position.y = mm(P.spkH * 0.31); spk.add(sBody);
-  const sDome = new THREE.Mesh(new THREE.CylinderGeometry(sr * 0.97, sr, mm(P.spkH * 0.38), 40), new THREE.MeshStandardMaterial({ color: 0xbfd4e6, roughness: .15, transparent: true, opacity: .45 }));
-  sDome.position.y = mm(P.spkH * 0.81); spk.add(sDome);
-  const gw = 250, gh = 300, gy = sy + P.spkH / 2;
-  box(A, 3, gh, gw, W / 2 + 1.5, gy, a.pz, M.black, false);                                                         // 그릴 (펀칭 철판 또는 스피커 천)
-  for (let i = 0; i < 9; i++) for (let j = 0; j < 8; j++) box(A, 1, 6, 6, W / 2 + 3.2, gy - gh / 2 + 24 + i * 31.5, a.pz - gw / 2 + 20 + j * 30, M.screw, false);
-  const tm = M.top();
-  // 상판: 위에서부터 단차층(5) · 포켓층(10, 손잡이 홈) · 남는 바닥(15 = 리더 위 remain + 아래 리더 홈층)
-  const s1 = sq(null, W / 2); s1.holes.push(sq(null, stepS / 2, new THREE.Path())); slab(A, s1, step, H, tm);
-  const s2 = sq(null, W / 2), h = mm(pocket / 2), nr = mm(FIX.notchW / 2), hole = new THREE.Path();
+  // ① 상판: 위에서부터 단차층(5) · 포켓층(10, 손잡이 홈) · 남는 바닥(15 = 리더 위 remain + 아래 리더 홈층)
+  const tm = faceMat('A.top', 0xe6dfcf, 0.55), H = S.H;
+  const s1 = sq(null, S.W / 2); s1.holes.push(sq(null, d.stepS / 2, new THREE.Path())); slab(A, s1, step, H, tm, 'A.top');
+  const s2 = sq(null, S.W / 2), h = mm(d.pocket / 2), nr = mm(FIX.notchW / 2), hole = new THREE.Path();
   hole.moveTo(-h, -h); hole.lineTo(h, -h); hole.lineTo(h, -nr); hole.absarc(h, 0, nr, -Math.PI / 2, Math.PI / 2, false); hole.lineTo(h, h); hole.lineTo(-h, h); hole.lineTo(-h, nr); hole.absarc(-h, 0, nr, Math.PI / 2, Math.PI * 1.5, false); hole.closePath();
-  s2.holes.push(hole); slab(A, s2, pocketDepth, H - step, tm);
-  const remain = Math.min(floorT, Math.max(0.5, P.remain));
-  slab(A, sq(null, W / 2), remain, H - step - pocketDepth, tm);
-  // 리더 자리: 태그가 오는 귀퉁이(관객 왼쪽·뒤, +X +Z) 아래
-  const tx = pocket / 2 - P.clear - P.bar / 2, tz = tx, rw = 60, rd = 45;
-  const s3 = sq(null, W / 2), rh = new THREE.Path(); rh.moveTo(mm(tx - rw / 2), mm(tz - rd / 2)); rh.lineTo(mm(tx + rw / 2), mm(tz - rd / 2)); rh.lineTo(mm(tx + rw / 2), mm(tz + rd / 2)); rh.lineTo(mm(tx - rw / 2), mm(tz + rd / 2)); rh.closePath();
-  s3.holes.push(rh); if (floorT - remain > 0.1) slab(A, s3, floorT - remain, H - step - pocketDepth - remain, tm);
-  // 놓는 방향 표시: 상판의 단차 바로 뒤(+Z)에 ▲, 캔버스 틀 윗변(그림 위쪽) 바깥면에 같은 색 점
+  s2.holes.push(hole); slab(A, s2, pocketDepth, H - step, tm, 'A.top');
+  slab(A, sq(null, S.W / 2), d.remain, H - step - pocketDepth, tm, 'A.top');
+  const rw = 60, rd = 45, s3 = sq(null, S.W / 2), rh = new THREE.Path();
+  rh.moveTo(mm(-rw / 2), mm(d.rz - rd / 2)); rh.lineTo(mm(rw / 2), mm(d.rz - rd / 2)); rh.lineTo(mm(rw / 2), mm(d.rz + rd / 2)); rh.lineTo(mm(-rw / 2), mm(d.rz + rd / 2)); rh.closePath();
+  s3.holes.push(rh); if (d.floorT - d.remain > 0.1) slab(A, s3, d.floorT - d.remain, H - step - pocketDepth - d.remain, tm, 'A.top');
   const tri = new THREE.Shape(); tri.moveTo(mm(-14), mm(-8)); tri.lineTo(mm(14), mm(-8)); tri.lineTo(0, mm(16)); tri.closePath();
   const triM = new THREE.Mesh(new THREE.ShapeGeometry(tri), new THREE.MeshStandardMaterial({ color: 0x2f7fd6, roughness: .6 }));
-  triM.rotation.x = -Math.PI / 2; triM.position.set(0, mm(H + 0.6), mm(stepS / 2 + 26)); A.add(triM);
-  // RC522 (홈 안, 위로 밀착) · 아두이노 (상판 아래) · USB
-  const yr = H - top + (floorT - remain) - 2;
-  box(A, rw - 4, 1.6, rd - 4, tx, yr, tz, M.board);
-  box(A, 68.6, 1.6, 53.4, -60, H - top - 14, 120, M.uno);
-  box(A, 12, 10, 16, -60 + 30, H - top - 14 - 6, 120 - 26, M.usb, false);
-  tube(A, [[-30, H - top - 20, 94], [-20, H - top - 120, 120], [0, a.pz + 300, 200], [-P.pc1H / 2 + 60, FIX.side + P.pc1W - 20, a.pz + P.pc1D / 2 - 20]], 2.5, M.usb);
-  // 캔버스 (포켓 바닥에 앉아 위로 5 솟음) + 네 귀퉁이 태그
-  const C = new THREE.Group(); A.add(C);
-  const cy = H - step - pocketDepth, cs = P.canvas, bw = P.bar;
-  [[0, -(cs - bw) / 2, cs, bw], [0, (cs - bw) / 2, cs, bw], [-(cs - bw) / 2, 0, bw, cs - 2 * bw], [(cs - bw) / 2, 0, bw, cs - 2 * bw]].forEach(([x, z, w, d]) => box(C, w, frame - 1, d, x, frame / 2 - 0.5, z, M.frame));
+  triM.rotation.x = -Math.PI / 2; triM.position.set(0, mm(H + 0.6), mm(d.stepS / 2 + 26)); A.add(triM);
+  // ① 스피커 구멍 (왼쪽 측판)
+  box(A, 3, 300, 250, S.W / 2 + 1.5, d.gy, d.gz, M.black, false, 'A.left');
+  // 캔버스 (포켓 바닥에 앉아 위로 5 솟음) + 틀 네 변 아랫면 NFC 스티커
+  canvasG = new THREE.Group(); A.add(canvasG);
+  const cs = P.canvas, bw = P.bar;
+  [[0, -(cs - bw) / 2, cs, bw], [0, (cs - bw) / 2, cs, bw], [-(cs - bw) / 2, 0, bw, cs - 2 * bw], [(cs - bw) / 2, 0, bw, cs - 2 * bw]].forEach(([x, z, w, dd]) => box(canvasG, w, frame - 1, dd, x, frame / 2 - 0.5, z, M.frame));
   const face = new THREE.Mesh(new THREE.BoxGeometry(mm(cs), mm(1), mm(cs)), [M.frame, M.frame, new THREE.MeshStandardMaterial({ map: canvasTex, roughness: .9 }), M.frame, M.frame, M.frame]);
-  face.position.y = mm(frame - 0.5); face.rotation.y = Math.PI; C.add(face);
-  [[1, 1], [-1, 1], [1, -1], [-1, -1]].forEach(([sx, sz]) => { const t = new THREE.Mesh(new THREE.CylinderGeometry(mm(P.tag / 2), mm(P.tag / 2), mm(0.6), 24), M.tag); t.position.set(mm(sx * (cs - bw) / 2), mm(-0.3), mm(sz * (cs - bw) / 2)); C.add(t); });
-  const dot = new THREE.Mesh(new THREE.CylinderGeometry(mm(7), mm(7), mm(1), 20), new THREE.MeshStandardMaterial({ color: 0x2f7fd6 }));
-  dot.rotation.x = Math.PI / 2; dot.position.set(0, mm(frame / 2), mm(cs / 2 + 0.5)); C.add(dot);
-  C.position.y = mm(cy + (view.lift ? 160 : 0));
+  face.position.y = mm(frame - 0.5); face.rotation.y = Math.PI; canvasG.add(face);
+  [[0, 1], [0, -1], [1, 0], [-1, 0]].forEach(([sx, sz]) => { const tg = new THREE.Mesh(new THREE.CylinderGeometry(mm(12.5), mm(12.5), mm(0.6), 24), M.tag); tg.position.set(mm(sx * (cs - bw) / 2), mm(-0.3), mm(sz * (cs - bw) / 2)); canvasG.add(tg); });
+  canvasG.userData.y0 = H - step - pocketDepth;
 
-  // ── 추가 좌대 (관객 기준 오른쪽 = −X) ──
-  // 색면화 좌대와 같은 바닥(b2W × b2D), 높이만 b2H로 낮춤. 판 18, 위판은 고정, 뒤판은 같은 미닫이
-  const SB = { W: P.b2W, D: P.b2D, H: P.b2H, top: 18, dir: -1 };
-  const B = new THREE.Group(); B.position.x = -mm(W / 2 + P.gap + SB.W / 2); world.add(B);
-  body(B, P.pc2W, P.pc2D, P.pc2H, '② 추가 좌대 · 데스크톱만, 높이만 낮춤', SB);
-  slab(B, sq(null, SB.W / 2), SB.top, SB.H, M.top());
-
-  // ── 라벨 ──
-  if (view.labels) {
-    label(A, '<b>리더 자리 홈</b> · 위 나무 ' + remain + 'mm', tx + 40, yr - 40, tz + 60, true);
-    label(A, '<b>손잡이 홈</b> 폭 30', pocket / 2 + 10, H + 25, 0, true);
-    label(A, '<b>포켓</b> ' + pocket + ' · 여유 ' + P.clear + '/측', 0, H + 70, -pocket / 2, true);
-    label(A, '<b>태그 4장</b> Ø' + P.tag + ' · 틀 귀퉁이', -cs / 2, cy + (view.lift ? 160 : 0) - 10, -cs / 2, true);
-    label(A, 'RC522 · 아두이노 (저희 부착)', -60, H - top - 60, 160);
-    label(A, '<b>스피커</b> Aura Studio 5 · Ø' + P.spkD + '×' + P.spkH + ' · 눕힌 PC 위', sx, sy + P.spkH + 40, a.pz, true);
-    label(A, '<b>스피커 그릴</b> ' + gw + '×' + gh + ' · 관객 왼쪽 측판', W / 2 + 20, gy - gh / 2 - 30, a.pz, true);
-    label(A, '<b>방향 표시</b> ▲ 그림 위쪽', 0, H + 20, stepS / 2 + 30, true);
-  }
-  renderChecks(pocket, stepS, floorT, remain);
+  if (view.eq) equipment(A, B, d);
+  // 선택한 면의 라벨
+  if (sel) { const sp = spec(sel), G = sel[0] === 'A' ? A : B; sp.items.forEach(([n, , pos]) => pos && label(G, '<b>' + n + '</b>', ...pos)); }
+  renderInfo();
 }
 
-/* ───────── 치수 검토 ───────── */
-function renderChecks(pocket, stepS, floorT, remain) {
-  const iw = FIX.W - 2 * FIX.side, ih = FIX.H - FIX.side - FIX.top;
-  const row = (k, v, ok) => `<dt>${k}</dt><dd class="${ok === undefined ? '' : ok ? 'good' : 'bad'}">${v}</dd>`;
-  const pc = (w, d, h) => [iw - w, iw - d, ih - h, iw - w, ih - h];
-  const [a1, a2, a3, a4, a5] = pc(P.pc1H, P.pc1D, P.pc1W); // 눕힌 PC
-  const bw = P.b2W - 2 * FIX.side, bd = P.b2D - 2 * FIX.side, bh = P.b2H - FIX.side - 18, [b1, b2, b3] = [bw - P.pc2W, bd - P.pc2D, bh - P.pc2H];
-  $('#chk').innerHTML = [
-    row('안쪽 포켓 (캔버스 + 여유×2)', `${pocket} × ${pocket}`),
-    row('손가락 단차', `${stepS} × ${stepS}`),
-    row('캔버스 윗면 돌출', `${FIX.frame - FIX.step - FIX.pocketDepth}`),
-    row('포켓 바닥 / 리더 위 나무', `${floorT} / ${remain}`, remain <= 8),
-    row('태그가 각재에 다 붙나 · 각재 폭 실측 필요', `${P.bar} vs Ø${P.tag}`, P.bar >= P.tag),
-    row('색면화 PC(눕힘) 안쪽 여유 W/D/H', `${a1} / ${a2} / ${a3}`, Math.min(a1, a2, a3) >= 20),
-    row('스피커가 PC 윗면 안에 앉나 (지름 vs PC 폭·깊이)', `${P.spkD} vs ${P.pc1H}·${P.pc1D}`, P.spkD <= Math.min(P.pc1H, P.pc1D)),
-    row('스피커 ↔ 리더 거리 (5cm 넘게)', `${FIX.H - FIX.top - FIX.side - P.pc1W - P.spkH}`, FIX.H - FIX.top - FIX.side - P.pc1W - P.spkH >= 50),
-    row('색면화 PC 뒤로 넣는 틈 W/H (뒤판 뺐을 때)', `${a4} / ${a5}`, Math.min(a4, a5) >= 10),
-    row('추가 좌대 안쪽 (W/D/H)', `${bw} / ${bd} / ${bh}`),
-    row('추가 PC 안쪽 여유 W/D/H (뒤로 넣음)', `${b1} / ${b2} / ${b3}`, Math.min(b1, b2, b3) >= 20),
-    row('뒤판 빼낼 옆자리 (한 좌대당)', `${P.b2W + 40}`),
-    row('선 구멍 (두 좌대) vs 접지 플러그 약 Ø40', `Ø${FIX.hole}`, FIX.hole >= 50),
-  ].join('');
-  document.querySelectorAll('[data-v]').forEach(el => el.textContent = { remain, clear: P.clear, pocket, b2: `${P.b2W} × ${P.b2D} × ${P.b2H} `.trim() }[el.dataset.v]);
+/* ───────── 사이드바 ───────── */
+function renderPeds() {
+  const d = dims();
+  $('#peds').innerHTML = [d.A, d.B].map(S => `<div class="ped"><div class="t"><b>${S.name}</b><span>${S.W} × ${S.D} × ${S.H}</span></div>
+    <div class="hint">판 ${FIX.side} · 상판 ${S.top}${S.key === 'A' ? ' · 캔버스 포켓' : ' · 고정'}</div>
+    <div class="faces">${FACES.map(([f, n]) => { const k = S.key + '.' + f, plain = spec(k).items[0][1].startsWith('없음'); return `<button class="b${plain ? ' plain' : ''}${sel === k ? ' on' : ''}" data-k="${k}">${n}</button>`; }).join('')}</div></div>`).join('');
+  $('#peds').querySelectorAll('button').forEach(b => b.onclick = () => select(b.dataset.k, true));
+}
+function renderInfo() {
+  renderPeds();
+  if (!sel) { $('#info').innerHTML = `<p>면을 고르세요. 회색 버튼은 가공이 없는 면이에요.</p>`; return; }
+  const sp = spec(sel);
+  $('#info').innerHTML = `<h3>${sp.title}</h3><div class="size">${sp.size}</div><dl>${sp.items.map(([n, v]) => `<dt>${n}</dt><dd>${v}</dd>`).join('')}</dl>`;
 }
 
-/* ───────── UI ───────── */
-const VIEWS = [
-  ['전체', [0.55, 1.6, -3.1], [-0.45, 0.5, 0]],
-  ['상판 포켓', [0.35, 1.45, -0.55], [0.05, 0.88, 0.02]],
-  ['리더 자리 (아래에서)', [0.25, 0.55, 0.05], [0.1, 0.87, 0.1]],
-  ['뒤에서 (뒤판·선)', [0.2, 1.25, 3.1], [-0.45, 0.4, 0.3]],
-];
+/* ───────── 선택 · 카메라 ───────── */
 let tween = null;
 function flyTo(p, t) { const p0 = camera.position.clone(), t0 = controls.target.clone(), st = performance.now(), P1 = new THREE.Vector3(...p), T1 = new THREE.Vector3(...t); tween = now => { const k = Math.min(1, (now - st) / 700), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; camera.position.lerpVectors(p0, P1, e); controls.target.lerpVectors(t0, T1, e); if (k >= 1) tween = null; }; }
-VIEWS.forEach(([n, p, t]) => { const b = document.createElement('button'); b.className = 'b'; b.textContent = n; b.onclick = () => flyTo(p, t); $('#hud').appendChild(b); });
-[['ghost', '반투명'], ['lid', '뒤판 밀어 열기'], ['lift', '캔버스 들어 올리기'], ['labels', '라벨']].forEach(([k, n]) => {
+function faceView(k) {
+  const d = dims(), [p, f] = k.split('.'), S = d[p], cx = mm(S.x), H = mm(S.H), my = H * 0.55;
+  return {
+    top: [[cx + 0.35, H + 1.2, -0.95], [cx, H, 0]],
+    front: [[cx + 0.5, my + 0.4, -2.5], [cx, H / 2, 0]],
+    left: p === 'B' ? [[cx + 0.3, H + 1.2, -1.7], [cx + 0.3, H / 2, 0]] : [[cx + 2.5, my + 0.4, -0.6], [cx, H / 2, 0]],
+    right: [[cx - 2.5, my + 0.4, -0.6], [cx, H / 2, 0]],
+    back: [[cx + 0.6, my + 0.45, 2.6], [cx, H / 2, 0.1]],
+    bottom: [[cx + 0.5, H + 1.2, 1.3], [cx, 0.05, 0.1]],
+  }[f];
+}
+function select(k, fly) {
+  sel = sel === k ? null : k;
+  if (sel && fly) flyTo(...faceView(sel));
+  build();
+}
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+function pick(e) {
+  const r = renderer.domElement.getBoundingClientRect(); ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ptr, camera);
+  const hit = ray.intersectObject(world, true).find(i => i.object.isMesh && i.object.userData.face);
+  return hit?.object.userData.face ?? null;
+}
+let down = null;
+renderer.domElement.addEventListener('pointerdown', e => down = [e.clientX, e.clientY]);
+renderer.domElement.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 5) { const k = pick(e); if (k || sel) select(k ?? sel, false); } down = null; });
+renderer.domElement.addEventListener('pointermove', e => { if (!e.buttons) renderer.domElement.style.cursor = pick(e) ? 'pointer' : ''; });
+
+/* ───────── UI ───────── */
+[['전체', [0.75, 1.65, -2.9], [-0.45, 0.45, 0]], ['위에서', [0.2, 2.2, -0.9], [-0.3, 0.6, 0]], ['뒤에서', [0.3, 1.3, 2.9], [-0.45, 0.4, 0.3]]]
+  .forEach(([n, p, t]) => { const b = document.createElement('button'); b.className = 'b'; b.textContent = n; b.onclick = () => flyTo(p, t); $('#hud').appendChild(b); });
+[['ghost', '반투명'], ['lid', '뒤판 떼기'], ['eq', '안에 들어갈 것']].forEach(([k, n]) => {
   const b = document.createElement('button'); b.className = 'b' + (view[k] ? ' on' : ''); b.textContent = n;
-  b.onclick = () => { view[k] = !view[k]; b.classList.toggle('on', view[k]); if (k !== 'lid') build(); }; // 뒤판은 다시 짓지 않고 루프에서 밀어 엶
+  b.onclick = () => { view[k] = !view[k]; b.classList.toggle('on', view[k]); if (k !== 'lid') build(); }; // 뒤판은 루프에서 움직임
   $('#toggles').appendChild(b);
 });
 PARAMS.forEach(([k, l]) => {
-  if (k === 'sub') { const d = document.createElement('div'); d.className = 'sub'; d.textContent = l; $('#params').appendChild(d); return; }
   const lab = document.createElement('label'); lab.innerHTML = `${l}<input type="number" step="${k === 'clear' ? 0.5 : 1}" value="${P[k]}">`;
   lab.querySelector('input').onchange = e => { const v = +e.target.value; if (v > 0) { P[k] = v; build(); } };
   $('#params').appendChild(lab);
@@ -353,12 +361,16 @@ PARAMS.forEach(([k, l]) => {
 function resize() { const w = main.clientWidth, h = main.clientHeight; renderer.setSize(w, h); labelR.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(main);
 build(); resize();
-// 뒤판: 약 1.6초에 걸쳐 스르륵 (사인 가감속)
-function slideDoors(now) {
+// 뒤판: 뒤로 당겨 빼고 살짝 내려놓음 / 캔버스: 상판을 고르면 들어 올림. 둘 다 약 1초 사인 가감속
+const ease = v => (1 - Math.cos(Math.PI * v)) / 2, toward = (v, to, dt) => to > v ? Math.min(to, v + dt) : Math.max(to, v - dt);
+function animate(now) {
   const dt = Math.min(0.05, (now - (lastT || now)) / 1000); lastT = now;
-  const to = view.lid ? 1 : 0; openT = to > openT ? Math.min(to, openT + dt / 1.6) : Math.max(to, openT - dt / 1.6);
-  const e = (1 - Math.cos(Math.PI * openT)) / 2;
-  doors.forEach(d => d.g.position.x = mm(d.dir * d.travel * e));
+  doors.forEach(o => {
+    const v = doorT[o.key] = toward(doorT[o.key] || 0, view.lid || sel === o.key + '.back' ? 1 : 0, dt), e = ease(v);
+    o.g.position.z = mm(o.z0 + 260 * e); o.g.rotation.x = 0.12 * Math.max(0, e - 0.6) / 0.4;
+  });
+  liftT = toward(liftT, sel === 'A.top' ? 1 : 0, dt);
+  if (canvasG) canvasG.position.y = mm(canvasG.userData.y0 + 160 * ease(liftT));
 }
-renderer.setAnimationLoop(now => { if (tween) tween(now); slideDoors(now); controls.update(); renderer.render(scene, camera); labelR.render(scene, camera); });
+renderer.setAnimationLoop(now => { if (tween) tween(now); animate(now); controls.update(); renderer.render(scene, camera); labelR.render(scene, camera); });
 </script>
