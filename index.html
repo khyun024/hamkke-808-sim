@@ -224,7 +224,7 @@ textarea#json { width: 100%; min-height: 90px; background: var(--field); color: 
         <h2>공간별 프로젝터</h2>
         <p class="hint" style="margin-bottom:8px">카드마다 모델과 설치 방식을 고르면 그 조합으로 벽을 가장 많이 채우는 위치로 바로 옮겨요.</p>
         <div class="btns" id="plans" style="margin-bottom:8px"></div>
-        <p class="hint" style="margin-bottom:8px">색면화 두 대 안: ①은 오른쪽 벽용을 원래 렌즈로 방 반대편 천장에 달아 두 빔이 아예 안 만나요. ②는 두 대 다 교체 렌즈로 바꾸고 정면 벽용을 봉으로 2.6 m까지 내려 달아요. 협동화(V5002)는 그대로예요.</p>
+        <p class="hint" style="margin-bottom:8px">색면화 두 대 안: 기본은 ③이에요. ①은 오른쪽 벽용을 원래 렌즈로 방 반대편 천장에 달아 두 빔이 아예 안 만나요. ②는 두 대 다 교체 렌즈로 바꾸고 정면 벽용을 봉으로 2.6 m까지 내려 달아요. ③은 두 대 다 교체 렌즈, 봉 없이 줌 끝과 가로 렌즈 시프트로 두 프로젝터를 옆으로 비켜 달아요(교체 렌즈가 줌·가로 시프트가 될 때). 협동화(V5002)는 그대로예요.</p>
         <div class="plist" id="plist"></div>
         <div class="btns" style="margin-top:8px">
           <button class="b" id="p-add">추가</button>
@@ -903,26 +903,36 @@ const ASPECT = { '16:9': 16 / 9, '16:10': 1.6, '4:3': 4 / 3 };
 const PCOLORS = ['#3fb6dc', '#e2725b', '#8bc34a', '#c48be0', '#f0c04a', '#5ad1b0'];
 // 프로젝터 안 (2026-11-03): 색면화 두 벽은 Sony PHZ60, 협동화는 Maxell MP-V5002. 천장 3.3 m.
 // 교체 렌즈(5~6 m에 300" → 투사비 0.77~0.93)로 두 대를 다 바꾸면 두 프로젝터 자리가 방 가운데에서 겹쳐 오른쪽 벽용이 정면 빔을 가림.
-//  안 ① (기본): 오른쪽 벽용은 원래 렌즈(1.23)로 방 반대편(왼쪽 벽에서 약 0.7 m) 천장에. 두 대 모두 천장 3.1 m, 빔이 1 m 넘게 비켜 감
+//  안 ① : 오른쪽 벽용은 원래 렌즈(1.23)로 방 반대편(왼쪽 벽에서 약 0.7 m) 천장에. 두 대 모두 천장 3.1 m, 빔이 1 m 넘게 비켜 감
 //  안 ② : 두 대 다 교체 렌즈. 정면 벽용을 봉으로 2.6 m까지 내려 달아 빔 윗변이 오른쪽 벽용(천장 밀착 3.15 m) 몸체 밑으로 약 8 cm 지나가게
 const PHZ60CN = { lumens: 6000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 0.77, trTele: 0.93, shiftVMin: -35, shiftVMax: 55, shiftHMax: 15, presetKey: 'phz60cn', place: 'ceiling' };
 const PHZ60STD = { lumens: 6000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 1.23, trTele: 1.97, shiftVMin: -35, shiftVMax: 55, shiftHMax: 15, presetKey: 'phz60', place: 'ceiling' };
 const PLANS = {
-  a: { label: '안 ① 오른쪽 벽용은 원래 렌즈', p3: { ...PHZ60CN, model: 'Sony VPL-PHZ60 + 교체 렌즈 · 천장', lensH: 3.1 }, p4: { ...PHZ60STD, model: 'Sony VPL-PHZ60 (원래 렌즈) · 천장, 방 반대편', lensH: 3.1 } },
+  a: { label: '안 ① 오른쪽 벽용은 원래 렌즈 (교체 렌즈 1대만일 때)', p3: { ...PHZ60CN, model: 'Sony VPL-PHZ60 + 교체 렌즈 · 천장', lensH: 3.1 }, p4: { ...PHZ60STD, model: 'Sony VPL-PHZ60 (원래 렌즈) · 천장, 방 반대편', lensH: 3.1 } },
   b: { label: '안 ② 둘 다 교체 렌즈 + 정면 봉', p3: { ...PHZ60CN, model: 'Sony VPL-PHZ60 + 교체 렌즈 · 봉으로 내려 닮', lensH: 2.6 }, p4: { ...PHZ60CN, model: 'Sony VPL-PHZ60 + 교체 렌즈 · 천장에 붙임', lensH: 3.15 } },
+  //  안 ③ (기본, 두 대 다 교체 렌즈로 쓰기로 함): 봉 없이 천장 3.1 m. 정면 벽용은 줌 광각 끝(0.77)·가로 시프트로 동쪽에, 오른쪽 벽용은 망원 끝(0.93)·가로 시프트로 입구 쪽에 → 평면에서 서로 빔 밖, 여유 약 0.3 m
+  c: { label: '안 ③ 둘 다 교체 렌즈 · 봉 없이', p3: { ...PHZ60CN, model: 'Sony VPL-PHZ60 + 교체 렌즈 · 천장, 광각 끝 · 가로 시프트', lensH: 3.1, zoom: 0, slide: 0.15 }, p4: { ...PHZ60CN, model: 'Sony VPL-PHZ60 + 교체 렌즈 · 천장, 망원 끝 · 가로 시프트', lensH: 3.1, zoom: 100, slide: -0.15 } },
 };
 const DEFAULTS = [
   // 협동화: 단초점 고정(0.56), 렌즈 시프트 없음, 최대 150". 천장(3.3 m)에 달면 30° 넘게 기울여야 해서 받침·선반(렌즈 1.65 m)에 둠.
   // 150"(3.2 × 2.0 m)를 벽 가운데에 기울임 없이: 벽에서 1.8 m. 벽 폭 6.4 m를 다 채우려면 약 300"라 이 기종 표기 범위를 넘음
   { id: 'p1', name: '협동화 프로젝터', model: 'Maxell MP-V5002 (단초점) · 받침', surface: 'hyup', mount: 'stand', lumens: 5000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 0.56, trTele: 0.56, zoom: 0, shiftV: 0, shiftH: 0, shiftVMax: 0, shiftVMin: 0, shiftHMax: 0, maxDiag: 150, distance: 1.8, offset: 0, lensH: 1.65, yaw: 0, pitch: 0, content: 'grid', mask: false, on: true, presetKey: 'mpv5002', place: 'stand' },
   // 색면화: 왼쪽 벽은 투사 없음. 정면·오른쪽은 좌대에 올린 그림의 띠가 이어 흐르는 한 화면(field). 벽을 꽉 덮고 넘치는 부분은 마스킹 (coverFit으로 거리·시프트 계산)
-  { id: 'p3', name: '색면화 · 정면', surface: 'sf', mount: 'ceiling', zoom: 0, shiftV: 0, shiftH: 0, distance: 5.8, offset: 0, yaw: 0, pitch: 0, content: 'field', mask: true, on: true, ...PLANS.a.p3 },
-  { id: 'p4', name: '색면화 · 오른쪽', surface: 'sr', mount: 'ceiling', zoom: 0, shiftV: 0, shiftH: 0, distance: 6.8, offset: 0, yaw: 0, pitch: 0, content: 'field', mask: true, on: true, ...PLANS.a.p4 },
+  { id: 'p3', name: '색면화 · 정면', surface: 'sf', mount: 'ceiling', zoom: 0, shiftV: 0, shiftH: 0, distance: 5.8, offset: 0, yaw: 0, pitch: 0, content: 'field', mask: true, on: true, ...PLANS.c.p3 },
+  { id: 'p4', name: '색면화 · 오른쪽', surface: 'sr', mount: 'ceiling', zoom: 0, shiftV: 0, shiftH: 0, distance: 5.1, offset: 0, yaw: 0, pitch: 0, content: 'field', mask: true, on: true, ...PLANS.c.p4 },
 ];
 const STORE = 'hamkke-808-projectors-v2';
 let projectors = [];
 try { const s = JSON.parse(localStorage.getItem(STORE)); if (Array.isArray(s) && s.length) projectors = s; } catch (e) { }
-function freshDefaults() { const arr = structuredClone(DEFAULTS); arr.forEach(p => { if (p.mask) coverFit(p); }); return arr; }
+function freshDefaults() { const arr = structuredClone(DEFAULTS); arr.forEach(p => { if (p.mask) coverFit(p); applySlide(p); }); return arr; }
+// 렌즈 자리를 벽 방향으로 화면 폭 × slide만큼 옮기고, 같은 크기의 가로 시프트로 화면을 벽 가운데에 되돌림 (안 ③)
+function applySlide(p) {
+  if (p.slide) {
+    p.offset = +(p.slide * p.distance / curTR(p)).toFixed(2);
+    for (const sh of [15, -15]) { p.shiftH = sh; if (projMath(p).cover) break; }
+  }
+  delete p.slide;
+}
 // 모델 프리셋 (렌즈 시프트는 프로젝터 기준: 천장에 거꾸로 달면 위아래가 뒤집힘)
 const PRESETS = {
   phz60: { model: 'Sony VPL-PHZ60', lumens: 6000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 1.23, trTele: 1.97, shiftVMin: -35, shiftVMax: 55, shiftHMax: 15 },
@@ -2059,7 +2069,10 @@ $('#p-solve').onclick = () => {
   }, 20);
 };
 function applyPlan(k) {
-  ['p3', 'p4'].forEach(id => { const p = projectors.find(q => q.id === id); if (!p) return; Object.assign(p, PLANS[k][id], { zoom: 0, mount: 'ceiling', mask: true }); coverFit(p); syncProjector(p); });
+  ['p3', 'p4'].forEach(id => {
+    const p = projectors.find(q => q.id === id); if (!p) return;
+    Object.assign(p, { zoom: 0 }, PLANS[k][id], { mount: 'ceiling', mask: true }); coverFit(p); applySlide(p); syncProjector(p);
+  });
   save(); renderProjUI(); renderPlans(k);
 }
 function renderPlans(cur) {
