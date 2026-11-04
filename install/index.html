@@ -1,0 +1,234 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>프로젝터 설치 체크리스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* 색면화 방 2대 + 협동화실 1대 설치 안내. 세 대 모두 천장. 전원은 미정이라 다루지 않음. 수치는 시뮬레이션 기준, 단위 m. 인쇄하면 A4 세로 */
+:root { --bg: #f3f1ec; --paper: #ffffff; --fg: #23211d; --muted: #6f6a61; --line: #dcd7ce; --soft: #f6f4ef; --accent: #2f7fd6; --warn: #e8893a; --pw: #d8453b;
+  --p1: #3fb6dc; --p3: #e2725b; --p4: #8bc34a;
+  --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 14px/1.65 var(--sans); }
+.page { max-width: 880px; margin: 0 auto; background: var(--paper); padding: 36px 44px 48px; }
+h1 { font-size: 24px; margin: 0; letter-spacing: -.01em; }
+.meta { color: var(--muted); margin: 4px 0 0; font-size: 13px; }
+h2 { font-size: 16px; margin: 36px 0 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+h2 small { font-weight: 500; color: var(--muted); font-size: 13px; margin-left: 6px; }
+h3 { font-size: 14px; margin: 18px 0 6px; }
+p { margin: 0 0 8px; }
+a { color: var(--accent); }
+.about { background: var(--soft); border-radius: 8px; padding: 12px 16px; margin: 18px 0 0; font-size: 13px; }
+.about p { margin: 0 0 4px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0 0; }
+.card { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; border-top: 4px solid var(--c); }
+.card b { display: block; font-size: 13px; }
+.card i { display: block; font-style: normal; font-size: 12px; color: var(--muted); }
+.card span { display: block; font: 500 13px/1.6 var(--mono); margin-top: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 6px 0 4px; }
+th, td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 500; font-size: 12px; background: var(--soft); }
+td:first-child { white-space: nowrap; font-weight: 600; }
+.num { font-family: var(--mono); font-size: 12.5px; }
+th .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 5px; }
+figure { margin: 8px 0 10px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 8px 6px; background: #fff; }
+figure svg { display: block; width: 100%; height: auto; font: 11px var(--sans); }
+figcaption { text-align: center; font-size: 12px; color: var(--muted); margin-top: 4px; }
+.sides { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.sides figure { margin: 0; }
+.note { border-left: 3px solid var(--warn); background: #fdf1e6; padding: 9px 14px; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 13px; }
+ol.steps { margin: 6px 0 0; padding-left: 20px; }
+ol.steps li { margin-bottom: 5px; }
+ul.chk { list-style: none; margin: 6px 0 0; padding: 0; }
+ul.chk li { position: relative; padding: 6px 0 6px 28px; border-bottom: 1px solid var(--line); }
+ul.chk li::before { content: ""; position: absolute; left: 2px; top: 10px; width: 14px; height: 14px; border: 1.5px solid var(--fg); border-radius: 3px; }
+.sides { margin-top: 12px; }
+tr.open td { background: #fdf1e6; }
+tr.open td:first-child { color: var(--warn); }
+.foot { margin-top: 30px; font-size: 12.5px; color: var(--muted); }
+@media (max-width: 720px) {
+  .page { padding: 22px 16px 32px; }
+  .cards, .sides { grid-template-columns: 1fr; }
+  td:first-child { white-space: normal; }
+  .scroll { overflow-x: auto; }
+  .scroll table { min-width: 560px; }
+}
+@media print {
+  body { background: #fff; font-size: 12px; }
+  .page { max-width: none; padding: 0; }
+  h2, h3 { break-after: avoid; }
+  figure, table, .note, .sides { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}
+</style>
+
+<div class="page">
+  <h1>프로젝터 설치 체크리스트</h1>
+  <p class="meta">함께누리예술전 · 성남큐브미술관 · 프로젝터 3대 천장 설치 · 단위 m</p>
+  <div class="about">
+    <p><b>표의 자리는 시뮬레이션으로 잡은 출발점입니다. 최종 위치는 현장에서 바닥에 놓고 쏴 본 뒤 정하고, 그다음 천장에 올립니다.</b></p>
+    <p>거리는 벽 마감면에서 렌즈 앞면까지, 높이는 렌즈 가운데 기준입니다. 전원은 미정이라 넣지 않았습니다.</p>
+  </div>
+
+  <h2>1. 자리 <small>출발점 · 현장에서 최종 결정</small></h2>
+  <figure id="f-plan"></figure>
+  <div class="scroll"><table>
+    <tr><th></th><th style="--c: var(--p3)"><span class="dot"></span>A. 색면화 정면</th><th style="--c: var(--p4)"><span class="dot"></span>B. 색면화 오른쪽</th><th style="--c: var(--p1)"><span class="dot"></span>C. 협동화</th></tr>
+    <tr><td>기종</td><td>Sony PHZ60 + 교체 렌즈</td><td>Sony PHZ60 + 교체 렌즈</td><td>Maxell MP-V5002</td></tr>
+    <tr><td>투사하는 벽까지</td><td class="num">5.75</td><td class="num">5.11</td><td class="num">3.71</td></tr>
+    <tr><td>옆 벽까지</td><td class="num">오른쪽 벽 2.58</td><td class="num">정면 벽 3.55</td><td class="num">정면 벽 3.22</td></tr>
+    <tr><td>렌즈 높이</td><td class="num">3.10</td><td class="num">3.10</td><td class="num">3.10</td></tr>
+    <tr><td>기울기</td><td>수평</td><td>수평</td><td>벽 쪽으로 10.8° 아래</td></tr>
+    <tr><td>줌</td><td>광각 끝</td><td>망원 끝</td><td>고정</td></tr>
+    <tr><td>렌즈 시프트</td><td>세로 31% 아래 · 가로 15% 벽 가운데 쪽</td><td>세로 42% 아래 · 가로 15% 벽 가운데 쪽</td><td>없음</td></tr>
+    <tr><td>메뉴</td><td>천장 설치 켬 · 키스톤 0</td><td>천장 설치 켬 · 키스톤 0</td><td>천장 설치 켬 · 4점 보정</td></tr>
+    <tr><td>맞춘 뒤 화면</td><td>벽 전체를 덮음. 넘치는 빛은 영상에서 검게</td><td>벽 전체를 덮음. 넘치는 빛은 영상에서 검게</td><td>아래 끝 = 벽 아래 끝. 네 귀를 벽 네 귀에</td></tr>
+    <tr><td>본체 무게</td><td class="num">약 7 kg</td><td class="num">약 7 kg</td><td class="num">8.1 kg</td></tr>
+  </table></div>
+  <div class="sides">
+    <figure id="f-s3"></figure>
+    <figure id="f-s4"></figure>
+    <figure id="f-s1"></figure>
+  </div>
+
+  <h2>2. 바닥에서 쏴 보고 위치 정하기</h2>
+  <p>프로젝터를 표의 거리에 맞춰 바닥(책상·받침)에 두고 실제 벽에 쏴 봅니다. 화면을 보며 앞뒤·좌우를 옮겨 자리를 정하고, 정한 자리를 바닥에 표시한 뒤 천장에 올립니다.</p>
+  <ul class="chk">
+    <li><b>A·B 투사비.</b> 정면 벽에서 5.75에 두고 광각 끝 화면 폭 W를 잽니다. 투사비 = 5.75 ÷ W. 0.77이 아니면 A 거리 = 7.46 × 투사비, B 거리 = 5.50 × 망원 투사비로 다시 잡습니다.</li>
+    <li><b>A·B 렌즈 시프트.</b> 세로 42%, 가로 15%까지 되는지 봅니다. 가로가 모자라면 그만큼 렌즈 자리를 벽 가운데 쪽으로 옮깁니다.</li>
+    <li><b>C 초점.</b> 협동화 벽에서 3.71에 두고 화면 전체에 초점이 맞는지 봅니다. 표기 최대(150")의 두 배라 가장 먼저 확인합니다. 안 맞으면 맞는 거리까지 당깁니다.</li>
+    <li><b>C 오프셋.</b> 수평으로 놓고 화면 가운데가 렌즈 높이보다 위로 뜨는지 봅니다. 뜨면 매단 뒤 기울기를 그만큼 줄입니다.</li>
+    <li><b>자리 확정.</b> 세 대 모두 화면이 벽을 덮는 자리를 찾으면 렌즈 앞면 자리를 바닥에 표시하고 거리를 적어 둡니다. 표와 달라지면 그 값이 최종입니다.</li>
+  </ul>
+
+  <h2>3. 설치</h2>
+  <ul class="chk">
+    <li><b>자리 표시.</b> 2번에서 정한 렌즈 앞면 자리를 바닥에 표시하고 레이저로 천장 그리드에 옮깁니다.</li>
+    <li><b>브래킷.</b> 그리드에 고정합니다. 칸이 안 맞으면 가장 가까운 칸에 걸고 슬라이드로 맞춥니다.</li>
+    <li><b>안전 와이어.</b> 본체와 그리드를 따로 묶습니다.</li>
+    <li><b>높이.</b> 렌즈 가운데 3.10.</li>
+    <li><b>기울기.</b> A·B 수평. C 벽 쪽으로 10.8° 아래. 좌우는 모두 수평.</li>
+    <li><b>줌·초점.</b> 격자 화면으로 A 광각 끝, B 망원 끝. 세 대 초점.</li>
+    <li><b>화면.</b> A·B는 시프트로 벽 가운데에. C는 아래 끝을 벽 아래 끝에. 세 대 모두 벽 네 변을 다 덮는지.</li>
+    <li><b>마스킹.</b> A·B 실제 영상으로 벽 밖이 검게 나오는지. C 4점 보정으로 네 귀를 벽 네 귀에.</li>
+    <li><b>A·B 간격.</b> B 본체가 A 빛에 걸리지 않는지(여유 약 0.5).</li>
+  </ul>
+
+  <h2>4. 영상선</h2>
+  <div class="scroll"><table>
+    <tr><th></th><th style="--c: var(--p3)"><span class="dot"></span>A</th><th style="--c: var(--p4)"><span class="dot"></span>B</th><th style="--c: var(--p1)"><span class="dot"></span>C</th></tr>
+    <tr><td>PC</td><td colspan="2">색면화 좌대 안 (HDMI 출력 2개)</td><td>협동화실 관객석 뒤쪽 구석</td></tr>
+    <tr><td>경로</td><td colspan="2">좌대 밑 → 바닥 몰딩 3.4 → 왼쪽 가벽으로 올림 → 그리드</td><td>구석 벽으로 올림 → 그리드</td></tr>
+    <tr><td>HDMI</td><td class="num">20 m</td><td class="num">15 m</td><td class="num">15 m</td></tr>
+  </table></div>
+  <p>영상이 비치는 벽(정면 벽, 오른쪽 벽, 협동화 벽)으로는 선을 올리지 않습니다.</p>
+
+  <h2>5. 현장 확인</h2>
+  <table>
+    <tr><th>항목</th><th>결과</th></tr>
+    <tr><td>천장 그리드 높이</td><td>3.30 (확인)</td></tr>
+    <tr><td>그리드 하중</td><td>7 ~ 8 kg 세 대 문제없음 (확인)</td></tr>
+    <tr><td>협동화실 구석 몰딩</td><td>가능 (확인)</td></tr>
+    <tr><td>협동화 PC 자리</td><td>뒤쪽 구석 두 곳 다 들어감 (확인). HDMI 15 m는 어느 쪽이든 닿음</td></tr>
+    <tr><td>조명</td><td>두 방 모두 끌 수 있음 (확인)</td></tr>
+    <tr class="open"><td>천장 전기</td><td>확인 중. 정해지면 전원 경로를 넣음</td></tr>
+    <tr class="open"><td>왼쪽 가벽 몰딩</td><td>아직 안 물어봄. A·B 영상선이 이 면으로 올라감</td></tr>
+  </table>
+
+  <p class="foot">3D 확인: <a href="../" target="_blank" rel="noopener">설치 시뮬레이션</a> · 2026-11-04</p>
+</div>
+
+<script>
+// 평면도: 시뮬레이션 평면 좌표(px, 1 px = 0.033 m) 그대로. 위쪽이 홀
+const S = 0.033, K = 2.3; // K: 그림 배율 (px → svg)
+const q = v => (v * K).toFixed(1);
+const X0 = 630, Y0 = 595, W = 450, H = 255;
+const P = (px, py) => [q(px - X0), q(py - Y0)];
+const m = v => v / S; // m → px
+const C = { p1: '#3fb6dc', p3: '#e2725b', p4: '#8bc34a', av: '#5b4fc4', wall: '#4a463f' };
+let s = `<svg viewBox="0 0 ${q(W)} ${q(H)}" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9z" fill="#6f6a61"/></marker></defs>
+<rect width="100%" height="100%" fill="#fff"/>`;
+const rect = (x0, y0, x1, y1, a = '') => { const [ax, ay] = P(Math.min(x0, x1), Math.min(y0, y1)); return `<rect x="${ax}" y="${ay}" width="${q(Math.abs(x1 - x0))}" height="${q(Math.abs(y1 - y0))}" ${a}/>`; };
+const line = (x0, y0, x1, y1, a = '') => { const [ax, ay] = P(x0, y0), [bx, by] = P(x1, y1); return `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" ${a}/>`; };
+const path = (pts, a = '') => `<polyline points="${pts.map(([x, y]) => P(x, y).join(',')).join(' ')}" fill="none" ${a}/>`;
+const poly = (pts, a = '') => `<polygon points="${pts.map(([x, y]) => P(x, y).join(',')).join(' ')}" ${a}/>`;
+const text = (x, y, t, a = '') => { const [ax, ay] = P(x, y); return `<text x="${ax}" y="${ay}" ${a}>${t}</text>`; };
+const dim = (x0, y0, x1, y1, t, tx, ty, a = '') => line(x0, y0, x1, y1, 'stroke="#6f6a61" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"') + text(tx, ty, t, `class="d" ${a}`);
+const T = { out: m(0.25) / 2, in: m(0.15) / 2 };
+// 바닥 구역
+s += rect(647, 634, 831, 833, 'fill="#eef6fb"') + rect(835, 617, 1063, 833, 'fill="#fbf0ec"');
+// 벽
+const wallsH = [[645, 725, 632, T.out], [645, 1069, 835, T.out]], wallsV = [[645, 632, 835, T.out], [1065, 595, 835, T.out], [833, 617, 835, T.in]];
+wallsH.forEach(([a, b, y, t]) => s += rect(a - t, y - t, b + t, y + t, `fill="${C.wall}"`));
+wallsV.forEach(([x, a, b, t]) => s += rect(x - t, a, x + t, b + t, `fill="${C.wall}"`));
+s += rect(1041 - m(1.07) / 2, 649 - m(1.07) / 2, 1041 + m(1.07) / 2, 649 + m(1.07) / 2, `fill="${C.wall}"`) + text(1041, 652, '기둥', 'class="w" text-anchor="middle"');
+// 투사면 (벽 마감면)
+const FY = 835 - T.out, RX = 1065 - T.out, LXe = 833 + T.in, LXw = 833 - T.in, BX = 645 + T.out;
+s += line(837, FY - 2, 1061, FY - 2, `stroke="${C.p3}" stroke-width="5"`) + line(RX - 2, 666, RX - 2, 831, `stroke="${C.p4}" stroke-width="5"`) + line(LXw - 2, 636, LXw - 2, 831, `stroke="${C.p1}" stroke-width="5"`);
+// 빛 (렌즈 → 투사면 양 끝)
+const L3 = [LXe + m(4.873), FY - m(5.75)], L4 = [RX - m(5.11), FY - m(3.553)], L1 = [LXw - m(3.71), 733.5];
+s += poly([L3, [837, FY], [1061, FY]], `fill="${C.p3}" fill-opacity=".14" stroke="${C.p3}" stroke-opacity=".5"`);
+s += poly([L4, [RX, 666], [RX, 831]], `fill="${C.p4}" fill-opacity=".16" stroke="${C.p4}" stroke-opacity=".6"`);
+s += poly([L1, [LXw, 636], [LXw, 831]], `fill="${C.p1}" fill-opacity=".16" stroke="${C.p1}" stroke-opacity=".6"`);
+// 좌대 (색면화 PC 안) · 협동화 PC (뒤 구석)
+s += rect(948 - 9.1, 728 - 9.1, 948 + 9.1, 728 + 9.1, `fill="#fff" stroke="${C.av}" stroke-width="1.6"`) + text(948, 715, '좌대 · 색면화 PC', 'class="s av" text-anchor="middle"');
+const pc = [BX + 8, FY - 8];
+s += rect(pc[0] - 6, pc[1] - 5, pc[0] + 6, pc[1] + 5, `fill="${C.av}"`) + text(pc[0] + 10, pc[1] - 10, '협동화 PC (관객석 뒤 구석)', 'class="s av"');
+// 영상선: 바닥·벽 = 실선, 천장 그리드 = 점선
+const riseAB = [LXe + 1, 728], riseC = [BX + 2, FY - 2];
+s += path([[948 - 9.1, 728], riseAB], `stroke="${C.av}" stroke-width="2.4"`);
+s += path([riseAB, [riseAB[0], L3[1]], L3], `stroke="${C.av}" stroke-width="1.6" stroke-dasharray="5 4"`);
+s += path([riseAB, [L4[0], riseAB[1]], L4], `stroke="${C.av}" stroke-width="1.6" stroke-dasharray="5 4"`);
+s += path([riseC, [L1[0], riseC[1]], L1], `stroke="${C.av}" stroke-width="1.6" stroke-dasharray="5 4"`);
+[riseAB, riseC].forEach(([x, y]) => { const [rx, ry] = P(x, y); s += `<circle cx="${rx}" cy="${ry}" r="4.5" fill="#fff" stroke="${C.av}" stroke-width="2"/>`; });
+s += text(riseAB[0] + 4, 742, '가벽으로 올림', 'class="s av"');
+// 프로젝터 본체 (렌즈 앞면 → 뒤로 0.338, 폭 0.422)
+const body = (L, dir, c, name) => { const d = m(0.338), w = m(0.422) / 2; const [x, y] = L;
+  const r = dir === 'up' ? [x - w, y, x + w, y + d] : dir === 'left' ? [x - d, y - w, x, y + w] : [x, y - w, x + d, y + w];
+  return rect(...r, `fill="${c}" stroke="#23211d" stroke-width="1"`) + text(dir === 'up' ? x : dir === 'left' ? x - d - 3 : x + d + 3, dir === 'up' ? y + d + 13 : y - w - 4, name, `class="n" text-anchor="${dir === 'up' ? 'middle' : dir === 'left' ? 'end' : 'start'}" fill="${c}"`); };
+s += body(L3, 'up', C.p3, 'A') + body(L4, 'left', C.p4, 'B') + body(L1, 'right', C.p1, 'C');
+// 치수
+s += dim(L3[0] + 14, L3[1], L3[0] + 14, FY, '5.75', L3[0] + 18, (L3[1] + FY) / 2 - 30);
+s += dim(L3[0], L3[1] - 18, RX, L3[1] - 18, '2.58', (L3[0] + RX) / 2, L3[1] - 22, 'text-anchor="middle"');
+s += dim(L4[0], L4[1] + 22, RX, L4[1] + 22, '5.11', (L4[0] + RX) / 2 - 30, L4[1] + 18, 'text-anchor="middle"');
+s += dim(L4[0] - 24, L4[1], L4[0] - 24, FY, '3.55', L4[0] - 28, (L4[1] + FY) / 2 + 4, 'text-anchor="end"');
+s += dim(L1[0], L1[1] - 24, LXw, L1[1] - 24, '3.71', (L1[0] + LXw) / 2, L1[1] - 28, 'text-anchor="middle"');
+s += dim(BX, L1[1] + 22, L1[0], L1[1] + 22, '2.30', (BX + L1[0]) / 2, L1[1] + 18, 'text-anchor="middle"');
+s += dim(L1[0] + 22, L1[1] + 10, L1[0] + 22, FY, '3.22', L1[0] + 26, (L1[1] + FY) / 2 + 4);
+// 벽 이름 · 구역
+s += text(949, FY - 8, '정면 벽 7.39', 'class="w2" text-anchor="middle"');
+s += `<text transform="translate(${q(RX - 9 - X0)},${q(748 - Y0)}) rotate(-90)" class="w2" text-anchor="middle">오른쪽 벽 5.45</text>`;
+s += `<text transform="translate(${q(LXe + 11 - X0)},${q(680 - Y0)}) rotate(90)" class="w2" text-anchor="middle">왼쪽 가벽 (투사 없음)</text>`;
+s += `<text transform="translate(${q(LXw - 7 - X0)},${q(680 - Y0)}) rotate(-90)" class="w2" text-anchor="middle">협동화 벽 6.44</text>`;
+s += `<text transform="translate(${q(BX + 9 - X0)},${q(700 - Y0)}) rotate(90)" class="w2" text-anchor="middle">뒤 벽 (관객석 쪽)</text>`;
+s += text(950, 610, '색면화 방', 'class="z" text-anchor="middle"') + text(690, 615, '협동화실', 'class="z" text-anchor="middle"') + text(780, 606, '↑ 홀 (열린 쪽)', 'class="s" text-anchor="middle"');
+s += `<style>.d{font:600 12px var(--mono);fill:#23211d}.s{font-size:11px;fill:#6f6a61}.av{fill:#5b4fc4;font-weight:600}.n{font:700 14px var(--sans)}.w{font-size:10px;fill:#fff}.w2{font-size:11px;fill:#23211d;font-weight:600}.z{font-size:13px;font-weight:700;fill:#23211d}</style></svg>`;
+document.getElementById('f-plan').innerHTML = s + '<figcaption>보라 = 영상선 (실선 바닥 · 점선 천장 그리드 · 흰 원 벽으로 올리는 자리)</figcaption>';
+
+// 옆에서 본 모습: 세 그림 같은 축척. 렌즈 → 벽, 벽 높이 3.30 · 천장 3.30
+function side(id, name, c, D, lensH, top, bot) {
+  const k = 34, oy = 16, wallX = 30 + 5.75 * k, ox = wallX - 12 - D * k, Y = h => oy + (4.6 - h) * k, w = wallX + 40, hh = Y(-0.8) + 26;
+  let t = `<svg viewBox="0 0 ${w} ${hh}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#fff"/>`;
+  t += `<line x1="8" y1="${Y(0)}" x2="${wallX + 6}" y2="${Y(0)}" stroke="#4a463f" stroke-width="2"/>`;
+  t += `<line x1="8" y1="${Y(3.3)}" x2="${wallX}" y2="${Y(3.3)}" stroke="#4a463f" stroke-width="1.2" stroke-dasharray="4 3"/><text x="10" y="${Y(3.3) - 4}" class="s">천장 그리드 3.30</text>`;
+  t += `<rect x="${wallX}" y="${Y(3.3)}" width="8" height="${3.3 * k}" fill="#4a463f"/>`;
+  const lx = ox + 12, ly = Y(lensH);
+  t += `<polygon points="${lx},${ly} ${wallX},${Y(top)} ${wallX},${Y(bot)}" fill="${c}" fill-opacity=".15" stroke="${c}" stroke-opacity=".6"/>`;
+  t += `<line x1="${wallX - 2}" y1="${Y(Math.min(top, 3.3))}" x2="${wallX - 2}" y2="${Y(Math.max(bot, 0))}" stroke="${c}" stroke-width="5"/>`;
+  t += `<line x1="${lx - 2}" y1="${Y(3.3)}" x2="${lx - 2}" y2="${ly}" stroke="#23211d" stroke-width="2"/>`;
+  t += `<rect x="${lx - 12}" y="${ly - 5}" width="12" height="10" fill="${c}" stroke="#23211d"/>`;
+  t += `<text x="${lx + 4}" y="${ly + 16}" class="d">렌즈 ${lensH.toFixed(2)}</text>`;
+  t += `<line x1="${lx}" y1="${Y(0) + 12}" x2="${wallX}" y2="${Y(0) + 12}" stroke="#6f6a61"/><text x="${(lx + wallX) / 2}" y="${Y(0) + 24}" class="d" text-anchor="middle">${D.toFixed(2)}</text>`;
+  const lab = (h, s2) => `<text x="${wallX + 11}" y="${Y(h) + 4}" class="s">${s2}</text>`;
+  t += lab(Math.min(top, 4.5), top.toFixed(2)) + lab(Math.max(bot, -0.6), bot.toFixed(2));
+  if (top > 3.3 || bot < 0) t += `<text x="${wallX - 6}" y="${Y(1.65) + 4}" class="s" text-anchor="end">벽 밖은 검게</text>`;
+  t += `<style>.d{font:600 11px var(--mono);fill:#23211d}.s{font-size:10px;fill:#6f6a61}</style></svg>`;
+  document.getElementById(id).innerHTML = t + `<figcaption>${name}</figcaption>`;
+}
+side('f-s3', 'A. 정면 · 수평 · 화면 위 3.98 · 아래 −0.69', C.p3, 5.75, 3.1, 3.98, -0.69);
+side('f-s4', 'B. 오른쪽 · 수평 · 화면 위 3.37 · 아래 −0.07', C.p4, 5.11, 3.1, 3.37, -0.07);
+side('f-s1', 'C. 협동화 · 10.8° 아래로 · 화면 위 4.33 · 아래 0.00', C.p1, 3.71, 3.1, 4.33, -0.01);
+</script>

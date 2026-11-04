@@ -417,6 +417,7 @@ function powerTube(pts, parent) {
   return m;
 }
 function nearestOutlet(F) {
+  scene.updateMatrixWorld(true); // 첫 계산 때 벽 행렬이 아직 안 잡혀 가벽을 뚫고 건너편 콘센트로 가던 문제
   const ray = new THREE.Raycaster();
   const list = FLOOR_OUTLETS.map(([px, py]) => v3(px, py, 0.05)).sort((a, b) => a.distanceTo(F) - b.distanceTo(F));
   const from = new THREE.Vector3(F.x, 0.05, F.z);
@@ -428,7 +429,8 @@ function nearestOutlet(F) {
   return list[0].setY(0.02);
 }
 // 색면화 두 벽(정면·오른쪽)은 영상이 비쳐서 선을 못 올림 → 투사 없는 왼쪽 가벽으로 올림 (2026-11-04 결정)
-const RISE_WALL = { sf: 'sl', sr: 'sl' };
+// 콘센트는 방 안 좌대 옆 바닥 콘센트. 두 선을 한 몰딩에 묶어 가벽까지 직선으로 깔고, 가벽 같은 자리에서 올림
+const RISE_WALL = { sf: { wall: 'sl', outlet: [954, 746] }, sr: { wall: 'sl', outlet: [954, 746] } };
 // 프로젝터 전원 경로: 천장 = 바닥 콘센트 → 바닥 → 투사 없는 가장 가까운 벽 → 벽 타고 위로 → 그리드 → 프로젝터 / 스탠드 = 콘센트 → 바닥 → 스탠드
 function projPower(p, m) {
   const L = m.lens, L2 = new THREE.Vector2(L.x, L.z), top = dims.ceilH - 0.05;
@@ -448,13 +450,15 @@ function projPower(p, m) {
       if (!onLit(F2) && (!best || d < best.d)) best = { d, F2 };
     }
   }
-  let F2 = best.F2;
-  const rw = RISE_WALL[p.surface] && surfGeom(RISE_WALL[p.surface]);
-  if (rw) { // 정해 둔 벽: 그 벽면에서 렌즈와 가장 가까운 자리
-    const A2 = new THREE.Vector2(rw.A.x, rw.A.z), t2 = new THREE.Vector2(rw.t.x, rw.t.z), a = THREE.MathUtils.clamp(L2.clone().sub(A2).dot(t2), 0.1, rw.L - 0.1);
+  let F2 = best.F2, O = null;
+  const rr = RISE_WALL[p.surface], rw = rr && surfGeom(rr.wall);
+  if (rw) { // 정해 둔 벽·콘센트: 콘센트에서 그 벽면으로 수직으로 간 자리에서 올림
+    O = v3(rr.outlet[0], rr.outlet[1], 0.02);
+    const A2 = new THREE.Vector2(rw.A.x, rw.A.z), t2 = new THREE.Vector2(rw.t.x, rw.t.z), a = THREE.MathUtils.clamp(new THREE.Vector2(O.x, O.z).sub(A2).dot(t2), 0.1, rw.L - 0.1);
     F2 = A2.addScaledVector(t2, a).addScaledVector(new THREE.Vector2(rw.n.x, rw.n.z), 0.03);
   }
-  const F = new THREE.Vector3(F2.x, 0.02, F2.y), O = nearestOutlet(F);
+  const F = new THREE.Vector3(F2.x, 0.02, F2.y);
+  O = O || nearestOutlet(F);
   return {
     pts: [O, F, new THREE.Vector3(F.x, top, F.z), new THREE.Vector3(L.x, top, L.z), new THREE.Vector3(L.x, L.y + 0.1, L.z)],
     floor: O.distanceTo(F), wall: top, ceil: F2.distanceTo(L2), drop: top - L.y - 0.1,
@@ -926,9 +930,12 @@ const PLANS = {
   c: { label: '안 ③ 둘 다 교체 렌즈 · 봉 없이', p3: { ...PHZ60CN, model: 'Sony VPL-PHZ60 + 교체 렌즈 · 천장, 광각 끝 · 가로 시프트', lensH: 3.1, zoom: 0, slide: 0.15 }, p4: { ...PHZ60CN, model: 'Sony VPL-PHZ60 + 교체 렌즈 · 천장, 망원 끝 · 가로 시프트', lensH: 3.1, zoom: 100, slide: -0.15 } },
 };
 const DEFAULTS = [
-  // 협동화: 단초점 고정(0.56), 렌즈 시프트 없음, 최대 150". 천장(3.3 m)에 달면 30° 넘게 기울여야 해서 받침·선반(렌즈 1.65 m)에 둠.
-  // 150"(3.2 × 2.0 m)를 벽 가운데에 기울임 없이: 벽에서 1.8 m. 벽 폭 6.4 m를 다 채우려면 약 300"라 이 기종 표기 범위를 넘음
-  { id: 'p1', name: '협동화 프로젝터', model: 'Maxell MP-V5002 (단초점) · 받침', surface: 'hyup', mount: 'stand', lumens: 5000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 0.56, trTele: 0.56, zoom: 0, shiftV: 0, shiftH: 0, shiftVMax: 0, shiftVMin: 0, shiftHMax: 0, maxDiag: 150, distance: 1.8, offset: 0, lensH: 1.65, yaw: 0, pitch: 0, content: 'grid', mask: false, on: true, presetKey: 'mpv5002', place: 'stand' },
+  // 협동화: 단초점 고정(0.56), 렌즈 시프트 없음, 표기 최대 150". 2026-11-04 천장에 매달고 벽(6.44 × 3.3 m)을 다 채우기로 함.
+  // 벽 전체는 약 320"로 표기 최대 150"의 두 배 → 초점이 안 맞을 수 있음. 안 되면 PHZ60 + 교체 렌즈로 바꾸는 안(벽에서 약 5.0 m)
+  // 렌즈 3.1 m, 시프트가 없어 아래로 10.8° 기울임. 벽 아래 끝을 화면 아래 끝에 맞춘 가장 가까운 거리 3.71 m (화소 약 67% 사용).
+  // coverFit(1.08 여유)보다 화면이 작고 밝아서 직접 계산한 값으로 고정(fixed). 표기 최대 150"를 넘는 크기라 초점은 현장 확인
+  // 본체 고정 오프셋(표기 없음)이 있으면 기울기가 줄어듦 → 현장에서 확인
+  { id: 'p1', name: '협동화 프로젝터', model: 'Maxell MP-V5002 (단초점) · 천장, 벽 전체', surface: 'hyup', mount: 'ceiling', lumens: 5000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 0.56, trTele: 0.56, zoom: 0, shiftV: 0, shiftH: 0, shiftVMax: 0, shiftVMin: 0, shiftHMax: 0, maxDiag: 150, distance: 3.71, offset: 0, lensH: 3.1, yaw: 0, pitch: -10.8, content: 'grid', mask: true, fixed: true, on: true, presetKey: 'mpv5002', place: 'ceiling' },
   // 색면화: 왼쪽 벽은 투사 없음. 정면·오른쪽은 좌대에 올린 그림의 띠가 이어 흐르는 한 화면(field). 벽을 꽉 덮고 넘치는 부분은 마스킹 (coverFit으로 거리·시프트 계산)
   { id: 'p3', name: '색면화 · 정면', surface: 'sf', mount: 'ceiling', zoom: 0, shiftV: 0, shiftH: 0, distance: 5.8, offset: 0, yaw: 0, pitch: 0, content: 'field', mask: true, on: true, ...PLANS.c.p3 },
   { id: 'p4', name: '색면화 · 오른쪽', surface: 'sr', mount: 'ceiling', zoom: 0, shiftV: 0, shiftH: 0, distance: 5.1, offset: 0, yaw: 0, pitch: 0, content: 'field', mask: true, on: true, ...PLANS.c.p4 },
@@ -936,7 +943,7 @@ const DEFAULTS = [
 const STORE = 'hamkke-808-projectors-v2';
 let projectors = [];
 try { const s = JSON.parse(localStorage.getItem(STORE)); if (Array.isArray(s) && s.length) projectors = s; } catch (e) { }
-function freshDefaults() { const arr = structuredClone(DEFAULTS); arr.forEach(p => { if (p.mask) coverFit(p); applySlide(p); }); return arr; }
+function freshDefaults() { const arr = structuredClone(DEFAULTS); arr.forEach(p => { if (p.mask && !p.fixed) coverFit(p); applySlide(p); }); return arr; }
 // 렌즈 자리를 벽 방향으로 화면 폭 × slide만큼 옮기고, 같은 크기의 가로 시프트로 화면을 벽 가운데에 되돌림 (안 ③)
 function applySlide(p) {
   if (p.slide) {
@@ -950,7 +957,8 @@ const PRESETS = {
   phz60: { model: 'Sony VPL-PHZ60', lumens: 6000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 1.23, trTele: 1.97, shiftVMin: -35, shiftVMax: 55, shiftHMax: 15 },
   // 업체 안내(2026-11-03): 중국산 교체 렌즈로 5~6 m에서 300" → 16:10 폭 6.46 m 기준 투사비 0.77~0.93. 렌즈 시프트는 본체 범위 그대로 된다고 가정 (실물 확인 필요)
   phz60cn: { model: 'Sony VPL-PHZ60 + 교체 렌즈 (투사비 0.77~0.93 추정)', lumens: 6000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 0.77, trTele: 0.93, shiftVMin: -35, shiftVMax: 55, shiftHMax: 15 },
-  // 신성미디어테크 상세: 0.64" 3LCD, 투사비 0.56 고정 줌, 화면 60~150", 키스톤 ±30°, 렌즈 시프트 표기 없음
+  // 신성미디어테크 상세(sslcd.co.kr, 2026-11-04 확인): 0.64" 3LCD, 투사비 0.56 고정, 화면 60~150"(150" = 1.7 m), 키스톤 상하·좌우 ±30°, 코너 키스톤,
+  // 렌즈 시프트·오프셋 표기 없음(매뉴얼 확인 필요), 8.1 kg, 506×136×424 mm, 360 W
   mpv5002: { model: 'Maxell MP-V5002 (단초점)', lumens: 5000, resW: 1920, resH: 1200, aspect: '16:10', trWide: 0.56, trTele: 0.56, shiftVMin: 0, shiftVMax: 0, shiftHMax: 0, maxDiag: 150 },
   // Panasonic 렌즈 가이드: ET-ELW21 고정 0.764 (이 렌즈에서는 렌즈 시프트 불가), ET-ELW22 줌 0.786–0.983 (세로 ±50%, 가로 ±10%)
   ez770w21: { model: 'Panasonic PT-EZ770 + ET-ELW21', lumens: 6500, resW: 1920, resH: 1200, aspect: '16:10', trWide: 0.764, trTele: 0.764, shiftVMin: 0, shiftVMax: 0, shiftHMax: 0 },
@@ -996,6 +1004,8 @@ if (!projectors.length) projectors = freshDefaults();
 { const fresh = freshDefaults(); projectors = projectors.map(p => /^미정/.test(p.model || '') && fresh.find(q => q.id === p.id) ? { ...fresh.find(q => q.id === p.id), content: p.content } : p); }
 // 예전 저장값: 색면화 두 벽의 '색면' 콘텐츠를 좌대 연동 흐름으로
 projectors.forEach(p => { if (p.content === 'color' && (p.surface === 'sf' || p.surface === 'sr')) p.content = 'field'; });
+// 예전 저장값: 받침·150" 협동화 프로젝터를 천장 · 벽 전체 안으로 (2026-11-04)
+{ const f1 = freshDefaults().find(q => q.id === 'p1'); projectors = projectors.map(p => p.id === 'p1' && p.presetKey === 'mpv5002' && !p.mask ? { ...f1, content: p.content } : p); }
 let selP = projectors[0]?.id;
 const pRuntime = new Map(); // id → { light, root, body, pole, lines, canvas, ctx, tex, media, label }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(projectors)); } catch (e) { } }
