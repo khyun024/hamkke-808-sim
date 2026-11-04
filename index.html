@@ -427,21 +427,33 @@ function nearestOutlet(F) {
   }
   return list[0].setY(0.02);
 }
-// 프로젝터 전원 경로: 천장 = 바닥 콘센트 → 바닥 → 가장 가까운 벽 → 벽 타고 위로 → 그리드 → 프로젝터 / 스탠드 = 콘센트 → 바닥 → 스탠드
+// 색면화 두 벽(정면·오른쪽)은 영상이 비쳐서 선을 못 올림 → 투사 없는 왼쪽 가벽으로 올림 (2026-11-04 결정)
+const RISE_WALL = { sf: 'sl', sr: 'sl' };
+// 프로젝터 전원 경로: 천장 = 바닥 콘센트 → 바닥 → 투사 없는 가장 가까운 벽 → 벽 타고 위로 → 그리드 → 프로젝터 / 스탠드 = 콘센트 → 바닥 → 스탠드
 function projPower(p, m) {
   const L = m.lens, L2 = new THREE.Vector2(L.x, L.z), top = dims.ceilH - 0.05;
   if (p.mount !== 'ceiling') {
     const base = new THREE.Vector3(L.x, 0.02, L.z), O = nearestOutlet(base);
     return { pts: [O, base, new THREE.Vector3(L.x, L.y - 0.1, L.z)], floor: O.distanceTo(base), wall: 0, ceil: 0, drop: 0, rise: L.y };
   }
+  // 선을 올릴 벽: 가장 가까운 벽면이되, 켜진 프로젝터가 비추는 면(투사면 앞 0.4 m 안)은 건너뜀 → 색면화는 투사 없는 왼쪽 가벽으로 올라감
+  const lit = [...new Set(projectors.filter(q => q.on).map(q => q.surface))].map(surfGeom).map(g => ({ A: new THREE.Vector2(g.A.x, g.A.z), t: new THREE.Vector2(g.t.x, g.t.z), n: new THREE.Vector2(g.n.x, g.n.z), L: g.L }));
+  const onLit = P => lit.some(g => { const r = P.clone().sub(g.A), a = r.dot(g.t), d = r.dot(g.n); return a > -0.2 && a < g.L + 0.2 && d > -0.05 && d < 0.4; });
   let best = null;
   for (const s of wallSegs) {
-    const ab = s.B.clone().sub(s.A), t = THREE.MathUtils.clamp(L2.clone().sub(s.A).dot(ab) / ab.lengthSq(), 0, 1);
-    const foot = s.A.clone().addScaledVector(ab, t), d = foot.distanceTo(L2);
-    if (!best || d < best.d) best = { d, foot, s };
+    const ab = s.B.clone().sub(s.A), len = ab.length(), dir = ab.clone().divideScalar(len), nn = new THREE.Vector2(-dir.y, dir.x);
+    for (let k = 0; k <= Math.ceil(len / 0.1); k++) {
+      const P = s.A.clone().addScaledVector(dir, Math.min(len, k * 0.1)), side = Math.sign(L2.clone().sub(P).dot(nn)) || 1;
+      const F2 = P.addScaledVector(nn, side * (s.t / 2 + 0.03)), d = F2.distanceTo(L2);
+      if (!onLit(F2) && (!best || d < best.d)) best = { d, F2 };
+    }
   }
-  const n = L2.clone().sub(best.foot).normalize();
-  const F2 = best.foot.clone().addScaledVector(n, best.s.t / 2 + 0.03);
+  let F2 = best.F2;
+  const rw = RISE_WALL[p.surface] && surfGeom(RISE_WALL[p.surface]);
+  if (rw) { // 정해 둔 벽: 그 벽면에서 렌즈와 가장 가까운 자리
+    const A2 = new THREE.Vector2(rw.A.x, rw.A.z), t2 = new THREE.Vector2(rw.t.x, rw.t.z), a = THREE.MathUtils.clamp(L2.clone().sub(A2).dot(t2), 0.1, rw.L - 0.1);
+    F2 = A2.addScaledVector(t2, a).addScaledVector(new THREE.Vector2(rw.n.x, rw.n.z), 0.03);
+  }
   const F = new THREE.Vector3(F2.x, 0.02, F2.y), O = nearestOutlet(F);
   return {
     pts: [O, F, new THREE.Vector3(F.x, top, F.z), new THREE.Vector3(L.x, top, L.z), new THREE.Vector3(L.x, L.y + 0.1, L.z)],
