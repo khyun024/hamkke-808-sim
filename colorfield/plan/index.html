@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>색면화 미디어아트 기획 정리</title>
+<style>
+  :root { --bg: #fff; --fg: #1d1f22; --muted: #6b7279; --line: #e2e5e8; --soft: #f5f6f7; --accent: #2f6fde; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #121416; --fg: #e8eaed; --muted: #98a0a8; --line: #2b3034; --soft: #1b1f23; --accent: #6ea0ff; } }
+  :root[data-theme="dark"] { --bg: #121416; --fg: #e8eaed; --muted: #98a0a8; --line: #2b3034; --soft: #1b1f23; --accent: #6ea0ff; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+  .page { max-width: 1040px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 24px; margin: 0 0 4px; } .meta { color: var(--muted); margin: 0 0 24px; }
+  h2 { font-size: 17px; margin: 36px 0 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+  h3 { font-size: 14.5px; margin: 18px 0 6px; }
+  p { margin: 6px 0; } ul { margin: 6px 0; padding-left: 20px; } li { margin: 2px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; } th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--soft); font-weight: 600; white-space: nowrap; } td.n { white-space: nowrap; }
+  .scroll { overflow-x: auto; }
+  blockquote { margin: 8px 0; padding: 8px 14px; border-left: 3px solid var(--accent); background: var(--soft); }
+  .thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 4px; display: block; }
+  .sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; border: 1px solid rgba(0,0,0,.15); vertical-align: -1px; margin-right: 3px; }
+  audio { width: 230px; height: 30px; display: block; }
+  .ok { color: #1f8a4c; } .warn { color: #c0672a; } .muted { color: var(--muted); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; } @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+  a { color: var(--accent); }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 3px; background: var(--soft); border: 1px solid var(--line); color: var(--muted); margin-left: 4px; }
+</style>
+<div class="page">
+  <h1>색면화 미디어아트 · 기획 정리</h1>
+  <p class="meta">2026 성남큐브미술관 〈함께누리예술전 · 사이 놀이터〉 워크숍존 색면화 방 · 파프리스튜디오 · 2026-11-09 정리 · <a href="../">프리비즈 ↗</a> · <a href="../../install/">설치 체크리스트 ↗</a></p>
+
+  <h2>1. 기준 문서</h2>
+  <div class="scroll"><table>
+    <tr><th>문서</th><th>날짜</th><th>이 기획에서 가져온 것</th></tr>
+    <tr><td class="n">재단 「함께누리예술전 미디어아트(색면화) 개요」 hwpx</td><td class="n">10-12 메일 첨부</td><td>전시 구성(캔버스 8점 + 미디어아트, 애장품 패널 8개), 공간 구성(안쪽 벽에 <b>색면화 인식 기반 미디어아트</b>, 사이드 벽에 실물 캔버스와 애장품 설명글), 관람 방향, 작품 8점의 <b>애장품 이야기</b>와 <b>찾은 색</b></td></tr>
+    <tr><td class="n">파프리 시안 메일 (재단 승인 자료)</td><td class="n">11-03</td><td>작동 방식: 캔버스를 좌대에 올리면 그 그림의 띠가 벽을 따라 흐르고, <b>그 작품의 애장품 이야기로 만든 음악</b>이 함께 나온다. 화면은 <b>음악에 맞춰</b> 움직이고 다른 그림을 올릴 때까지 이어진다</td></tr>
+    <tr><td class="n">과업지시서 「다감각 영상물 제작 및 구현」</td><td class="n">11-05</td><td>색면화 작품의 기획 의도와 시각적 특성을 반영한 인터랙티브 미디어아트, 전시장에서 정상 구동, 접근성, 저작권 문제 없는 음원, 재단·작가 의견에 따른 수정</td></tr>
+    <tr><td class="n">장비 임차 리스트 · 설치업체 답신</td><td class="n">11-02 · 11-08</td><td>색면화 방 프로젝터 2대(정면·오른쪽 벽), PC는 좌대 안. 설치업체는 MP-V5002 기준으로 거리 재계산 예정</td></tr>
+  </table></div>
+  <blockquote>투사면은 <b>정면 7.4 m + 오른쪽 5.45 m 두 면</b>으로 확정했습니다(재단 확인, 2026-11-09). 개요의 "3면 중 가장 안쪽 벽" 표기는 초기 안입니다.</blockquote>
+
+  <h2>2. 콘셉트 한 줄</h2>
+  <p><b>참여자의 색면화가 벽만큼 커져서 숨을 쉰다.</b> 캔버스를 좌대에 올리면 그 그림의 색면이 좌대 쪽 벽에서 모서리를 돌아 오른쪽 벽까지 물감처럼 번져 나간다. 색과 비례는 원작 그대로 두고, 띠의 경계가 물결치고 색면 안에서 빛의 결이 흐르는 정도만 움직인다. 그 위로 아주 적은 빛 먼지가 떠돈다. 음악은 그 참여자의 애장품 이야기로 만든 2분 연주곡이고, 저음·악센트·음역이 화면의 파도와 밝기를 움직인다.</p>
+  <ul>
+    <li><b>지키는 것</b>: 원작의 색, 띠의 순서와 비례, 손으로 그은 경계의 울퉁불퉁함.</li>
+    <li><b>움직이는 것</b>: 경계 위를 지나는 긴 파도(벽에서 약 35 cm/초), 색면 안 빛의 결(±16%), 띠 두께의 숨(±10%), 음악에 따른 밝기.</li>
+    <li><b>하지 않는 것</b>: 그림을 가루로 흩뜨리거나 다른 모양으로 바꾸는 것. 글자·캡션(설명은 사이드 벽 패널이 맡는다).</li>
+  </ul>
+
+  <h2>3. 작품 8점 · 이야기 · 음악</h2>
+  <p class="muted">번호는 재단 개요 표 순서 = 페이지 썸네일 순서(숫자 키 1~8). 이야기와 찾은 색은 재단 개요 그대로. 음악은 2판(11-09, 공통 팔레트: 펠트 피아노·따뜻한 현·유리 질감). 반응 지표는 프리비즈에서 곡을 틀고 23초간 잰 값(0~1, 클수록 화면이 많이 움직임). 〈아빠〉〈나〉는 고음 범위와 악센트 문턱을 고친 뒤 다시 잰 값이고, 나머지는 고치기 전 값이라 지금은 조금 더 높게 나옵니다.</p>
+  <div class="scroll"><table id="works">
+    <tr><th>번호</th><th>캔버스</th><th>작품 · 애장품 이야기</th><th>찾은 색</th><th>음악 (조성 · 빠르기 · 악기)</th><th>듣기</th><th>반응 지표</th></tr>
+  </table></div>
+  <p class="muted">〈나이키 운동화〉는 개요의 제목과 설명(농구공)이 서로 맞지 않습니다. 패널 문구를 확정할 때 재단에 확인합니다.</p>
+
+  <h2>4. 음악 ↔ 화면 상호작용 규칙</h2>
+  <div class="scroll"><table>
+    <tr><th>음악에서 읽는 것</th><th>화면에서 일어나는 일</th><th>세기 · 시간</th></tr>
+    <tr><td>저음(30~170 Hz)</td><td>띠 경계의 파도가 높아진다</td><td>최대 +35% · 부드럽게 따라감(반응 부드러움 60%)</td></tr>
+    <tr><td>악센트(스펙트럼이 갑자기 커지는 순간)</td><td>빛 물결 머리에서 넓은 빛이 번져 양옆으로 퍼진다</td><td>1.1초에 한 번까지 · 9초간 사그라듦 · 6초 넘게 조용하면 문턱이 내려가 희미한 곡에서도 가끔 생김</td></tr>
+    <tr><td>음역(70 Hz ~ 4.5 kHz를 띠 수만큼 나눔)</td><td>위 띠는 높은 음, 아래 띠는 낮은 음에 밝아진다</td><td>최대 +35% 밝기</td></tr>
+    <tr><td>고음(1.5~7 kHz)</td><td>빛 먼지 일부가 느리게 반짝인다</td><td>먼지 10%만</td></tr>
+    <tr><td>전체 음량</td><td>색면 전체 밝기와 먼지 흐름 속도가 조금 오른다</td><td>+6% · +25%</td></tr>
+    <tr><td>곡의 네 마디</td><td>빛 물결이 시작 벽에서 끝 벽까지 한 번 지나간다 (그림을 올린 순간부터)</td><td>〈결혼식〉 63 BPM 3/4 = 11.4초, 〈아빠〉 56 BPM 4/4 = 17.1초</td></tr>
+    <tr><td>그림을 올림 · 바꿈 · 뺌</td><td>음악이 2초에 차오르고, 바꾸면 2.5초에 잦아든 뒤 다음 곡이 시작. 색면은 같은 방향으로 번지고 풀어짐</td><td>두 곡이 겹치지 않음</td></tr>
+  </table></div>
+  <p>곡마다 다이내믹이 달라서 〈선생님〉〈아빠〉〈나〉는 반응 배율을 1.3~1.4로 올려 두었습니다(페이지의 <code>WORKS[].rx</code>). 조절 패널 「소리 반응」에서 전체 세기를 바꿀 수 있습니다.</p>
+
+  <h2>5. 만드는 순서 (기획 → 음악 → 미디어아트)</h2>
+  <ol>
+    <li><b>기획</b>: 이 문서의 3번 표가 기준입니다. 작품 이야기·찾은 색·음악 콘셉트가 바뀌면 여기부터 고칩니다.</li>
+    <li><b>음악 생성</b>: <a href="../sound/README.md">sound/README.md</a>의 프롬프트(작품별 앞부분 + 공통 꼬리말)로 ElevenLabs Music에 2분 연주곡을 요청합니다. 곡당 약 1,650 크레딧, 한 곡씩 20초 간격. 받은 파일은 앞뒤 무음을 잘라 -18 LUFS로 맞춰 <code>sound/cfN.mp3</code>로 넣습니다. 파일만 바꾸면 페이지는 그대로 씁니다.</li>
+    <li><b>미디어아트 반영</b>: 페이지 <code>WORKS</code>에 그 곡의 조성·BPM·박자를 적습니다(네 마디 빛 물결 주기와 실시간 합성음이 여기서 나옵니다). 다이내믹이 작은 곡은 <code>rx</code>를 올립니다.</li>
+    <li><b>점검</b>: 프리비즈에서 소리를 켜고 그림을 올린 뒤 콘솔 <code>cfAR.v</code>(저음·고음·음량)와 <code>cfAR.k</code>(악센트 수)를 봅니다. 저음·음량 평균 0.35 이상, 악센트 10초에 2회 이상이면 반응이 보입니다.</li>
+  </ol>
+
+  <h2>6. 현황 · 남은 일</h2>
+  <div class="grid2">
+    <div><h3>되어 있는 것</h3><ul>
+      <li>캔버스 사진 8점(〈너부리〉는 11-09 단체 사진에서 잘라 넣음)</li>
+      <li>음악 2판 8곡(-18 LUFS, 89~120초, 공통 팔레트)</li>
+      <li>색면 방식 프리비즈(① 물결치는 경계 기본, 안 ②~⑥ 프리셋)</li>
+      <li>투사면 두 면(정면 + 오른쪽) 재단 확인 완료</li>
+      <li>좌대 NFC 인식(Web Serial), 송출 화면 <code>?output=2</code>, 설치 체크리스트</li>
+    </ul></div>
+    <div><h3>확인·결정할 것</h3><ul>
+      <li>MP-V5002로 바뀔 경우 색면화 방 프로젝터 거리 재계산(설치업체)</li>
+      <li>〈나이키 운동화〉 제목·설명 불일치 → 재단</li>
+      <li>음악은 사람이 들어 보고 확정(파도 속도·잔상은 현장에서 조정)</li>
+      <li>NFC 태그 8장 등록, 좌대 제작 완료 확인</li>
+    </ul></div>
+  </div>
+</div>
+<script>
+const WORKS = [
+  ['cf1', '나이키 운동화', '동그란 모양으로 어디든 굴러가는 농구공은 제가 제일 좋아하는 물건이에요. 늘 내 방에 있어요.', ['황토색', '회색', '흰색', '갈색', '검은색'], 'D도리안 · 70 BPM · 둥글게 구르는 아르페지오, 가끔 공 튀는 낮은 소리', { bass: .52, high: .33, level: .49, hits: 6.1 }],
+  ['cf2', '결혼식', '하얀 드레스, 검정 턱시도. 생각만으로도 설레는 결혼식의 한 장면이에요.', ['주황색', '연두색', '분홍색', '검은색', '베이지색', '흰색', '빨간색'], 'F장조 · 63 BPM 3/4 · 펠트 피아노 왈츠, 셀레스타 반짝임, 따뜻한 현', { bass: .46, high: .34, level: .39, hits: 4.3 }],
+  ['cf3', '아빠', '힘든 순간에도 늘 곁에서 든든하게 지켜준 나의 아빠, 이제 내가 지켜줄게요.', ['노란색', '검은색', '하늘색', '분홍색', '초록색', '보라색', '살구색'], 'E♭장조 · 56 BPM · 낮은 첼로와 현, 느린 심장 박동, 돌아올 때마다 한 단 높아지는 선율', { bass: .40, high: .27, level: .40, hits: 1.7, rx: 1.35 }],
+  ['cf4', '초코 쿠키', '먹는 걸 워낙 좋아해요. 달콤한 초코 쿠키 한입이면 힘이 불끈 솟아요.', ['회색', '검은색', '노란색', '황토색', '흰색', '갈색'], 'C리디아 · 72 BPM · 펠트 피아노 위 마림바·칼림바 점, 가끔 솟는 아르페지오', { bass: .45, high: .47, level: .52, hits: 6.5 }],
+  ['cf5', '동물', '그림 그리는 걸 좋아하는데 그중 동물 그리기가 가장 재미있어요. 동물 피규어도 집에 한가득이에요.', ['흰색', '검은색', '갈색', '고동색', '주황색'], 'A장조 5음 · 68 BPM · 피아노와 나무 마림바, 작은 플루트 새소리', { bass: .51, high: .45, level: .48, hits: 7.0 }],
+  ['cf6', '나', '세상에서 제일 중요한 건 바로, 나 자신! 내가 젤 소중해요.', ['검은색', '보라색', '살구색', '파란색', '흰색', '청록색'], 'E장조 · 60 BPM · 피아노 아래 맑게 피어나는 현·유리 패드, 으뜸음으로 돌아오는 선율', { bass: .38, high: .09, level: .35, hits: 0.9, rx: 1.4 }],
+  ['cf7', '선생님', '늘 친절하게 맞아주는 선생님이 제일 좋아요. 매일매일 선생님을 그림으로 그리고 편지를 써서 드려요.', ['검은색', '주황색', '남색', '노란색', '살구색', '보라색'], 'G장조 · 66 BPM · 인사 같은 짧은 피아노 구절과 한 옥타브 위 메아리', { bass: .36, high: .01, level: .37, hits: 3.9, rx: 1.3 }],
+  ['cf8', '너부리', '너부리 없이는 어디든 한 발짝도 갈 수 없어요. 우리, 앞으로도 함께 하자.', ['황토색', '검은색', '흰색', '분홍색'], 'B♭장조 · 66 BPM 걷는 빠르기 · 3도 아래서 나란히 걷는 두 선율, 먼 발걸음', { bass: .47, high: .28, level: .47, hits: 6.5 }],
+];
+const SW = { 주황색: '#e8762b', 연두색: '#8fd14f', 분홍색: '#e97fb4', 검은색: '#1a1a1a', 베이지색: '#e6d2b0', 흰색: '#f4f2ec', 빨간색: '#c42a2a', 남색: '#243a7a', 노란색: '#f1d21b', 살구색: '#f4b79a', 보라색: '#6e3fa3', 회색: '#9a9a9a', 황토색: '#c7922b', 갈색: '#8a5a2b', 하늘색: '#7fb6e6', 초록색: '#2f9e44', 고동색: '#4a2a1a', 파란색: '#2f5bd6', 청록색: '#1f8a8a' };
+const t = document.getElementById('works'), v = Date.now();
+WORKS.forEach(([k, title, story, cols, music, m], i) => {
+  const tr = document.createElement('tr');
+  const weak = m.hits < 2 || m.high < 0.1;
+  tr.innerHTML = `<td class="n">${i + 1}</td><td><img class="thumb" src="../${k}.jpg" alt="〈${title}〉 캔버스"></td>
+    <td><b>〈${title}〉</b><br><span class="muted">${story}</span></td>
+    <td>${cols.map(c => `<span class="sw" style="background:${SW[c] || '#888'}"></span>${c}`).join('<br>')}</td>
+    <td>${music}</td>
+    <td><audio controls preload="none" src="../sound/${k}.mp3?v=${v}"></audio></td>
+    <td class="n">저음 ${m.bass} · 고음 ${m.high}<br>음량 ${m.level} · 악센트 ${m.hits}/10초${m.rx ? `<br><span class="tag">반응 ×${m.rx}</span>` : ''}<br><span class="${weak ? 'warn' : 'ok'}">${weak ? '잔잔한 곡 · 배율로 보정' : '반응 충분'}</span></td>`;
+  t.appendChild(tr);
+});
+document.querySelectorAll('audio').forEach(a => a.addEventListener('play', () => document.querySelectorAll('audio').forEach(b => { if (b !== a) b.pause(); })));
+</script>
+</html>

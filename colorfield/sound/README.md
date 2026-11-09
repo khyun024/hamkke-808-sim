@@ -1,30 +1,37 @@
 # 색면화 작품별 음악 파일
 
-색면화 페이지의 「소리 → 소리 방식 → 음악 파일 (sound 폴더)」을 고르면, 그림을 올릴 때 이 폴더의 같은 이름 파일을 반복 재생합니다. 파일이 없는 작품은 브라우저에서 만드는 「작품별 소리」로 대신합니다.
+작품 이야기·찾은 색·음악 콘셉트·상호작용 규칙은 [../plan/](../plan/) 기획 정리에 모아 두었습니다. 여덟 곡을 한 번에 들어 보는 플레이어도 거기에 있습니다. 기획 → 음악 생성 → 페이지 반영 순서로 고칩니다.
 
-- 파일 이름: `cf1.mp3` ~ `cf8.mp3` (아래 표의 번호)
-- 길이: 2~3분. 끝과 처음이 자연스럽게 이어지도록 처음과 끝을 조용하게 둡니다.
-- 보컬 없이 연주곡으로 만듭니다.
+색면화 페이지의 「소리 → 소리 방식 → 작품별 음악 (ElevenLabs)」(기본값)을 고르면, 그림을 올릴 때 이 폴더의 같은 이름 파일을 반복 재생합니다. 파일이 없는 작품은 브라우저에서 만드는 「작품별 소리」로 대신합니다.
+
+- 파일 이름: `cf1.mp3` ~ `cf8.mp3` (아래 표의 번호 = 재단 개요 표 순서 = 페이지 썸네일 순서 = 숫자 키 1~8. 2026-11-09 개요 순서로 다시 매김)
+- 길이: 2분. 끝 8초와 다음 회차의 처음을 겹쳐서(크로스페이드) 이어 갑니다.
+- 음량: 모두 -18 LUFS로 맞춤 (음량만 조정, 다이내믹은 그대로).
 - 작품 이야기는 「함께누리예술전 미디어아트(색면화) 개요.hwpx」에서 가져왔습니다.
 
-## ElevenLabs Music 프롬프트
+## 2026-11-09 다시 만듦 (2판)
 
-공통 꼬리말(모든 프롬프트 끝에 붙임):
-`Instrumental only, no vocals, no drums. Slow, gentle, spacious mix for a dark gallery installation where colored light particles slowly drift across the walls. Seamless loop: begin and end softly at the same level.`
+1판(11-03)은 곡마다 악기가 달라(오르골 왈츠, 로즈 건반, 마림바, 합창…) 그림을 바꿀 때 라디오 채널을 돌리는 느낌이었습니다. 2판은 여덟 곡이 **한 설치의 한 음색**으로 들리도록 공통 팔레트를 정하고, 그림이 올라와 띠가 하나씩 도착하는 첫 15초에 맞춰 음도 하나씩 들어오게 했습니다. 1판 파일은 `../_candidates/prev_261103/`에 그대로 있습니다.
 
-| 번호 | 작품 | 이야기 | 프롬프트 |
+### 공통 꼬리말 (모든 프롬프트 뒤에 붙임)
+
+> Part of an eight-piece suite for one quiet gallery installation, so every piece shares the same sound palette: soft felt piano, warm sustained strings, a faint glassy mallet texture, and a hint of room air. No drums, no vocals, instrumental only. Very gentle dynamics, slow attacks, lots of silence and space, long natural reverb of a dark concrete room where coloured light particles drift slowly across a wall. Structure: begin almost silent, with single notes arriving one by one over the first fifteen seconds like coloured bands appearing on a wall; then settle into a slow, breathing, sustained passage that could continue forever; end as softly as it began, at the same low level, so the piece loops seamlessly.
+
+### 작품별 프롬프트
+
+| 번호 | 작품 | 이야기 | 프롬프트 (앞부분) |
 |---|---|---|---|
-| cf1 | 〈결혼식〉 | 하얀 드레스, 검정 턱시도. 생각만으로도 설레는 결혼식의 한 장면 | Tender music-box waltz in F major, 63 BPM, 3/4. Celesta and music box melody over soft warm strings, a few sparkling high chimes. Feeling of quiet excitement and a white dress in soft light. |
-| cf2 | 〈선생님〉 | 늘 친절하게 맞아주는 선생님. 매일 그림을 그리고 편지를 써서 드려요 | Warm, kind Rhodes electric piano in G major, 70 BPM. Simple greeting-like phrases, each answered by a softer echo an octave higher like a reply letter. Light felt piano and warm pad. Friendly, everyday comfort. |
-| cf3 | 〈초코 쿠키〉 | 달콤한 초코 쿠키 한입이면 힘이 불끈 솟아요 | Sweet, playful marimba and kalimba in C lydian, 80 BPM. Bouncy short notes over a cozy low warm pad, with a small rising arpeggio now and then like a burst of energy. Light, delicious, smiling. |
-| cf4 | 〈나이키 운동화〉 | 동그란 모양으로 어디든 굴러가는 농구공. 늘 내 방에 있어요 | Plucked nylon guitar and pizzicato in D dorian, 84 BPM. Rolling arpeggios that feel round and moving, muffled warm room tone, occasional soft low thuds like a ball bouncing and slowing down. Earthy ochre and brown colors. |
-| cf5 | 〈아빠〉 | 힘든 순간에도 곁에서 든든하게 지켜준 아빠, 이제 내가 지켜줄게요 | Deep, steady cello and low strings in E-flat major, 54 BPM. A slow heartbeat-like low pulse underneath. A simple melody that rises one step higher each time it returns, growing from being protected to protecting. Warm, strong, tender. |
-| cf6 | 〈동물〉 | 그림 그리기를 좋아하고, 동물 피규어가 집에 한가득 | Playful wooden marimba, woodblocks and toy-like percussion in A major pentatonic, 78 BPM. Little flute bird calls and soft animal-like motifs around the melody. Curious, cozy, a room full of tiny figures. |
-| cf7 | 〈나〉 | 세상에서 제일 중요한 건 바로 나 자신, 내가 젤 소중해요 | Clear, wordless humming choir ("ooh") in E major, 62 BPM, over airy blooming synth pads that swell every few bars. Confident, self-affirming, calm and bright. |
-| cf8 | 〈너부리〉 | 너부리 없이는 어디든 한 발짝도 갈 수 없어요. 우리, 앞으로도 함께 하자 | Gentle walking-pace duet in B-flat major, 74 BPM. Marimba melody with a plucked second voice always a third below, walking side by side. Soft footstep-like low taps on every beat. Warm, loyal companionship, a plush friend you never leave behind. |
+| cf1 | 〈나이키 운동화〉 | 동그란 모양으로 어디든 굴러가는 농구공. 늘 내 방에 있어요 | 〈Basketball〉. D dorian, 70 BPM. Felt piano plays round, rolling arpeggios that keep circling like a ball rolling across a room; a muffled low thud now and then, slowing like a bounce coming to rest. Strings stay low and earthy, ochre and brown. |
+| cf2 | 〈결혼식〉 | 하얀 드레스, 검정 턱시도. 생각만으로도 설레는 결혼식의 한 장면 | 〈Wedding〉. F major, 63 BPM, gentle 3/4 waltz feel implied by the piano, never heavy. Felt piano carries a tender, slightly shy melody; a few sparkling high celesta notes like light on a white dress; warm strings hold underneath. Quiet excitement held in. |
+| cf3 | 〈아빠〉 | 힘든 순간에도 곁에서 든든하게 지켜준 아빠, 이제 내가 지켜줄게요 | 〈Dad〉. E-flat major, 56 BPM. Low cello and warm strings lead with the felt piano answering; a very soft slow heartbeat-like pulse far underneath. A simple melody that returns a little higher each time, growing from being protected to protecting. Steady, strong, tender. |
+| cf4 | 〈초코 쿠키〉 | 달콤한 초코 쿠키 한입이면 힘이 불끈 솟아요 | 〈Chocolate Cookie〉. C lydian, 72 BPM. Felt piano with small bright mallet dots (soft marimba and kalimba) hopping above it; every so often a small rising arpeggio like a little burst of energy, then it relaxes again. Sweet, smiling, never hurried. |
+| cf5 | 〈동물〉 | 그림 그리기를 좋아하고, 동물 피규어가 집에 한가득 | 〈Animals〉. A major pentatonic, 68 BPM. Felt piano with a wooden marimba close behind; tiny flute-like bird motifs appear now and then around the melody, curious and shy. A room full of small animal figures. |
+| cf6 | 〈나〉 | 세상에서 제일 중요한 건 바로 나 자신, 내가 젤 소중해요 | 〈Me〉. E major, 60 BPM. Felt piano under a clear, airy, blooming string and glass pad that swells every few bars and settles; a calm, confident melody that returns to its root note. Self-affirming, bright, still. |
+| cf7 | 〈선생님〉 | 늘 친절하게 맞아주는 선생님. 매일 그림을 그리고 편지를 써서 드려요 | 〈My Teacher〉. G major, 66 BPM, unhurried 4/4. Felt piano plays short greeting-like phrases, and each phrase is answered by a softer echo one octave higher, like a reply letter. Warm strings swell gently under the answers. Kind, everyday comfort. |
+| cf8 | 〈너부리〉 | 너부리 없이는 어디든 한 발짝도 갈 수 없어요. 우리, 앞으로도 함께 하자 | 〈Neoburi, my plush friend〉. B-flat major, 66 BPM, walking pace. Felt piano melody with a second soft voice always a third below, walking side by side; very soft footstep-like taps far in the background. Warm, loyal companionship; never alone. |
 
-〈너부리〉는 캔버스 사진(`colorfield/cf8.jpg`)이 아직 없어서 썸네일이 숨겨져 있습니다. 사진을 넣으면 바로 나타납니다.
+### 만드는 법
 
-## 만든 곡 (2026-11-03)
+ElevenLabs Music API(`POST /v1/music`, `model_id: music_v1`, `force_instrumental: true`, `music_length_ms: 120000`)에 위 프롬프트 + 공통 꼬리말을 보냅니다. 한 곡에 약 1,650 크레딧. 동시에 여러 곡을 보내면 429가 나므로 한 곡씩 20초 간격으로 보냅니다. 가끔 거의 무음인 결과(-70 LUFS)가 나오면 같은 프롬프트로 다시 만듭니다(11-09 〈결혼식〉 1회). 꼬리말의 "begin almost silent" 때문에 앞에 9~28초 무음이 붙어 나오기도 해서, 받은 파일은 `silencedetect`(-48 dB)로 앞뒤 무음을 잘라내고(앞 0.5초·뒤 1초만 남김) `ebur128`로 재서 `volume=`으로 -18 LUFS에 맞춘 뒤 트루피크 -1.5 dB 리미터를 걸어 192k mp3로 저장합니다. 그래서 곡 길이가 89~120초로 제각각입니다(〈동물〉이 89초로 가장 짧음). 〈나이키 운동화〉는 앞 무음이 24초라 "begin very quietly but audibly from the first second"로 바꿔 한 번 더 만든 것을 썼습니다.
 
-cf1~cf7은 위 프롬프트 + 공통 꼬리말로 ElevenLabs Music(music_v1, 연주곡 강제, 2분)으로 만들고 -18 LUFS로 맞췄습니다. cf8은 계정 크레딧이 모자라 아직 만들지 못했습니다. 다시 만들 때는 같은 프롬프트를 쓰고, 파일만 같은 이름으로 바꿔 넣으면 됩니다.
+캔버스 사진은 `../cf1.jpg` ~ `../cf8.jpg`(개요 순서). 〈너부리〉(cf8)는 2026-11-09에 8점을 한 번에 찍은 사진에서 잘라 넣었습니다 (검정·황토·크림·분홍 띠).
