@@ -5,11 +5,36 @@
 색면화 페이지의 「소리 → 소리 방식 → 작품별 음악 (ElevenLabs)」(기본값)을 고르면, 그림을 올릴 때 이 폴더의 같은 이름 파일을 반복 재생합니다. 파일이 없는 작품은 브라우저에서 만드는 「작품별 소리」로 대신합니다.
 
 - 파일 이름: `cf1.mp3` ~ `cf8.mp3` (아래 표의 번호 = 재단 개요 표 순서 = 페이지 썸네일 순서 = 숫자 키 1~8. 2026-11-09 개요 순서로 다시 매김)
-- 길이: 2분. 끝 8초와 다음 회차의 처음을 겹쳐서(크로스페이드) 이어 갑니다.
+- 길이: 1분 안팎. 끝 3초와 다음 회차의 처음을 겹쳐서(크로스페이드) 이어 갑니다.
 - 음량: 모두 -18 LUFS로 맞춤 (음량만 조정, 다이내믹은 그대로).
 - 작품 이야기는 「함께누리예술전 미디어아트(색면화) 개요.hwpx」에서 가져왔습니다.
 
-## 2026-11-09 다시 만듦 (2판)
+## 2026-11-11 다시 만듦 (3판, 지금 들어 있는 것)
+
+2판은 앰비언트에 가까워 첫 15초가 조용했고 길이가 2분이었습니다. 3판은 **1분 안팎, 첫 1초부터 그 작품의 멜로디가 들리는 짧은 곡**입니다. 여덟 곡이 같은 악기 팔레트를 쓰고, 애장품 이야기는 선율의 성격으로 담았습니다. 음이 또렷하게 끊어져 나와서 화면의 소리 파장이 잘 보입니다. 2판 파일은 `../_candidates/prev_261109/`에 있습니다.
+
+### 공통 꼬리말
+
+> One of eight short pieces for one gallery installation, so all eight share one sound palette: felt piano, warm strings, soft mallets (marimba, celesta, glockenspiel) and plucked strings. Instrumental only, no vocals, no drum kit. This is a melodic miniature, not ambient music: the main melody begins within the first second, clear, simple and singable like a children's song, played with distinct note attacks. The melody is stated, answered once, and returns at the end. A gentle steady pulse runs underneath the whole piece so the rhythm can always be felt. Warm, close, bright mix with a short natural room reverb, no long ambient intro, no fade-in. About one minute long; it ends on a soft resolved chord that can loop straight back to the opening.
+
+### 작품별 프롬프트 (앞부분)
+
+| 번호 | 작품 | 프롬프트 |
+|---|---|---|
+| cf1 | 〈나이키 운동화〉 | 〈Basketball〉: a round ball that rolls anywhere, always in my room. D dorian, 84 BPM. From the first second, plucked nylon guitar and pizzicato strings play a bouncy, rolling melody that circles like a ball; marimba answers. A soft low thud lands on the downbeats like a ball bouncing, slowing a little at phrase ends. Playful, earthy, ochre and brown. |
+| cf2 | 〈결혼식〉 | 〈Wedding〉: a white dress, a black tuxedo, a scene that makes my heart flutter. F major, 3/4 waltz, 72 BPM. From the first second, a music-box and celesta melody over felt piano in a gentle one-two-three; warm strings join for the answer and a few bright glockenspiel sparkles land on the high notes. Tender, fluttering, happy. |
+| cf3 | 〈아빠〉 | 〈Dad〉: my dad always protected me, now I will protect him. E-flat major, 60 BPM. From the first second, a warm cello sings a simple strong melody over felt piano chords; a soft low heartbeat pulse on every beat. Each time the melody returns it starts one step higher, growing from being protected to protecting. Steady, strong, tender. |
+| cf4 | 〈초코 쿠키〉 | 〈Chocolate Cookie〉: one sweet bite and I am full of energy. C lydian, 92 BPM. From the first second, marimba and kalimba play a bouncy, sweet, hopping melody with felt piano underneath; every few bars a quick rising glockenspiel arpeggio bursts up like a jolt of energy. Light, delicious, smiling. |
+| cf5 | 〈동물〉 | 〈Animals〉: I love drawing animals, my home is full of animal figures. A major pentatonic, 88 BPM. From the first second, wooden marimba plays a curious tiptoeing melody with pizzicato strings; a small flute answers with short bird-call motifs, and woodblock taps mark the beat like little footsteps of toy animals. Playful, cozy. |
+| cf6 | 〈나〉 | 〈Me〉: the most important thing in the world is me, I am precious. E major, 76 BPM. From the first second, felt piano plays a bright, confident, simple melody that keeps returning to its home note; a celesta doubles the melody an octave higher and a clear glockenspiel bell rings on the first beat of each bar; warm strings bloom underneath. Self-assured, clear, shining. |
+| cf7 | 〈선생님〉 | 〈My Teacher〉: my kind teacher greets me every day; I draw her and write her letters. G major, 80 BPM. From the first second, felt piano plays a short greeting-like phrase, and each phrase is answered by a celesta echo one octave higher, like a letter and its reply. Light pizzicato strings keep a friendly walking pulse. Warm, kind, everyday comfort. |
+| cf8 | 〈너부리〉 | 〈Neoburi, my plush friend〉: I cannot go one step without Neoburi; let us stay together. B-flat major, 82 BPM, walking pace. From the first second, marimba plays a cheerful walking melody with a plucked second voice always a third below, side by side; soft footstep-like taps on every beat. Warm, loyal, companionable. |
+
+### 만드는 법
+
+`POST /v1/music`, `model_id: music_v1`, `force_instrumental: true`, `music_length_ms: 60000`. 곡당 약 825 크레딧, 한 곡씩 15초 간격으로 보냅니다. 받은 파일은 앞뒤 무음(-48 dB)을 잘라 -18 LUFS로 맞추고 트루피크 -1.5 dB 리미터를 걸어 192k mp3로 저장합니다. 페이지는 끝 3초를 다음 회차의 처음과 겹쳐 반복합니다. 곡의 빠르기·박자를 바꾸면 `../index.html`의 `WORKS`에도 같은 값을 적습니다(빛 물결 주기가 거기서 나옵니다).
+
+## 2026-11-09 (2판, 지난 것)
 
 1판(11-03)은 곡마다 악기가 달라(오르골 왈츠, 로즈 건반, 마림바, 합창…) 그림을 바꿀 때 라디오 채널을 돌리는 느낌이었습니다. 2판은 여덟 곡이 **한 설치의 한 음색**으로 들리도록 공통 팔레트를 정하고, 그림이 올라와 띠가 하나씩 도착하는 첫 15초에 맞춰 음도 하나씩 들어오게 했습니다. 1판 파일은 `../_candidates/prev_261103/`에 그대로 있습니다.
 

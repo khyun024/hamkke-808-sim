@@ -155,6 +155,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { TexturePass } from 'three/addons/postprocessing/TexturePass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
 const $ = s => document.querySelector(s);
 
@@ -163,10 +164,10 @@ const $ = s => document.querySelector(s);
 const GROUPS = [
   ['look', '표현', true, [
     { k: 'render', l: '그리는 방식', seg: ['색면 + 빛 먼지', '색면만', '빛 입자만 (1판)'], d: 0 },
-    { k: 'paintTex', l: '색면 안 빛의 결 (물감 농담처럼)', min: 0, max: 0.6, step: 0.01, d: 0.16, f: v => Math.round(v * 100) + '%', u: 1, when: o => o.render !== 2 },
+    { k: 'paintTex', l: '색면 안 빛의 결 (물감 농담처럼)', min: 0, max: 0.6, step: 0.01, d: 0.08, f: v => Math.round(v * 100) + '%', u: 1, when: o => o.render !== 2 },
     { k: 'edgeAmp', l: '띠 경계가 숨 쉬는 폭', min: 0, max: 40, step: 0.5, d: 9, f: v => v.toFixed(1) + ' px · 벽에서 약 ' + (v * 12.85 / 2048 * 100).toFixed(0) + ' cm', u: 1, when: o => o.render !== 2 },
     { k: 'edgeSpd', l: '경계가 숨 쉬는 빠르기', min: 0, max: 3, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1, when: o => o.render !== 2 },
-    { k: 'paintFeather', l: '띠 경계 번짐', min: 0, max: 40, step: 0.5, d: 7, f: v => v.toFixed(1) + ' px', u: 1, when: o => o.render !== 2 },
+    { k: 'paintFeather', l: '띠 경계 번짐', min: 0, max: 40, step: 0.5, d: 2.5, f: v => v.toFixed(1) + ' px', u: 1, when: o => o.render !== 2 },
     { k: 'edgeWave', l: '경계를 지나가는 파도 높이', min: 0, max: 80, step: 1, d: 22, f: v => v.toFixed(0) + ' px · 벽에서 약 ' + (v * 12.85 / 2048 * 100).toFixed(0) + ' cm', u: 1, when: o => o.render !== 2 },
     { k: 'texAniso', l: '빛의 결 길이 (가로로 늘임)', min: 1, max: 10, step: 0.5, d: 3, f: v => v.toFixed(1) + '×', u: 1, when: o => o.render !== 2 },
     { k: 'breathe', l: '띠 두께 숨 쉬기', min: 0, max: 0.5, step: 0.01, d: 0.1, f: v => '±' + Math.round(v * 100) + '%', u: 1, when: o => o.render !== 2 },
@@ -174,14 +175,16 @@ const GROUPS = [
     { k: 'bleed', l: '이웃 색으로 번짐 (잉크처럼)', min: 0, max: 100, step: 1, d: 0, f: v => v.toFixed(0) + ' px', u: 1, when: o => o.render !== 2 },
     { k: 'caustic', l: '물빛 무늬 (수면 아래 햇빛처럼)', min: 0, max: 1, step: 0.05, d: 0, f: v => Math.round(v * 100) + '%', u: 1, when: o => o.render !== 2 },
     { k: 'dust', l: '빛 먼지 양 (알갱이 수의 비율)', min: 0, max: 1, step: 0.01, d: 0.06, f: v => Math.round(v * 100) + '%', when: o => o.render === 0 },
-    { k: 'dustGain', l: '빛 먼지 밝기', min: 0, max: 2, step: 0.05, d: 0.6, f: v => v.toFixed(2) + '×', u: 1, when: o => o.render === 0 },
+    { k: 'dustGain', l: '빛 먼지 밝기', min: 0, max: 2, step: 0.05, d: 0.35, f: v => v.toFixed(2) + '×', u: 1, when: o => o.render === 0 },
   ]],
   ['appear', '나타나는 방식', true, [
     { k: 'entry', l: '알갱이가 오는 곳', seg: ['왼쪽에서 쏘기', '흩어진 데서 모이기', '위에서 떨어지기', '아래서 떠오르기', '띠 중심선에서 펼쳐지기'], d: 0, u: 1 },
-    { k: 'order', l: '채워지는 순서', seg: ['왼쪽 → 오른쪽', '오른쪽 → 왼쪽', '가운데부터', '양 끝부터', '무작위', '한꺼번에'], d: 0, u: 1 },
+    { k: 'order', l: '채워지는 순서', seg: ['왼쪽 → 오른쪽', '오른쪽 → 왼쪽', '가운데에서 양 끝으로', '양 끝에서 가운데로', '무작위', '한꺼번에'], d: 3, u: 1 },
+    { k: 'meetMode', l: '모이는 자리', seg: ['두 벽이 만나는 모서리', '직접 정하기'], d: 0, when: o => o.order === 2 || o.order === 3 },
+    { k: 'meet', l: '모이는 자리 (펼친 화면에서의 위치)', min: 0.1, max: 0.9, step: 0.01, d: 0.5, f: v => Math.round(v * 100) + '%', when: o => (o.order === 2 || o.order === 3) && o.meetMode === 1 },
     { k: 'bandOrder', l: '띠 순서', seg: ['위 띠부터', '아래 띠부터', '두꺼운 띠부터', '얇은 띠부터', '모든 띠 함께'], d: 0 },
-    { k: 'gap', l: '띠 사이 간격', min: 0, max: 6, step: 0.1, d: 2.2, f: v => v.toFixed(1) + ' 초', u: 1 },
-    { k: 'travel', l: '한 띠가 다 채워지는 시간', min: 1, max: 40, step: 0.5, d: 12, f: v => v.toFixed(1) + ' 초', u: 1 },
+    { k: 'gap', l: '띠 사이 간격', min: 0, max: 6, step: 0.1, d: 1.2, f: v => v.toFixed(1) + ' 초', u: 1 },
+    { k: 'travel', l: '한 띠가 다 채워지는 시간', min: 1, max: 40, step: 0.5, d: 6, f: v => v.toFixed(1) + ' 초', u: 1 },
     { k: 'fly', l: '알갱이 비행 시간', min: 0.2, max: 10, step: 0.1, d: 3.5, f: v => v.toFixed(1) + ' 초', u: 1 },
     { k: 'jit', l: '도착 시각 흩어짐', min: 0, max: 6, step: 0.1, d: 1.2, f: v => v.toFixed(1) + ' 초', u: 1 },
     { k: 'spread', l: '출발 위치 퍼짐', min: 0, max: 4, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
@@ -189,7 +192,7 @@ const GROUPS = [
   ]],
   ['hold', '머무는 동안', true, [
     { k: 'hold', l: '움직임', seg: ['제자리에서 흔들림', '통째로 흐름', '숨 쉬기', '출렁임', '흐르는 입자', '물결'], d: 5, u: 1 },
-    { k: 'trail', l: '잔상 (알갱이 자국이 획처럼 남는 시간)', min: 0, max: 3, step: 0.05, d: 0.7, f: v => v ? v.toFixed(2) + ' 초' : '없음' },
+    { k: 'trail', l: '잔상 (알갱이 자국이 획처럼 남는 시간)', min: 0, max: 3, step: 0.05, d: 0.08, f: v => v ? v.toFixed(2) + ' 초' : '없음' },
     { k: 'waveSpd', l: '파도가 지나가는 속도 (색면 경계 · 물결 입자)', min: 5, max: 300, step: 1, d: 55, f: v => v.toFixed(0) + ' px/초 · 벽에서 약 ' + (v * 12.85 / 2048 * 100).toFixed(0) + ' cm/초', u: 1, when: o => o.hold === 5 || o.render !== 2 },
     { k: 'drift', l: '흐르는 속도 (통째로 흐름일 때)', min: -150, max: 150, step: 1, d: 18, f: v => v.toFixed(0) + ' px/초', u: 1, when: o => o.hold === 1 },
     { k: 'flowSpd', l: '알갱이가 흐르는 속도 (흐르는 입자 · 물결)', min: 2, max: 240, step: 1, d: 14, f: v => v.toFixed(0) + ' px/초 · 벽에서 약 ' + (v * 12.85 / 2048 * 100).toFixed(0) + ' cm/초', u: 1, when: o => o.hold >= 4 },
@@ -218,9 +221,19 @@ const GROUPS = [
     { k: 'rBeat', l: '악센트 → 빛 물결 머리에서 번지는 빛', min: 0, max: 3, step: 0.05, d: 0.7, f: v => v.toFixed(2) + '×', u: 1 },
     { k: 'rHigh', l: '고음 → 알갱이 반짝임', min: 0, max: 3, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
     { k: 'rBand', l: '음역 → 띠마다 밝기 (위 띠 = 높은 음)', min: 0, max: 3, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
-    { k: 'ripSpd', l: '번지는 빛이 퍼지는 속도', min: 40, max: 1500, step: 10, d: 160, f: v => v.toFixed(0) + ' px/초', u: 1 },
+    { k: 'ripSpd', l: '번지는 빛이 퍼지는 속도', min: 40, max: 1500, step: 10, d: 300, f: v => v.toFixed(0) + ' px/초', u: 1 },
     { k: 'beatSens', l: '악센트 감도', min: 0.3, max: 3, step: 0.05, d: 0.8, f: v => v.toFixed(2) + '×' },
     { k: 'smooth', l: '반응 부드러움 (클수록 느리게 따라감)', min: 0, max: 1, step: 0.05, d: 0.6, f: v => Math.round(v * 100) + '%' },
+    { k: 'sndAmp', l: '소리 파장 높이 (음이 날 때마다 경계를 타고 퍼지는 물결)', min: 0, max: 200, step: 1, d: 80, f: v => v.toFixed(0) + ' px · 벽에서 약 ' + (v * 12.85 / 2048 * 100).toFixed(0) + ' cm', u: 1, when: o => o.render !== 2 },
+    { k: 'sndSpd', l: '소리 파장이 퍼지는 속도', min: 60, max: 1200, step: 10, d: 300, f: v => v.toFixed(0) + ' px/초 · 벽에서 약 ' + (v * 12.85 / 2048).toFixed(1) + ' m/초', u: 1, when: o => o.render !== 2 },
+    { k: 'sndRip', l: '파장의 잔물결 (0 = 매끈한 봉우리)', min: 0, max: 1, step: 0.05, d: 0.45, f: v => Math.round(v * 100) + '%', u: 1, when: o => o.render !== 2 },
+    { k: 'sndGlow', l: '파장이 지나는 자리의 밝기', min: 0, max: 2, step: 0.05, d: 0.5, f: v => v.toFixed(2) + '×', u: 1, when: o => o.render !== 2 },
+    { k: 'sndLine', l: '경계에 빛나는 선 밝기', min: 0, max: 4, step: 0.05, d: 1.5, f: v => v.toFixed(2) + '×', u: 1, when: o => o.render !== 2 },
+    { k: 'wfAmp', l: '파형 선 (지금 나는 소리의 실제 파형이 경계 위에서 떨림)', min: 0, max: 120, step: 1, d: 36, f: v => v.toFixed(0) + ' px · 벽에서 약 ' + (v * 12.85 / 2048 * 100).toFixed(0) + ' cm', u: 1, when: o => o.render !== 2 },
+    { k: 'wfBase', l: '파형 선이 항상 보이는 정도 (0 = 음이 날 때만)', min: 0, max: 1, step: 0.05, d: 0.4, f: v => Math.round(v * 100) + '%', u: 1, when: o => o.render !== 2 },
+    { k: 'front', l: '음 앞머리 빛 (음이 날 때마다 모서리에서 양옆으로 달려가는 세로 빛줄기)', min: 0, max: 4, step: 0.05, d: 1.4, f: v => v.toFixed(2) + '×', u: 1, when: o => o.render !== 2 },
+    { k: 'eq', l: '음역 막대 (그 음역의 소리가 나면 그 띠가 두꺼워짐. 위 띠 = 높은 음)', min: 0, max: 1.5, step: 0.05, d: 0.4, f: v => '+' + Math.round(v * 100) + '%', u: 1, when: o => o.render !== 2 },
+    { k: 'flash', l: '음이 날 때 화면 전체가 살짝 밝아짐', min: 0, max: 1, step: 0.05, d: 0.18, f: v => '+' + Math.round(v * 100) + '%', u: 1, when: o => o.render !== 2 },
   ]],
   ['shape', '알갱이 형태', true, [
     { k: 'shape', l: '모양', seg: ['둥근 빛', '또렷한 점', '네모', '가로 획', '별', '고리'], d: 0, u: 1 },
@@ -231,11 +244,17 @@ const GROUPS = [
     { k: 'feather', l: '띠 경계 번짐', min: 0, max: 80, step: 1, d: 0, f: v => v.toFixed(0) + ' px', u: 1 },
   ]],
   ['light', '색 · 빛', false, [
-    { k: 'gain', l: '밝기', min: 0.05, max: 3, step: 0.05, d: 0.85, f: v => v.toFixed(2), u: 1 },
-    { k: 'sat', l: '채도', min: 0, max: 2, step: 0.05, d: 1, f: v => Math.round(v * 100) + '%', u: 1 },
-    { k: 'bloom', l: '번짐(블룸) 세기', min: 0, max: 2.5, step: 0.05, d: 0.22, f: v => v.toFixed(2) },
-    { k: 'bloomR', l: '번짐 반경', min: 0, max: 1, step: 0.02, d: 0.5, f: v => v.toFixed(2) },
-    { k: 'bloomT', l: '번짐 시작 밝기', min: 0, max: 1, step: 0.02, d: 0.55, f: v => v.toFixed(2) },
+    { k: 'srcVivid', l: '물감색 또렷하게 (띠 색을 순색 쪽으로. 0 = 사진 색 그대로)', min: 0, max: 1, step: 0.05, d: 0.85, f: v => Math.round(v * 100) + '%' },
+    { k: 'gain', l: '밝기', min: 0.05, max: 3, step: 0.05, d: 1, f: v => v.toFixed(2), u: 1 },
+    { k: 'sat', l: '채도 (원본 색)', min: 0, max: 2, step: 0.05, d: 1.3, f: v => Math.round(v * 100) + '%', u: 1 },
+    { k: 'bloom', l: '번짐(블룸) 세기', min: 0, max: 2.5, step: 0.05, d: 0.12, f: v => v.toFixed(2) },
+    { k: 'bloomR', l: '번짐 반경', min: 0, max: 1, step: 0.02, d: 0.6, f: v => v.toFixed(2) },
+    { k: 'bloomT', l: '번짐 시작 밝기', min: 0, max: 1, step: 0.02, d: 0.85, f: v => v.toFixed(2) },
+    { k: 'tone', l: '톤 매핑 (ACES는 밝은 색의 물을 뺌. 색을 지키려면 없음 · 유니티에서는 None 또는 Neutral)', seg: ['없음', 'ACES'], d: 0 },
+    { k: 'exposure', l: '노출', min: 0.3, max: 3, step: 0.05, d: 1, f: v => v.toFixed(2) + '×' },
+    { k: 'vivid', l: '쨍함 (보정 채도)', min: 0.5, max: 3, step: 0.05, d: 1.55, f: v => Math.round(v * 100) + '%' },
+    { k: 'pop', l: '색 밀어내기 (탁한 색을 순색 쪽으로, 프로젝터에서 물 빠지는 만큼 보정)', min: 0, max: 1, step: 0.05, d: 0.35, f: v => Math.round(v * 100) + '%' },
+    { k: 'contrast', l: '대비', min: 0.7, max: 1.8, step: 0.01, d: 1.18, f: v => v.toFixed(2) },
   ]],
   ['idle', '아이들 (그림이 없을 때)', false, [
     { k: 'iGain', l: '밝기', min: 0, max: 4, step: 0.05, d: 1, f: v => v.toFixed(2) + '×', u: 1 },
@@ -253,7 +272,7 @@ const GROUPS = [
     { k: 'bellLen', l: '종소리 여운', min: 1, max: 15, step: 0.5, d: 7, f: v => v.toFixed(1) + ' 초' },
     { k: 'pad', l: '머무는 화음 · 음악 파일 크기', min: 0, max: 2, step: 0.05, d: 1, f: v => Math.round(v * 100) + '%' },
     { k: 'padIn', l: '머무는 소리가 차오르는 시간', min: 0.2, max: 20, step: 0.2, d: 6, f: v => v.toFixed(1) + ' 초', when: o => o.sndMode !== 2 },
-    { k: 'musicIn', l: '음악이 차오르는 시간 (그림을 올린 순간부터)', min: 0.2, max: 10, step: 0.1, d: 2, f: v => v.toFixed(1) + ' 초', when: o => o.sndMode === 2 },
+    { k: 'musicIn', l: '음악이 차오르는 시간 (그림을 올린 순간부터)', min: 0.1, max: 10, step: 0.1, d: 0.3, f: v => v.toFixed(1) + ' 초', when: o => o.sndMode === 2 },
     { k: 'musicOut', l: '음악이 잦아드는 시간 (그림을 바꾸거나 뺄 때)', min: 0.5, max: 10, step: 0.1, d: 2.5, f: v => v.toFixed(1) + ' 초', when: o => o.sndMode === 2 },
   ]],
 ];
@@ -274,16 +293,17 @@ const PRESETS = [
   ['빛 입자 · 떨어지는 빛', { render: 2, trail: 0,  entry: 2, order: 4, fly: 4.5, jit: 3, spread: 1.5, shape: 4, size: 6, count: 90000, gain: 1.1, exit: 1, twAmt: 1.8 }],
   ['빛 입자 · 출렁이는 띠', { render: 2, trail: 0,  hold: 3, breath: 14, turb: 1.4, feather: 14, bandScale: 0.85, size: 3.5, entry: 4, order: 5, bandOrder: 4, fly: 5 }],
 ];
-const STORE = 'cf-prefs-v6';
+const STORE = 'cf-prefs-v11';
 // 예전 저장값(v2~v4)에서 올라올 때: 소리 반응·움직임·모양·흐름·잔상 값은 새 기본값으로, 나머지 조절값은 그대로 둠
 const pref = (() => { try {
   const cur = localStorage.getItem(STORE); if (cur) return JSON.parse(cur);
-  const old = ['cf-prefs-v5', 'cf-prefs-v4', 'cf-prefs-v3', 'cf-prefs-v2'].map(k => localStorage.getItem(k)).find(Boolean);
+  const old = ['cf-prefs-v10', 'cf-prefs-v9', 'cf-prefs-v8', 'cf-prefs-v7', 'cf-prefs-v6', 'cf-prefs-v5', 'cf-prefs-v4', 'cf-prefs-v3', 'cf-prefs-v2'].map(k => localStorage.getItem(k)).find(Boolean);
   const o = old ? JSON.parse(old) : {};
   GROUPS.find(g => g[0] === 'react')[3].forEach(p => delete o[p.k]);
   GROUPS.find(g => g[0] === 'hold')[3].forEach(p => delete o[p.k]);
   GROUPS.find(g => g[0] === 'look')[3].forEach(p => delete o[p.k]);
-  ['padIn', 'shape', 'size', 'sizeVar', 'gain', 'bloom', 'bloomT', 'waveSpd'].forEach(k => delete o[k]);
+  GROUPS.find(g => g[0] === 'light')[3].forEach(p => delete o[p.k]);
+  ['padIn', 'shape', 'size', 'sizeVar', 'waveSpd', 'order', 'meet', 'meetMode', 'trail', 'musicIn', 'gap', 'travel'].forEach(k => delete o[k]);
   return o;
 } catch (e) { return {}; } })();
 const opt = Object.assign({ mode: 'both', dir: 'ltr' }, DEF, pref);
@@ -336,6 +356,26 @@ function renderTrails(dt) {
 }
 const bloom = new UnrealBloomPass(new THREE.Vector2(CF.PW, CF.PH), opt.bloom, opt.bloomR, opt.bloomT);
 composer.addPass(bloom);
+// 색 보정: 유니티 HDRP의 기본 흐름(노출 → 대비 → ACES 톤 매핑 → 채도)을 흉내 내 색을 쨍하게. 유니티로 옮길 때는 Volume의 Exposure·Tonemapping(ACES)·Color Adjustments 값으로 그대로 옮김
+const gradePass = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uExposure: { value: 1 }, uVivid: { value: 1 }, uContrast: { value: 1 }, uTone: { value: 1 }, uPop: { value: 0 } },
+  vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: /* glsl */`
+    uniform sampler2D tDiffuse; uniform float uExposure, uVivid, uContrast, uTone, uPop; varying vec2 vUv;
+    vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); } // Narkowicz ACES 근사
+    void main() {
+      vec3 c = max(texture2D(tDiffuse, vUv).rgb, 0.0) * uExposure;
+      c = 0.18 * pow(c / 0.18, vec3(uContrast));            // 중간 회색(0.18)을 축으로 대비
+      if (uTone > 0.5) c = aces(c);
+      float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+      c = clamp(mix(vec3(l), c, uVivid), 0.0, 1.0);          // 톤 매핑 뒤에 채도를 올려 밝은 색도 물 빠지지 않게
+      // 색 밀어내기: 가장 약한 채널을 더 빼서 순색에 가깝게(회색 기운 제거). 무채색(흰·검정·회색)은 건드리지 않음
+      float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b)), chroma = mx - mn;
+      c = mix(c, clamp((c - mn * 0.85) / max(1.0 - mn * 0.85, 0.001) * (1.0 + 0.15 * chroma), 0.0, 1.0), uPop * smoothstep(0.18, 0.45, chroma));
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+});
+composer.addPass(gradePass);
 const fieldTex = () => composer.readBuffer.texture;
 
 const NOISE = /* glsl */`
@@ -379,7 +419,7 @@ uniform float uHold, uDrift, uBreath, uTurb, uFlow, uNoise, uTwAmt, uTwSpd, uWav
 uniform float uFlowSpd, uFlowVar, uFlowCurl, uFlowLife, uFlowStreak;
 uniform float uExit, uLeave, uExitSpd;
 uniform float uSize, uSizeVar, uBandScale, uFeather, uGain, uSat;
-uniform float uReact, uRBass, uRBeat, uRHigh, uRBand, uRipSpd, uBass, uHigh, uLevel, uBandE[16], uWaveT0, uTrailK, uWaveSpd, uDustGain;
+uniform float uReact, uRBass, uRBeat, uRHigh, uRBand, uRipSpd, uBass, uHigh, uLevel, uBandE[16], uWaveT0, uTrailK, uWaveSpd, uDustGain, uMeet;
 uniform vec4 uHits, uHitX;
 varying vec3 vCol; varying float vA;
 ${NOISE}
@@ -396,8 +436,9 @@ float ripples(float x) {
 }
 float orderKey(float u) {
   if (is(uOrder, 1.0)) return 1.0 - u;
-  if (is(uOrder, 2.0)) return abs(u - 0.5) * 2.0;
-  if (is(uOrder, 3.0)) return 1.0 - abs(u - 0.5) * 2.0;
+  float q = u < uMeet ? (uMeet - u) / uMeet : (u - uMeet) / (1.0 - uMeet); // 모이는 자리에서 0, 양쪽 끝에서 1 (두 벽 길이가 달라도 동시에 출발해 동시에 만남)
+  if (is(uOrder, 2.0)) return q;
+  if (is(uOrder, 3.0)) return 1.0 - q;
   if (is(uOrder, 4.0)) return fract(aSeed.x * 7.31 + aSeed.y * 3.17);
   if (is(uOrder, 5.0)) return aSeed.y * 0.12;
   return u;
@@ -416,7 +457,7 @@ vec3 basePos(float tau, vec2 tgt, float key, out float a, out float b) {
     else if (is(uEntry, 2.0)) st = vec2(tgt.x + (aSeed.x - 0.5) * 60.0 * uSpread, uPH + 10.0 + aSeed.y * 260.0 * uSpread);
     else if (is(uEntry, 3.0)) st = vec2(tgt.x + (aSeed.x - 0.5) * 60.0 * uSpread, -10.0 - aSeed.y * 260.0 * uSpread);
     else if (is(uEntry, 4.0)) st = vec2(tgt.x + (aSeed.x - 0.5) * 30.0 * uSpread, aBand.y);
-    else st = vec2(-12.0 - aSeed.x * 60.0, tgt.y + (aSeed.y - 0.5) * 120.0 * uSpread);
+    else st = vec2(is(uOrder, 3.0) && tgt.x > uMeet * uPW ? uPW + 12.0 + aSeed.x * 60.0 : -12.0 - aSeed.x * 60.0, tgt.y + (aSeed.y - 0.5) * 120.0 * uSpread); // 양 끝에서 모일 때는 가까운 쪽 끝에서 날아옴
     vec2 p = mix(st, tgt, e);
     p.y += sin(s * 3.14159) * (aSeed.z - 0.5) * 40.0 * uSpread;
     p += curl(p * 0.0035 * uNoise + aSeed.xy * 3.0, t * 0.1) * 32.0 * uTurb * (1.0 - e);
@@ -470,7 +511,8 @@ vec3 basePos(float tau, vec2 tgt, float key, out float a, out float b) {
   p += curl(tgt * 0.0045 * uNoise + aSeed.zw, t * 0.04) * 4.0 * uTurb * settle * (uHold > 3.5 ? 0.3 : 1.0); // 흐를 때는 알갱이 각자의 잔떨림을 줄임
   p.y += sin(tgt.x * 0.004 + t * 0.22 + aSeed.w) * 1.5 * uTurb;
   // 빛 물결: 그림이 올라온 순간부터 시작 쪽에서 끝 쪽으로 지나감 (음악 파일일 때는 네 마디에 한 번)
-  float d = p.x / uPW - fract((uTime - uWaveT0) / uWavePer) * 1.6 + 0.3, pulse = exp(-d * d * 30.0) * uWaveAmp;
+  float wq = uOrder > 1.5 && uOrder < 3.5 ? abs(p.x / uPW - uMeet) / max(uMeet, 1.0 - uMeet) : p.x / uPW; // 가운데 기준일 때는 모이는 자리에서 양옆으로 퍼짐
+  float d = wq - fract((uTime - uWaveT0) / uWavePer) * 1.6 + 0.3, pulse = exp(-d * d * 30.0) * uWaveAmp;
   p += curl(tgt * 0.012 * uNoise, t * 0.15) * 5.0 * pulse * uTurb;
   b = 0.85 + 0.16 * uTwAmt * sin(uTime * (0.25 + aSeed.z * 0.7) * uTwSpd + aSeed.w * 6.283) + 0.35 * pulse + 0.2 * (1.0 - settle);
   if (is(uHold, 2.0)) b += 0.12 * uTurb * sin(uTime * 6.2832 / uBreath + aBand.x * 0.9);
@@ -545,6 +587,8 @@ uniform float uOrder, uGap, uTravel, uJit, uLeave, uExitSpd, uWaveAmp, uWavePer,
 uniform float uPaintTex, uEdgeAmp, uEdgeSpd, uPaintFeather, uFlowSpd, uGain, uSat, uTrailK;
 uniform float uEdgeWave, uWaveSpd, uTexAniso, uBreathe, uBreatheT, uBleed, uCaustic;
 uniform float uReact, uRBand, uRBeat, uRipSpd, uLevel, uBass, uBandE[16];
+uniform float uMeet, uSndAmp, uSndSpd, uSndRip, uSndGlow, uSndLine, uSndHead, uWfAmp, uWfBase, uFront, uEq, uFlash, uFastE[16], uFrontNow;
+uniform sampler2D uSndTex, uWfTex;
 uniform vec4 uHits, uHitX;
 varying vec2 vUv;
 ${NOISE}
@@ -559,10 +603,29 @@ float ripples(float x) {
   return r;
 }
 float orderKey(float u) {
+  float q = u < uMeet ? (uMeet - u) / uMeet : (u - uMeet) / (1.0 - uMeet);
   if (is(uOrder, 1.0)) return 1.0 - u;
-  if (is(uOrder, 2.0)) return abs(u - 0.5) * 2.0;
-  if (is(uOrder, 3.0)) return 1.0 - abs(u - 0.5) * 2.0;
+  if (is(uOrder, 2.0)) return q;
+  if (is(uOrder, 3.0)) return 1.0 - q;
   return u;
+}
+// 소리 파장: 음역별 세기의 지난 몇 초가 텍스처(가로 = 시간, 세로 = 띠)에 들어 있음. 모이는 자리에서 난 소리가 uSndSpd로 양옆으로 퍼진다고 보고,
+// 이 자리(x)에 지금 도착한 세기를 읽음. row는 띠 번호 좌표(띠 i의 가운데 = i + 0.5, 띠 i와 i+1 사이 경계 = i + 1)
+float snd(float x, float row) {
+  float age = abs(x - uMeet * uPW) / uSndSpd * 60.0; // 60 = 초당 기록 수
+  if (age > 500.0) return 0.0;
+  return texture2D(uSndTex, vec2(fract((uSndHead - age) / 512.0), row / 16.0)).r * 1.5;
+}
+// 전체 소리의 '음이 난 순간'(세로 16번째 줄에 기록): 모서리에서 양옆으로 달려가는 얇은 빛줄기
+float sndFront(float x) {
+  float age = abs(x - uMeet * uPW) / uSndSpd * 60.0;
+  if (age > 500.0) return 0.0;
+  return texture2D(uSndTex, vec2(fract((uSndHead - age) / 512.0), 15.5 / 16.0)).r * 1.5;
+}
+// 지금 나는 소리의 실제 파형(오실로스코프): 모서리에서 양옆으로 같은 파형이 펼쳐짐. -1 ~ 1
+float wf(float x) {
+  float d = abs(x - uMeet * uPW) / (0.62 * uPW);
+  return d > 1.0 ? 0.0 : (texture2D(uWfTex, vec2(d, 0.5)).r - 0.5) * 2.0 * (1.0 - smoothstep(0.75, 1.0, d));
 }
 // 띠 경계: 손으로 그은 선처럼 조금 울퉁불퉁하고(고정), 천천히 숨 쉬듯 오르내리며, 그 위로 긴 파도가 흐름 방향으로 지나감.
 // 같은 경계를 나누는 두 띠가 같은 값을 씀 (yEdge로 구분)
@@ -572,6 +635,11 @@ float edge(float yEdge, float x, float amp) {
   float brush = (noise(vec3(x * 0.035, yEdge * 0.11, 3.0)) - 0.5) * 5.0;
   float wave = (sin(x * 0.0062 - uTime * uWaveSpd * 0.0062 + yEdge * 0.02) * 0.6 + sin(x * 0.0131 - uTime * uWaveSpd * 0.0094 + yEdge * 0.05 + 1.3) * 0.4) * uEdgeWave * (1.0 + 0.35 * uReact * uBass);
   return yEdge + (slow + wave) * amp + brush;
+}
+// 그 경계에 지금 도착한 소리 파장의 높이(px). 봉우리 위에 잔물결을 얹어 '파장'으로 보이게
+float sndWave(float x, float row, float e) {
+  float dist = abs(x - uMeet * uPW);
+  return e * uSndAmp * uReact * (1.0 - uSndRip * 0.5 * (1.0 - cos(dist * 0.055 - uTime * 7.0 + row * 1.7)));
 }
 // 물빛 무늬: 수면 아래 바닥에 어리는 햇빛처럼 밝은 줄이 느리게 흔들림
 float caustic(float x, float y) {
@@ -586,25 +654,34 @@ void main() {
   if (tau < 0.0) discard;
   float key = orderKey(u), f = max(uPaintFeather, 0.5);
   // 빛 물결 · 번지는 빛 (알갱이 층과 같은 규칙)
-  float d = u - fract((uTime - uWaveT0) / uWavePer) * 1.6 + 0.3, pulse = exp(-d * d * 30.0) * uWaveAmp;
+  float wq = uOrder > 1.5 && uOrder < 3.5 ? abs(u - uMeet) / max(uMeet, 1.0 - uMeet) : u;
+  float d = wq - fract((uTime - uWaveT0) / uWavePer) * 1.6 + 0.3, pulse = exp(-d * d * 30.0) * uWaveAmp;
   float rp = uReact * uRBeat * ripples(x);
+  float fr = uReact * uFront * sndFront(x), wv = wf(x);
   vec3 col = vec3(0.0); float cover = 0.0;
   // 띠 두께 숨 쉬기: 띠마다 다른 박자로 두꺼워졌다 얇아짐. 전체 높이는 그대로라 위에서부터 다시 쌓음
   float hs[16]; float tot = 0.0;
-  for (int i = 0; i < 16; i++) { if (float(i) >= uN) break; hs[i] = (uY1[i] - uY0[i]) * (1.0 + uBreathe * sin(uTime * 6.2832 / uBreatheT + float(i) * 1.9 + 0.7)); tot += hs[i]; }
+  for (int i = 0; i < 16; i++) { if (float(i) >= uN) break; hs[i] = (uY1[i] - uY0[i]) * (1.0 + uBreathe * sin(uTime * 6.2832 / uBreatheT + float(i) * 1.9 + 0.7)) * (1.0 + uEq * uReact * uFastE[i]); tot += hs[i]; } // 음역 막대: 소리가 난 띠가 두꺼워지고 나머지가 그만큼 얇아짐
   float cursor = uPH, cs = uPH / max(tot, 1.0);
   float cau = uCaustic > 0.001 ? caustic(x, y) : 0.0;
   for (int i = 0; i < 16; i++) {
     if (float(i) >= uN) break;
     float top = cursor, bot = cursor - hs[i] * cs; cursor = bot;
     float y0e = uY0[i], y1e = uY1[i];
+    // 이 픽셀에서 먼 띠는 건너뜀 (경계가 움직일 수 있는 최대 폭 밖)
+    float reach = uEdgeWave * 1.4 + uEdgeAmp + 2.2 * uSndAmp * uReact + uBleed + f + 12.0;
+    if (y < bot - reach || y > top + reach) continue;
     // 잉크처럼 번짐: 경계의 번짐 폭이 자리마다 다르고 천천히 움직임
-    float fb = f + uBleed * noise(vec3(x * 0.004, y0e * 0.03, uTime * 0.05)), ft = f + uBleed * noise(vec3(x * 0.004, y1e * 0.03, uTime * 0.05));
+    float fb = f, ft = f;
+    if (uBleed > 0.01) { fb += uBleed * noise(vec3(x * 0.004, y0e * 0.03, uTime * 0.05)); ft += uBleed * noise(vec3(x * 0.004, y1e * 0.03, uTime * 0.05)); }
     // 경계가 움직일 수 있는 양은 그 경계에 닿은 두 띠 중 얇은 쪽 두께에 맞춤
-    float room = 2.6 * (uEdgeWave * 1.35 + uEdgeAmp) + 1.0;
+    float room = 2.6 * (uEdgeWave * 1.35 + uEdgeAmp) + 1.0, roomS = 1.6 * uSndAmp + 1.0;
     float a0 = clamp(min(hs[i], (float(i + 1) < uN) ? hs[min(i + 1, 15)] : hs[i]) * cs / room, 0.0, 1.0);
     float a1 = clamp(min(hs[i], (i > 0) ? hs[max(i - 1, 0)] : hs[i]) * cs / room, 0.0, 1.0);
-    float b0 = edge(y0e, x, a0) + (bot - y0e), b1 = edge(y1e, x, a1) + (top - y1e);
+    // 소리 파장: 아래 경계는 이 띠와 아래 띠 사이(row i+1), 위 경계는 위 띠와 이 띠 사이(row i). 얇은 띠는 덜 밀림
+    float fi = float(i), e0 = snd(x, fi + 1.0), e1 = snd(x, fi);
+    float s0 = clamp(min(hs[i], (float(i + 1) < uN) ? hs[min(i + 1, 15)] : hs[i]) * cs / roomS, 0.0, 1.0), s1 = clamp(min(hs[i], (i > 0) ? hs[max(i - 1, 0)] : hs[i]) * cs / roomS, 0.0, 1.0);
+    float b0 = edge(y0e, x, a0) + (bot - y0e) + sndWave(x, fi + 1.0, e0) * s0, b1 = edge(y1e, x, a1) + (top - y1e) + sndWave(x, fi, e1) * s1;
     float w = (i == 15 || float(i + 1) >= uN ? 1.0 : smoothstep(b0 - fb, b0 + fb, y)) * (i == 0 ? 1.0 : 1.0 - smoothstep(b1 - ft, b1 + ft, y));
     if (w <= 0.001) continue;
     // 채워짐: 띠 차례(uRank)대로, 시작 쪽에서 끝 쪽으로 물감이 번지듯. 앞머리는 부드럽고 조금 들쭉날쭉
@@ -617,8 +694,18 @@ void main() {
     float g = noise(vec3(tx, ty, uTime * 0.03)) * 0.65 + noise(vec3(tx * 2.3, ty * 2.3, uTime * 0.05 + 7.0)) * 0.35;
     float tex = 1.0 + (g - 0.5) * 2.0 * uPaintTex;
     float be = uReact * uRBand * uBandE[i];
-    vec3 c = uCol[i] * tex * (1.0 + 0.3 * pulse + 0.3 * rp + 0.35 * be + 1.4 * uCaustic * cau);
+    float el = snd(x, fi + 0.5) * uReact; // 이 띠 음역의 소리가 지금 이 자리를 지나는 세기
+    vec3 c = uCol[i] * tex * (1.0 + 0.3 * pulse + 0.3 * rp + 0.2 * be + uSndGlow * 0.9 * el + 0.55 * fr + 1.4 * uCaustic * cau);
     col += c * w * reveal; cover += w * reveal;
+    // 경계에 빛나는 선: 파장이 지나는 동안 띠 사이 경계가 밝은 선으로 떠오름 (맨 아래 띠의 아래 경계는 없음)
+    if (uSndLine > 0.001 && float(i + 1) < uN) {
+      // 선의 자리는 경계 + 실제 파형. 음이 날 때 크게 떨리고 밝아지며, 평소에도 wfBase만큼은 보임
+      float la = uWfBase * (0.35 + 0.65 * min(1.0, uLevel * 1.6)) + e0 * uReact;
+      float ly = b0 + wv * uWfAmp * s0 * (0.45 + 0.9 * min(1.0, e0 + uLevel));
+      float ln = exp(-pow((y - ly) / (2.2 + 3.0 * e0), 2.0)) * la * uSndLine * reveal;
+      vec3 lc = mix(max(uCol[i], uCol[min(i + 1, 15)]), vec3(1.0), 0.6);
+      col += lc * ln * 1.7; cover += ln * 0.2;
+    }
   }
   if (cover <= 0.001) discard;
   // 사라짐: 채워진 순서대로 옅어지며 결이 풀어짐
@@ -628,13 +715,13 @@ void main() {
     a = exp(-lv * 0.7) * smoothstep(0.0, 0.5, noise(vec3(x * 0.004, y * 0.01, uTime * 0.1)) + 1.0 - lv * 0.5);
   }
   col = mix(vec3(dot(col, vec3(0.2126, 0.7152, 0.0722))), col, uSat);
-  gl_FragColor = vec4(max(col, 0.0) * uGain * uTrailK * a * (1.0 + 0.06 * uReact * uLevel), 1.0);
+  gl_FragColor = vec4(max(col, 0.0) * uGain * uTrailK * a * (1.0 + 0.06 * uReact * uLevel + uFlash * uReact * uFrontNow), 1.0);
 }`;
 const PAINT_VERT = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
 
 // 조절값 uniform은 모든 입자 재질이 같은 객체를 나눠 씀
 const SU = { uTime: { value: 0 }, uPW: { value: CF.PW }, uPH: { value: CF.PH }, uL0: { value: CF.L0 },
-  uBass: { value: 0 }, uHigh: { value: 0 }, uLevel: { value: 0 }, uBandE: { value: new Array(16).fill(0) }, uHits: { value: new THREE.Vector4(-99, -99, -99, -99) }, uHitX: { value: new THREE.Vector4() }, uWaveT0: { value: 0 }, uTrailK: { value: 1 } };
+  uBass: { value: 0 }, uHigh: { value: 0 }, uLevel: { value: 0 }, uBandE: { value: new Array(16).fill(0) }, uHits: { value: new THREE.Vector4(-99, -99, -99, -99) }, uHitX: { value: new THREE.Vector4() }, uWaveT0: { value: 0 }, uTrailK: { value: 1 }, uSndTex: { value: null }, uSndHead: { value: 0 }, uMeet: { value: 0.576 }, uWfTex: { value: null }, uFastE: { value: new Array(16).fill(0) }, uFrontNow: { value: 0 } };
 PARAMS.forEach(p => { if (p.u) SU['u' + p.k[0].toUpperCase() + p.k.slice(1)] = { value: opt[p.k] }; });
 const uName = k => 'u' + k[0].toUpperCase() + k.slice(1);
 function pointsMesh(n, vert, uniforms, attrs) {
@@ -747,6 +834,32 @@ function bandsOf(img, rect) {
   });
 }
 const linCol = rgb => new THREE.Color().setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, THREE.SRGBColorSpace);
+function hslRgb(h, s, l) {
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
+}
+// 벽에 쏠 색: 사진에서 읽은 물감색은 조명·종이 때문에 탁하므로, 색상은 그대로 두고 채도를 순색 쪽으로 올리고 밝기를 색이 가장 진하게 보이는 중간으로 당김.
+// 흰색은 더 희게, 검정은 더 검게. 무채색(회색·흰·검정)에는 색을 입히지 않음
+function vividRgb(rgb) {
+  const k = opt.srcVivid; if (k <= 0) return rgb;
+  const [h, s, l] = rgbHsl(rgb), cr = (Math.max(...rgb) - Math.min(...rgb)) / 255; // cr = 실제 색 기운(0~1). 크림·회색처럼 거의 무채색인 색은 작음
+  // 무채색 쪽: 밝으면 더 희게, 어두우면 더 검게 (색을 입히지 않음)
+  const neutral = hslRgb(h, s * (1 - 0.6 * k), l > 0.6 ? l + (1 - l) * 0.5 * k : l * (1 - 0.5 * k));
+  // 유채색 쪽: 색상은 그대로, 채도를 순색 쪽으로. 옅은 색(분홍·살구색)은 덜 올려 제 이름을 지키고, 어두운 색은 색이 보이는 밝기까지 올림
+  const pastel = Math.min(1, Math.max(0, (l - 0.55) / 0.2));
+  // 진하게: 밝은 쪽 색은 밝기를 조금 눌러 물감이 두껍게 올라간 것처럼(밝기 0.55 위를 40% 압축), 채도는 순색 쪽으로
+  const lt = l < 0.3 ? 0.36 : l > 0.55 ? 0.55 + (l - 0.55) * 0.6 : l;
+  const vivid = hslRgb(h, s + (1 - s) * (0.9 - 0.35 * pastel) * k, l + (lt - l) * 0.9 * k);
+  const w = Math.min(1, Math.max(0, (cr - 0.12) / 0.2)); // 색 기운이 약하면 무채색으로, 뚜렷하면 유채색으로 다룸
+  return neutral.map((v, i) => v + (vivid[i] - v) * w);
+}
+const bandCol = b => linCol(vividRgb(b.rgb));
+function recolor() { // 색 설정을 바꾸면 벽에 있는 그림과 쉬는 화면의 색을 다시 계산
+  slots.forEach(sl => sl.show && sl.show.bands.forEach((b, i) => { const c = bandCol(b); if (c.r * .2126 + c.g * .7152 + c.b * .0722 < 0.02) c.multiplyScalar(0.6).addScalar(0.006); sl.paint.material.uniforms.uCol.value[i].set(c.r, c.g, c.b); }));
+  if (idleBands) setIdlePaint(idleBands);
+}
+let idleBands = null;
 // 띠가 출발하는 차례 (0, 1, 2…)
 function ranksOf(bands) {
   const n = bands.length, idx = bands.map((b, i) => i);
@@ -768,7 +881,7 @@ function fillSlot(slot, show) {
   const tg = A('aTarget'), co = A('aColor'), sd = A('aSeed'), bd = A('aBand');
   const cum = []; let acc = 0; show.bands.forEach(b => cum.push(acc += b.w));
   const lum = c => c.r * .2126 + c.g * .7152 + c.b * .0722;
-  const cols = show.bands.map(b => { const c = linCol(b.rgb); return lum(c) < 0.02 ? c.multiplyScalar(0.6).addScalar(0.012) : c; });
+  const cols = show.bands.map(b => { const c = bandCol(b); return lum(c) < 0.02 ? c.multiplyScalar(0.6).addScalar(0.006) : c; });
   const glw = cols.map(c => lum(c) < 0.03 ? 0.1 : 0.55); // 검은 띠의 반짝임은 희미하게
   for (let j = 0; j < CF.NMAX; j++) {
     const r = Math.random() * acc; let i = 0; while (i < cum.length - 1 && r > cum[i]) i++;
@@ -801,14 +914,18 @@ function fillIdle() {
     for (let q = 0; q < 4; q++) sd[4 * j + q] = Math.random();
   }
   ['aTarget', 'aColor', 'aSeed'].forEach(n => g.getAttribute(n).needsUpdate = true);
-  const bs = sets[0], P = idlePaint.material.uniforms; P.uN.value = bs.length;
-  bs.forEach((b, i) => { P.uY0.value[i] = (1 - b.y1) * CF.PH; P.uY1.value[i] = (1 - b.y0) * CF.PH; const c = linCol(b.rgb); P.uCol.value[i].set(c.r, c.g, c.b); });
+}
+function setIdlePaint(bs) {
+  idleBands = bs;
+  const P = idlePaint.material.uniforms; P.uN.value = bs.length;
+  bs.forEach((b, i) => { P.uY0.value[i] = (1 - b.y1) * CF.PH; P.uY1.value[i] = (1 - b.y0) * CF.PH; const c = bandCol(b); P.uCol.value[i].set(c.r, c.g, c.b); });
 }
 
 /* ───────── 상태 ─────────
    한 번 올린 그림은 다른 그림을 올리거나 뺄 때까지 계속 머묾 (반복하지 않음) */
 const field = { cur: null, hist: [], idleA: 1, drop: 1 };
-const tnow = () => performance.now() / 1000;
+let SKEW = 0; // 확인용: cfStep()이 더하는 가짜 시간(초)
+const tnow = () => performance.now() / 1000 + SKEW;
 const phaseOf = (s, now) => now < s.t0 ? -1 : now - s.t0;
 function placeImage(img, name, key, rect) {
   if (field.cur?.key === key) return;
@@ -837,6 +954,7 @@ function releaseShow(s, now) {
 }
 function removeImage() {
   if (!field.cur) return;
+  setIdlePaint(field.cur.bands); // 쉬는 동안에는 방금 내린 그림의 색면이 옅게 남음
   releaseShow(field.cur, tnow()); field.cur = null; buildPedestalArt(); renderUI();
 }
 // 지금 그림을 처음부터 다시 흘러나오게 (조절값 확인용)
@@ -893,14 +1011,14 @@ function sndSet(on) {
    선율의 음은 그 그림의 띠 색에서 나옴 (색상 → 음계 자리, 밝기 → 옥타브). */
 const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], dorian: [0, 2, 3, 5, 7, 9, 10], penta: [0, 2, 4, 7, 9], lydian: [0, 2, 4, 6, 7, 9, 11] };
 const WORKS = {
-  cf1: { title: '나이키 운동화', story: '동그란 모양으로 어디든 굴러가는 농구공은 제가 제일 좋아하는 물건. 늘 내 방에 있어요', mood: '굴러감 · 튕기는 현과 공 튀는 소리', root: 50, scale: 'dorian', bpm: 70, meter: 4, lead: 'pluck', pad: 'room', extra: 'bounce', prog: [0, 3, 0, 6] },
-  cf2: { title: '결혼식', story: '하얀 드레스, 검정 턱시도. 생각만으로도 설레는 결혼식의 한 장면', mood: '설렘 · 오르골 왈츠', root: 53, scale: 'major', bpm: 63, meter: 3, lead: 'musicbox', pad: 'strings', extra: 'sparkle', prog: [0, 3, 5, 4] },
-  cf3: { title: '아빠', story: '힘든 순간에도 곁에서 든든하게 지켜준 아빠, 이제 내가 지켜줄게요', mood: '든든함 · 낮은 현과 한 단씩 차오르는 선율', root: 51, scale: 'major', bpm: 56, meter: 4, lead: 'cello', pad: 'strings', extra: 'pulse', rise: true, prog: [0, 5, 3, 4], rx: 1.35 },
-  cf4: { title: '초코 쿠키', story: '달콤한 초코 쿠키 한입이면 힘이 불끈 솟아요', mood: '달콤함 · 통통 튀는 마림바', root: 48, scale: 'lydian', bpm: 72, meter: 4, lead: 'marimba', pad: 'warm', extra: 'pop', prog: [0, 1, 0, 4] },
-  cf5: { title: '동물', story: '그림 그리기를 좋아하고, 동물 피규어가 집에 한가득', mood: '장난스러움 · 나무 소리와 새소리', root: 57, scale: 'penta', bpm: 68, meter: 4, lead: 'wood', pad: 'warm', extra: 'chirp', prog: [0, 2, 3, 0] },
-  cf6: { title: '나', story: '세상에서 제일 중요한 건 바로 나 자신, 내가 젤 소중해요', mood: '자기 긍정 · 맑은 목소리와 피어나는 화음', root: 52, scale: 'major', bpm: 60, meter: 4, lead: 'voice', pad: 'air', extra: 'bloom', prog: [0, 4, 3, 0], rx: 1.4 },
-  cf7: { title: '선생님', story: '늘 친절하게 맞아주는 선생님. 매일 그림을 그리고 편지를 써서 드려요', mood: '다정한 인사 · 건반과 답장 같은 메아리', root: 55, scale: 'major', bpm: 66, meter: 4, lead: 'piano', pad: 'warm', extra: 'echo', prog: [0, 4, 5, 3], rx: 1.3 },
-  cf8: { title: '너부리', story: '너부리 없이는 어디든 한 발짝도 갈 수 없어요. 우리, 앞으로도 함께 하자', mood: '함께 걷기 · 나란히 가는 두 선율과 발걸음', root: 58, scale: 'major', bpm: 66, meter: 4, lead: 'marimba', pad: 'warm', extra: 'steps', duet: true, prog: [0, 3, 4, 0] },
+  cf1: { title: '나이키 운동화', story: '동그란 모양으로 어디든 굴러가는 농구공은 제가 제일 좋아하는 물건. 늘 내 방에 있어요', mood: '굴러감 · 튕기는 현과 공 튀는 소리', root: 50, scale: 'dorian', bpm: 84, meter: 4, lead: 'pluck', pad: 'room', extra: 'bounce', prog: [0, 3, 0, 6] },
+  cf2: { title: '결혼식', story: '하얀 드레스, 검정 턱시도. 생각만으로도 설레는 결혼식의 한 장면', mood: '설렘 · 오르골 왈츠', root: 53, scale: 'major', bpm: 72, meter: 3, lead: 'musicbox', pad: 'strings', extra: 'sparkle', prog: [0, 3, 5, 4] },
+  cf3: { title: '아빠', story: '힘든 순간에도 곁에서 든든하게 지켜준 아빠, 이제 내가 지켜줄게요', mood: '든든함 · 낮은 현과 한 단씩 차오르는 선율', root: 51, scale: 'major', bpm: 60, meter: 4, lead: 'cello', pad: 'strings', extra: 'pulse', rise: true, prog: [0, 5, 3, 4] },
+  cf4: { title: '초코 쿠키', story: '달콤한 초코 쿠키 한입이면 힘이 불끈 솟아요', mood: '달콤함 · 통통 튀는 마림바', root: 48, scale: 'lydian', bpm: 92, meter: 4, lead: 'marimba', pad: 'warm', extra: 'pop', prog: [0, 1, 0, 4] },
+  cf5: { title: '동물', story: '그림 그리기를 좋아하고, 동물 피규어가 집에 한가득', mood: '장난스러움 · 나무 소리와 새소리', root: 57, scale: 'penta', bpm: 88, meter: 4, lead: 'wood', pad: 'warm', extra: 'chirp', prog: [0, 2, 3, 0] },
+  cf6: { title: '나', story: '세상에서 제일 중요한 건 바로 나 자신, 내가 젤 소중해요', mood: '자기 긍정 · 맑은 목소리와 피어나는 화음', root: 52, scale: 'major', bpm: 76, meter: 4, lead: 'voice', pad: 'air', extra: 'bloom', prog: [0, 4, 3, 0] },
+  cf7: { title: '선생님', story: '늘 친절하게 맞아주는 선생님. 매일 그림을 그리고 편지를 써서 드려요', mood: '다정한 인사 · 건반과 답장 같은 메아리', root: 55, scale: 'major', bpm: 80, meter: 4, lead: 'piano', pad: 'warm', extra: 'echo', prog: [0, 4, 5, 3] },
+  cf8: { title: '너부리', story: '너부리 없이는 어디든 한 발짝도 갈 수 없어요. 우리, 앞으로도 함께 하자', mood: '함께 걷기 · 나란히 가는 두 선율과 발걸음', root: 58, scale: 'major', bpm: 82, meter: 4, lead: 'marimba', pad: 'warm', extra: 'steps', duet: true, prog: [0, 3, 4, 0] },
 };
 const GENERIC = { title: '', story: '', mood: '띠 색으로 만든 선율 · 건반', root: 55, scale: 'penta', bpm: 66, meter: 4, lead: 'piano', pad: 'warm', extra: '', prog: [0, 3, 4, 0] };
 const workOf = s => WORKS[s.key] || GENERIC;
@@ -978,7 +1096,7 @@ function loadMusic(key) {
 }
 // 음악 파일 반복: 곡 끝 몇 초와 다음 회차의 처음을 겹쳐서(크로스페이드) 이음매 없이 이어 감
 function playLoop(s, buf) {
-  const ctx = snd.ctx, XF = Math.min(8, buf.duration / 4), out = ctx.createGain(), srcs = [];
+  const ctx = snd.ctx, XF = Math.min(3, buf.duration / 8), out = ctx.createGain(), srcs = []; // 1분 곡은 첫 멜로디가 바로 나오므로 겹침을 짧게
   out.gain.value = 0; out.connect(snd.bus); out.gain.linearRampToValueAtTime(opt.pad, ctx.currentTime + opt.musicIn);
   const seg = t => {
     const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = buf; src.connect(g).connect(out);
@@ -1356,6 +1474,12 @@ function apply(k) {
   if (k === 'bloom') bloom.strength = v;
   if (k === 'bloomR') bloom.radius = v;
   if (k === 'bloomT') bloom.threshold = v;
+  if (k === 'exposure') gradePass.uniforms.uExposure.value = v;
+  if (k === 'vivid') gradePass.uniforms.uVivid.value = v;
+  if (k === 'contrast') gradePass.uniforms.uContrast.value = v;
+  if (k === 'tone') gradePass.uniforms.uTone.value = v;
+  if (k === 'pop') gradePass.uniforms.uPop.value = v;
+  if (k === 'srcVivid') recolor();
   if (k === 'bandOrder') slots.forEach(s => s.show && applyRanks(s.show));
   if (k === 'sndMode' && snd.on && field.cur) { const s = field.cur; sndRelease(s, 1.2); s.noFile = false; if (v === 1) s.launched.forEach(i => sndLaunch(s, i, true)); }
   if (snd.ctx) {
@@ -1428,14 +1552,49 @@ window.cfLevel = () => { if (!snd.meter) return 0; const a = new Float32Array(sn
 /* ───────── 소리 분석 → 입자 ─────────
    출력 소리의 주파수를 매 프레임 읽어 저음·고음·전체 세기, 띠별 음역 세기, 박자(소리가 갑자기 커지는 순간)를 구함.
    곡마다 음량이 달라도 반응이 비슷하도록 최근 최댓값으로 나눠 씀 */
-const AR = { bins: null, prev: null, flux: 0, fluxAvg: 0.01, lastHit: -9, k: 0, agc: { bass: 0.2, high: 0.1, level: 0.2, band: 0.2 }, slow: {}, v: { bass: 0, high: 0, level: 0 }, band: new Float32Array(16) };
+const AR = { bins: null, prev: null, flux: 0, fluxAvg: 0.01, lastHit: -9, k: 0, agc: { bass: 0.2, high: 0.1, level: 0.2, band: 0.2 }, slow: {}, v: { bass: 0, high: 0, level: 0 }, band: new Float32Array(16), fast: new Float32Array(16), agcB: new Float32Array(16).fill(0.03), slowB: new Float32Array(16), front: 0, fluxSlow: 0 };
+// 소리 파장용 기록: 가로 512칸(초당 60칸, 약 8.5초) × 세로 16띠. 가장 새 칸 = SND.head. 셰이더가 거리만큼 지난 칸을 읽어 파장이 퍼져 나가는 것처럼 보임
+const SND = { W: 512, H: 16, rate: 60, head: 0, acc: 0, data: new Uint8Array(512 * 16 * 4) };
+SND.tex = new THREE.DataTexture(SND.data, SND.W, SND.H, THREE.RGBAFormat, THREE.UnsignedByteType);
+SND.tex.wrapS = THREE.RepeatWrapping; SND.tex.wrapT = THREE.ClampToEdgeWrapping; SND.tex.magFilter = SND.tex.minFilter = THREE.LinearFilter; SND.tex.generateMipmaps = false; SND.tex.needsUpdate = true;
+SU.uSndTex.value = SND.tex;
+// 파형(오실로스코프)용: 지금 나는 소리 약 23 ms를 512칸에. 오르는 영점에서 시작하도록 맞춰(트리거) 선이 제자리에서 떨리게 함
+const WF = { N: 512, data: new Uint8Array(512 * 4).fill(128), buf: null, sm: new Float32Array(512), agc: 0.05 };
+WF.tex = new THREE.DataTexture(WF.data, WF.N, 1, THREE.RGBAFormat, THREE.UnsignedByteType);
+WF.tex.wrapS = WF.tex.wrapT = THREE.ClampToEdgeWrapping; WF.tex.magFilter = WF.tex.minFilter = THREE.LinearFilter; WF.tex.generateMipmaps = false; WF.tex.needsUpdate = true;
+SU.uWfTex.value = WF.tex;
+function wfRecord(dtA) {
+  const on = snd.on && snd.meter;
+  if (on) {
+    const an = snd.meter; if (!WF.buf) WF.buf = new Float32Array(an.fftSize);
+    an.getFloatTimeDomainData(WF.buf);
+    let t0 = 1, pk = 0; for (let i = 1; i < 1000; i++) if (WF.buf[i - 1] < 0 && WF.buf[i] >= 0) { t0 = i; break; }
+    for (let i = 0; i < WF.buf.length; i++) pk = Math.max(pk, Math.abs(WF.buf[i]));
+    WF.agc = Math.max(WF.agc * Math.exp(-dtA / 3), pk, 0.02); // 조용한 곡도 선이 보이도록 최근 최댓값으로 나눔
+    const k = 1 - Math.exp(-dtA / 0.035);
+    for (let j = 0; j < WF.N; j++) { const v = (WF.buf[t0 + j * 2] ?? 0) / WF.agc; WF.sm[j] += (v - WF.sm[j]) * k; }
+  } else for (let j = 0; j < WF.N; j++) WF.sm[j] *= Math.exp(-dtA / 0.3);
+  for (let j = 0; j < WF.N; j++) WF.data[j * 4] = Math.max(0, Math.min(255, Math.round(128 + WF.sm[j] * 120)));
+  WF.tex.needsUpdate = true;
+}
+function sndRecord(now) {
+  const dt = Math.min(0.5, Math.max(0, now - (SND.t ?? now))); SND.t = now; // 화면이 느려도 실제 흐른 시간만큼 기록
+  SND.acc += dt * SND.rate; let wrote = false;
+  while (SND.acc >= 1) {
+    SND.acc -= 1; SND.head = (SND.head + 1) % SND.W; wrote = true;
+    for (let i = 0; i < SND.H; i++) SND.data[(i * SND.W + SND.head) * 4] = Math.max(0, Math.min(255, Math.round((i === 15 ? AR.front : AR.fast[i]) / 1.5 * 255))); // 15번째 줄 = 전체 소리의 음 앞머리
+  }
+  if (wrote) SND.tex.needsUpdate = true;
+  SU.uSndHead.value = SND.head + SND.acc; // 칸 사이도 매끄럽게 흐르도록 소수점까지
+}
 function analyse(now) {
-  const U = SU;
+  const U = SU, dtA = Math.min(0.25, Math.max(0.001, now - (AR.t ?? now - 0.016))); AR.t = now; // 파장용 필터는 프레임 수가 아니라 시간 기준
   // 부드러움 0 → 바로 따라감(시각화 느낌), 1 → 몇 초에 걸쳐 숨 쉬듯 (미디어아트 느낌). 기본 0.6
   const sm = opt.smooth, ease = (cur, tgt, up = 0.45, down = 0.08) => { up *= 1 - 0.85 * sm; down *= 1 - 0.8 * sm; return cur + (tgt - cur) * (tgt > cur ? up : down); };
   if (!snd.on || !snd.meter) {
     AR.v.bass = ease(AR.v.bass, 0); AR.v.high = ease(AR.v.high, 0); AR.v.level = ease(AR.v.level, 0);
-    for (let i = 0; i < 16; i++) { AR.band[i] = ease(AR.band[i], 0); U.uBandE.value[i] = AR.band[i]; }
+    for (let i = 0; i < 16; i++) { AR.band[i] = ease(AR.band[i], 0); U.uBandE.value[i] = AR.band[i]; AR.fast[i] *= Math.exp(-dtA / 0.28); }
+    AR.front *= Math.exp(-dtA / 0.09);
   } else {
     const an = snd.meter, n = an.frequencyBinCount, hz = snd.ctx.sampleRate / 2 / n;
     if (!AR.bins) { AR.bins = new Uint8Array(n); AR.prev = new Float32Array(n); an.smoothingTimeConstant = 0.55; }
@@ -1451,13 +1610,23 @@ function analyse(now) {
     const nb = field.cur ? field.cur.bands.length : 6;
     for (let i = 0; i < 16; i++) {
       let e = 0;
-      if (i < nb) { const f1 = 4500 * Math.pow(70 / 4500, i / nb), f0 = 4500 * Math.pow(70 / 4500, (i + 1) / nb); e = lift('band' + i, norm('band' + i, avg(f0, f1))); }
+      let tr = 0; // 평소보다 커진 만큼만 (음이 나는 순간)
+      if (i < nb) { const f1 = 4500 * Math.pow(70 / 4500, i / nb), f0 = 4500 * Math.pow(70 / 4500, (i + 1) / nb), raw = avg(f0, f1), x = norm('band' + i, raw); e = lift('band' + i, x);
+        // 파장용은 띠마다 따로 정규화: 소리가 작은 음역도 자기 기준으로 '음이 난 순간'이 잡히게
+        AR.agcB[i] = Math.max(AR.agcB[i] * 0.999, raw, 0.03); const xn = raw / AR.agcB[i];
+        AR.slowB[i] += (xn - AR.slowB[i]) * (1 - Math.exp(-dtA / 0.7)); tr = Math.min(1.5, 3.2 * Math.max(0, xn - AR.slowB[i] - 0.03)); }
       AR.band[i] = ease(AR.band[i], e, 0.5, 0.1); U.uBandE.value[i] = AR.band[i];
+      AR.fast[i] += (tr - AR.fast[i]) * (1 - Math.exp(-dtA / (tr > AR.fast[i] ? 0.02 : 0.28))); // 파장용: 음이 나는 순간 바로 솟고 조금 천천히 가라앉음 (부드러움 설정과 무관)
     }
     // 악센트: 스펙트럼이 갑자기 커지는 양(flux)이 평소보다 확 클 때. 번지는 빛은 아무 데서나가 아니라 지금 빛 물결이 지나는 자리에서 생김
     let flux = 0; for (let i = 2; i < n / 2; i++) { const x = AR.bins[i] / 255, d = x - AR.prev[i]; if (d > 0) flux += d; AR.prev[i] = x; }
     flux /= n / 2; AR.fluxAvg = AR.fluxAvg * 0.96 + flux * 0.04;
-    const hx = waveHead(now); // 물결 머리가 벽 밖(양 끝 바깥)에 있을 때는 빛을 만들지 않음 (끝에 몰려 덩어리로 보이던 문제)
+    // 음 앞머리: 스펙트럼이 평소보다 갑자기 커진 정도(0~1.5). 음 하나하나가 짧은 봉우리로 기록됨
+    AR.fluxSlow += (flux - AR.fluxSlow) * (1 - Math.exp(-dtA / 1.2));
+    const ft = Math.min(1.5, Math.max(0, flux - AR.fluxSlow * 1.3) / Math.max(0.004, AR.fluxSlow) * 0.5);
+    AR.front += (ft - AR.front) * (1 - Math.exp(-dtA / (ft > AR.front ? 0.015 : 0.09)));
+    const centered = opt.order === 2 || opt.order === 3;
+    const hx = centered ? SU.uMeet.value * CF.PW : waveHead(now); // 가운데 기준이면 모이는 자리에서, 아니면 물결 머리에서 (벽 밖이면 만들지 않음)
     // 첼로·목소리처럼 악센트가 희미한 곡(〈아빠〉〈나〉)에서도 빛이 아주 안 생기지 않게: 6초 넘게 조용하면 문턱을 천천히 낮춤
     const relax = Math.max(0.35, 1 - Math.max(0, now - AR.lastHit - 6) * 0.1);
     if (hx >= 0 && hx <= CF.PW && flux > AR.fluxAvg * (1 + 0.9 / opt.beatSens * relax) + 0.002 * relax && now - AR.lastHit > 1.1) {
@@ -1465,7 +1634,10 @@ function analyse(now) {
       U.uHits.value.setComponent(k, now); U.uHitX.value.setComponent(k, hx);
     }
   }
+  if (window.cfInject) { const v = window.cfInject(now); if (v.fast) AR.fast.set(v.fast); if (v.front != null) AR.front = v.front; if (v.level != null) AR.v.level = v.level; }
   U.uBass.value = AR.v.bass; U.uHigh.value = AR.v.high; U.uLevel.value = AR.v.level;
+  for (let i = 0; i < 16; i++) U.uFastE.value[i] = Math.min(1.2, AR.fast[i]); U.uFrontNow.value = Math.min(1, AR.front);
+  wfRecord(dtA);
 }
 
 // 빛 물결 머리의 x (셰이더의 d = 0인 자리). 음악 파일일 때 물결 주기는 그 곡의 네 마디
@@ -1474,7 +1646,7 @@ function wavePeriod() {
   const w = field.cur && WORKS[field.cur.key];
   return opt.sndMode === 2 && w && snd.on ? 60 / w.bpm * w.meter * 4 : opt.wavePer;
 }
-window.cfAR = AR; window.cfView = { camera, controls }; // 개발 확인용 (소리 분석 값, 시점)
+window.cfAR = AR; window.cfSND = SND; window.cfView = { camera, controls }; // 개발 확인용 (소리 분석 값, 시점)
 /* ───────── 루프 ───────── */
 const clock = new THREE.Clock();
 let fpsN = 0, fpsT = 0;
@@ -1486,9 +1658,10 @@ function spillOf(s, now) {
   const c = new THREE.Color(0, 0, 0); s.bands.forEach(b => c.add(linCol(b.rgb).multiplyScalar(b.w)));
   return c.multiplyScalar(Math.max(0, Math.min(1, k)));
 }
-function frame(nowMs) {
-  requestAnimationFrame(frame);
-  const dt = Math.min(clock.getDelta(), 0.05), now = nowMs / 1000;
+let lastNow = null;
+function frame(nowMs) { requestAnimationFrame(frame); step(nowMs / 1000 + SKEW, nowMs); }
+function step(now, nowMs) {
+  const dt = Math.min(Math.max(0, now - (lastNow ?? now)), 0.05); lastNow = now;
   if (tween) tween(nowMs); else controls.update();
   const cur = field.cur;
   field.idleA = THREE.MathUtils.clamp(field.idleA + (cur ? -dt / 3 : dt / 6), 0, 1);
@@ -1504,8 +1677,11 @@ function frame(nowMs) {
   }
   SU.uTime.value = now;
   SU.uWavePer.value = wavePeriod();
+  // 모이는 자리: 두 벽이 만나는 모서리(펼친 화면에서 정면 벽 길이만큼 간 자리. 방향을 뒤집으면 반대쪽)
+  SU.uMeet.value = opt.meetMode === 0 ? (opt.dir === 'rtl' ? ROOM.RL : ROOM.W) / TOTAL : opt.meet;
   SU.uReact.value = opt.react * ((cur && WORKS[cur.key]?.rx) || 1); // 다이내믹이 작은 곡은 반응을 조금 키움 (rx)
   analyse(now);
+  sndRecord(now);
   const spill = new THREE.Color(0, 0, 0);
   slots.forEach(sl => {
     const s = sl.show, U = sl.per;
@@ -1554,8 +1730,11 @@ function frame(nowMs) {
   fpsN++; fpsT += dt; if (fpsT > 1) { $('#fps').textContent = `${Math.round(fpsN / fpsT)} fps`; fpsN = 0; fpsT = 0; }
 }
 fillIdle();
+setIdlePaint(IDLE_BANDS);
 applyDir();
 renderUI();
 resize();
 requestAnimationFrame(frame);
+// 확인용: cfStep(프레임 수, 프레임 간격초) — 화면이 느리게 그려지는 환경에서도 시간을 감아 장면을 확인. cfInject = now => ({ fast: [16개], front }) 로 소리 값을 넣어 볼 수 있음
+window.cfStep = (n = 60, d = 1 / 60) => { for (let i = 0; i < n; i++) { SKEW += d; step(performance.now() / 1000 + SKEW, performance.now()); } return SKEW; };
 </script>
